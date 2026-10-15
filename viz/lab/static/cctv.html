@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sim Lab · From CCTV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0d12;--panel:#12151d;--panel2:#181c26;--line:#262b38;--text:#e7e9ee;--muted:#8a91a3;--accent:#5b8cff;
+--a:#36c98e;--b:#f0b03c;--av:#ef5a5a;--oth:#5bb8ff;--good:#36c98e;--bad:#ef5a5a;--warn:#f0b03c}
+:root[data-theme="light"]{--bg:#f6f7f9;--panel:#fff;--panel2:#f0f2f5;--line:#dfe3ea;--text:#151821;--muted:#5d6577;--accent:#2d63e8;--oth:#1f7fd1}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 Inter,system-ui,sans-serif}
+header{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+header h1{font-size:16px;margin:0;font-weight:700}
+header .sub{color:var(--muted);font-size:13px}
+header .sp{flex:1}
+header a{color:var(--accent);font-weight:600;text-decoration:none}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:7px 12px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;padding:10px 16px;width:100%}
+button.small{padding:3px 8px;font-size:12px}
+button:disabled{opacity:.5;cursor:not-allowed}
+main{display:grid;grid-template-columns:400px 1fr;min-height:calc(100vh - 55px)}
+aside{border-right:1px solid var(--line);padding:16px;overflow:auto;max-height:calc(100vh - 55px)}
+section.out{padding:16px 20px;overflow:auto;max-height:calc(100vh - 55px)}
+h2{font-size:12px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin:18px 0 8px;font-weight:600;display:flex;align-items:center;gap:8px}
+h2 .n{display:inline-flex;width:18px;height:18px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);align-items:center;justify-content:center;font-size:11px;color:var(--text)}
+h2.done .n{background:var(--good);border-color:var(--good);color:#04110a}
+.seg{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:3px}
+.seg button{flex:1;border:0;background:transparent;padding:6px}
+.seg button.on{background:var(--panel);box-shadow:0 1px 3px #0004;font-weight:600}
+input,select{font:12px 'JetBrains Mono',monospace;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:5px 6px;width:100%}
+input[type=checkbox]{width:auto}
+input[type=file]{font:12px Inter,sans-serif;padding:6px}
+.row{display:grid;grid-template-columns:1fr 110px;gap:8px;align-items:center;margin:5px 0;font-size:13px}
+.row3{display:grid;grid-template-columns:28px 1fr 1fr;gap:6px;align-items:center;margin:3px 0;font-size:12px}
+.note{font-size:12px;color:var(--muted);margin:6px 0}
+.warn{color:var(--warn)}
+.tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.5px;color:#1a1300;background:var(--warn);border-radius:4px;padding:1px 6px;margin-left:6px}
+.pill{font:11px 'JetBrains Mono',monospace;border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
+.th{border:2px solid var(--line);border-radius:8px;padding:4px;background:var(--panel);font-size:11px;cursor:pointer}
+.th img{width:100%;height:64px;object-fit:contain;background:#000;border-radius:4px;display:block}
+.th.av{border-color:var(--av)} .th.oth{border-color:var(--oth)}
+.th .btns{display:flex;gap:4px;margin-top:4px}.th .btns button{flex:1;padding:2px 0;font-size:11px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+.card .k{color:var(--muted);font-size:12px}
+.card .v{font-size:28px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums}
+.card .ci{font:12px 'JetBrains Mono',monospace;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.bar{position:relative;height:8px;background:var(--panel2);border-radius:4px;margin-top:10px}
+.bar i{position:absolute;top:0;bottom:0;border-radius:4px;opacity:.45}
+.bar b{position:absolute;top:-3px;width:3px;height:14px;border-radius:2px}
+#frameWrap{position:relative}
+#cv{width:100%;display:block;border-radius:10px;background:#1c2029;cursor:crosshair}
+.empty{color:var(--muted);padding:60px 0;text-align:center}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl td,.tbl th{padding:4px 4px;border-bottom:1px solid var(--line);text-align:left}
+.tbl th{color:var(--muted);font-weight:500}
+.mono{font-family:'JetBrains Mono',monospace}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.actions a,.actions button{font:inherit;text-decoration:none;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:8px 12px}
+.actions a.go{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+ul.as{margin:6px 0;padding-left:18px;font-size:12px;color:var(--muted)}
+svg text{fill:var(--muted);font:11px Inter,sans-serif}
+@media (max-width:1000px){main{grid-template-columns:1fr}aside,section.out{max-height:none}.cards,.grid2{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.cards,.grid2{grid-template-columns:1fr}section.out{padding:16px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Sim Lab · From CCTV</h1><span class="sub">Video → measured speeds with error bars → careful-driver P(avoid)</span>
+  <span class="sp"></span>
+  <a href="./">← Manual ranges</a>
+  <span class="pill" title="Vehicles only. No number-plate or face reading. Persons blurred.">privacy: vehicles only · persons blurred</span>
+  <button id="theme">Theme</button>
+</header>
+<main>
+<aside>
+  <h2 id="h1"><span class="n">1</span>Upload CCTV clip</h2>
+  <input type="file" id="file" accept="video/*,.mp4,.mov,.avi,.mkv,.webm,.m4v">
+  <div class="row" style="grid-template-columns:auto 1fr"><input type="checkbox" id="plates" checked><label for="plates">Blur number-plate zones in every still shown</label></div>
+  <button class="primary" id="upload">Upload &amp; detect vehicles on GPU</button>
+  <p class="note">Max 200 MB. The clip is stored only in our private Modal volume and can be deleted below. We detect vehicles only (RT-DETR, Apache-2.0; ByteTrack, MIT); people are detected solely to blur them. Nothing reads plates or faces.</p>
+  <p class="note" id="upStatus"></p>
+
+  <h2 id="h2"><span class="n">2</span>Calibrate the road plane</h2>
+  <div class="seg" id="mode"><button data-m="rectangle" class="on">Rectangle (lane × length)</button><button data-m="points">Points (x, y in m)</button></div>
+  <p class="note" id="modeHelp"></p>
+  <div id="rectIn">
+    <div class="row"><label>Length L along the lane (m)</label><input id="L" type="number" step="0.01" min="0" placeholder="measured"></div>
+    <div class="row"><label>Width W across (m) <span id="wTag"></span></label><input id="W" type="number" step="0.01" min="0" placeholder="measured"></div>
+    <div class="note">Don't know W? <button class="small" id="suggestW">Use 3.65 m</button> typical UK trunk-road lane: an assumption you must confirm on site or from a plan.</div>
+  </div>
+  <div id="ptsIn" hidden></div>
+  <div class="row"><label>Lane width for cut-in test (m)</label><input id="lane" type="number" step="0.01" min="0" placeholder="enter"></div>
+  <div class="row"><label>Click precision σ (px)</label><input id="csig" type="number" step="0.5" value="2"></div>
+  <div class="row"><label>Measured-length precision σ (m)</label><input id="wsig" type="number" step="0.01" value="0.05"></div>
+  <p class="note">σ defaults are design assumptions; they set the calibration part of every error bar. Calibrate a rectangle that covers where the vehicles drive: extrapolating far beyond it widens the speed error.</p>
+  <div style="display:flex;gap:6px"><button class="small" id="undo">Undo click</button><button class="small" id="clear">Clear clicks</button></div>
+
+  <h2 id="h3"><span class="n">3</span>Pick the AV (and optionally the other vehicle)</h2>
+  <div id="thumbs" class="thumbs"><span class="note">Tracks appear after detection.</span></div>
+  <p class="note">Other vehicle left empty = <b>auto</b>: the one the AV gets closest to while it is ahead. If the tracker split one vehicle into several tracks (occlusion), mark every fragment: they are stitched together.</p>
+
+  <h2 id="h4"><span class="n">4</span>Run the counterfactual</h2>
+  <div class="row"><label>Crash type</label><select id="ctype"><option value="">auto (from lateral motion)</option><option value="cut_in">cut-in</option><option value="lead_vehicle_decel">lead vehicle brakes</option></select></div>
+  <div class="row"><label>Contact in video?</label><select id="col"><option value="auto">auto (boxes meet)</option><option value="1">yes</option><option value="0">no</option></select></div>
+  <div class="row"><label>Monte Carlo samples</label><input id="n" type="number" value="4000" min="100" max="20000" step="500"></div>
+  <button class="primary" id="run" disabled>Measure &amp; run on Modal</button>
+  <p class="note" id="runStatus"></p>
+</aside>
+<section class="out">
+  <div class="card"><div class="k" id="frameTitle">First frame (privacy-blurred). Click to place calibration points.</div>
+    <div id="frameWrap"><canvas id="cv" width="1280" height="720"></canvas></div>
+    <p class="note" id="frameNote">Upload a clip to start.</p></div>
+  <div id="out"></div>
+</section>
+</main>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let vid=null, info=null, img=null, mode='rectangle', clicks=[], ego=[], other=[], last=null, wAssumed=false;
+$('#theme').onclick=()=>{const r=document.documentElement;r.dataset.theme=r.dataset.theme==='light'?'dark':'light';draw();if(last)renderOut(last);};
+
+// ---------- calibration UI
+const HELP={rectangle:'Click 4 road points: A then B along one lane line (A near, B far, L metres apart), then C across from B and D across from A on the other line (W metres apart). Use paint corners you can measure.',
+ points:'Click 4 or more road points (no three in a line) and type each point\'s road coordinates in metres (e.g. from a site plan). More than 4 points also gives a reprojection residual.'};
+function setMode(m){mode=m;document.querySelectorAll('#mode button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
+  $('#modeHelp').textContent=HELP[m];$('#rectIn').hidden=m!=='rectangle';$('#ptsIn').hidden=m!=='points';
+  if(m==='rectangle'&&clicks.length>4)clicks=clicks.slice(0,4);renderPts();draw();check();}
+document.querySelectorAll('#mode button').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+$('#suggestW').onclick=()=>{$('#W').value='3.65';wAssumed=true;$('#wTag').innerHTML='<span class="tag">ASSUMED, CONFIRM</span>';syncLane();check();};
+$('#W').oninput=()=>{wAssumed=false;$('#wTag').innerHTML='';syncLane();check();};
+let laneTouched=false;$('#lane').oninput=()=>{laneTouched=true;check();};
+function syncLane(){if(!laneTouched&&mode==='rectangle')$('#lane').value=$('#W').value;}
+['#L','#csig','#wsig'].forEach(s=>$(s).oninput=check);
+$('#undo').onclick=()=>{clicks.pop();renderPts();draw();check();};
+$('#clear').onclick=()=>{clicks=[];renderPts();draw();check();};
+function renderPts(){
+  if(mode!=='points'){return;}
+  $('#ptsIn').innerHTML=clicks.length?'<div class="row3 note"><span>#</span><span>x (m, along)</span><span>y (m, across)</span></div>'+clicks.map((c,i)=>`<div class="row3"><span class="mono">${i+1}</span><input data-i="${i}" data-a="wx" type="number" step="0.01" value="${c.wx??''}"><input data-i="${i}" data-a="wy" type="number" step="0.01" value="${c.wy??''}"></div>`).join(''):'<p class="note">Click on the frame to add points.</p>';
+  $('#ptsIn').querySelectorAll('input').forEach(inp=>inp.oninput=()=>{clicks[+inp.dataset.i][inp.dataset.a]=inp.value===''?null:+inp.value;check();});
+}
+$('#cv').onclick=e=>{
+  if(!img)return;const r=e.target.getBoundingClientRect();
+  const u=(e.clientX-r.left)/r.width*img.naturalWidth, v=(e.clientY-r.top)/r.height*img.naturalHeight;
+  if(mode==='rectangle'&&clicks.length>=4)return;
+  clicks.push({u,v,wx:null,wy:null});renderPts();draw();check();
+};
+function calibReq(){
+  const c={mode,img_pts:clicks.map(p=>[p.u,p.v]),click_sigma_px:+$('#csig').value,world_sigma_m:+$('#wsig').value};
+  if(mode==='rectangle'){c.length_m=+$('#L').value;c.width_m=+$('#W').value;}else c.world_pts=clicks.map(p=>[p.wx,p.wy]);
+  return c;
+}
+function calibOk(){
+  if(mode==='rectangle')return clicks.length===4&&+$('#L').value>0&&+$('#W').value>0;
+  return clicks.length>=4&&clicks.every(p=>Number.isFinite(p.wx)&&Number.isFinite(p.wy)&&p.wx!==null&&p.wy!==null);
+}
+function check(){
+  const ok2=calibOk();$('#h2').classList.toggle('done',ok2);$('#h3').classList.toggle('done',ego.length>0);
+  const lane=+$('#lane').value>0;
+  $('#run').disabled=!(vid&&info&&ok2&&ego.length>0&&lane);
+  $('#runStatus').textContent=!vid?'':!info?'Waiting for detection…':!ok2?(mode==='rectangle'?`Calibration: ${clicks.length}/4 clicks, enter L and W.`:'Calibration: 4+ clicks with metres.'):!ego.length?'Pick the AV track.':!lane?'Enter the lane width.':'';
+}
+
+// ---------- frame drawing
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+function draw(){
+  const cv=$('#cv'),ctx=cv.getContext('2d');
+  if(!img){ctx.fillStyle='#1c2029';ctx.fillRect(0,0,cv.width,cv.height);return;}
+  cv.width=img.naturalWidth;cv.height=img.naturalHeight;ctx.drawImage(img,0,0);
+  const s=Math.max(1,img.naturalWidth/900);
+  if(info){for(const t of info.tracks){
+    const isE=ego.includes(t.id),isO=other.includes(t.id);const col=isE?css('--av'):isO?css('--oth'):'#ffffffaa';
+    ctx.strokeStyle=col;ctx.lineWidth=(isE||isO?3.5:1.5)*s;ctx.beginPath();t.path.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();
+    const p=t.path[t.path.length-1];ctx.fillStyle=col;ctx.font=`600 ${13*s}px Inter`;ctx.fillText(`#${t.id}${isE?' AV':isO?' other':''}`,p[0]+5*s,p[1]-5*s);}}
+  if(clicks.length){
+    ctx.strokeStyle='#ffd400';ctx.lineWidth=2*s;ctx.setLineDash([8*s,6*s]);ctx.beginPath();
+    clicks.forEach((p,i)=>i?ctx.lineTo(p.u,p.v):ctx.moveTo(p.u,p.v));if(mode==='rectangle'&&clicks.length===4)ctx.closePath();ctx.stroke();ctx.setLineDash([]);
+    clicks.forEach((p,i)=>{ctx.fillStyle='#ffd400';ctx.beginPath();ctx.arc(p.u,p.v,5*s,0,7);ctx.fill();
+      ctx.fillStyle='#000';ctx.font=`700 ${12*s}px Inter`;const lab=mode==='rectangle'?'ABCD'[i]:String(i+1);
+      ctx.fillStyle='#ffd400';ctx.fillText(lab,p.u+7*s,p.v+14*s);});
+  }
+}
+
+// ---------- upload + detection
+$('#upload').onclick=async()=>{
+  const f=$('#file').files[0];if(!f){$('#upStatus').textContent='Choose a video file first.';return;}
+  if(f.size>200*1024*1024){$('#upStatus').textContent='File is larger than 200 MB.';return;}
+  const fd=new FormData();fd.append('file',f);fd.append('blur_plates',$('#plates').checked?'1':'0');
+  $('#upload').disabled=true;$('#upStatus').textContent=`Uploading ${(f.size/1e6).toFixed(1)} MB…`;
+  try{const r=await fetch('api/video/upload',{method:'POST',body:fd});if(!r.ok)throw new Error(await r.text());
+    const j=await r.json();openVideo(j.id);}
+  catch(e){$('#upStatus').textContent='Upload failed: '+e.message;}finally{$('#upload').disabled=false;}
+};
+async function openVideo(id){
+  vid=id;info=null;ego=[];other=[];clicks=[];img=null;last=null;$('#out').innerHTML='';renderPts();draw();
+  history.replaceState(null,'','?v='+id);check();
+  const t0=performance.now();
+  for(;;){
+    const r=await fetch(`api/video/${id}/status`);if(!r.ok){$('#upStatus').textContent='Unknown video id.';return;}
+    const s=await r.json();
+    if(s.state==='running'){$('#upStatus').textContent=`Detecting + tracking vehicles on a Modal L4 GPU… ${((performance.now()-t0)/1000).toFixed(0)} s (first run also downloads the model)`;await new Promise(r=>setTimeout(r,2500));continue;}
+    if(s.state==='error'){$('#upStatus').innerHTML='<span class="warn">Detection failed: '+esc(s.error)+'</span>';return;}
+    $('#upStatus').textContent=`Done: ${s.n_tracks} vehicle tracks · ${s.frames_processed} frames at ${(+s.fps).toFixed(1)} fps${s.stride>1?' (every '+s.stride+'th frame)':''} · ${s.n_person_frames} frames with persons blurred.`;
+    $('#h1').classList.add('done');break;
+  }
+  info=await (await fetch(`api/video/${id}/tracks`)).json();
+  img=new Image();img.onload=()=>{draw();$('#frameNote').textContent=`${info.width}×${info.height} · ${info.model} · ${info.tracker}${info.plates_blurred?' · plate zones blurred':''}`;};
+  img.src=`api/video/${id}/frame0.jpg?ts=${Date.now()}`;
+  renderThumbs();check();
+}
+function renderThumbs(){
+  if(!info.tracks.length){$('#thumbs').innerHTML='<span class="note warn">No vehicles tracked for at least 8 frames.</span>';return;}
+  $('#thumbs').innerHTML=info.tracks.map(t=>`<div class="th ${ego.includes(t.id)?'av':other.includes(t.id)?'oth':''}" data-id="${t.id}">
+    ${t.thumb?`<img src="api/video/${vid}/track/${t.id}.jpg" alt="track ${t.id}">`:'<div style="height:64px"></div>'}
+    <div><b>#${t.id}</b> ${esc(t.cls)} · ${t.t0}–${t.t1}s</div>
+    <div class="btns"><button data-r="av">AV</button><button data-r="oth">Other</button></div></div>`).join('');
+  $('#thumbs').querySelectorAll('.th').forEach(el=>{const id=+el.dataset.id;
+    const tog=(a,x)=>a.includes(x)?a.filter(v=>v!==x):a.concat([x]);
+    el.querySelector('[data-r=av]').onclick=e=>{e.stopPropagation();ego=tog(ego,id);other=other.filter(v=>v!==id);renderThumbs();draw();check();};
+    el.querySelector('[data-r=oth]').onclick=e=>{e.stopPropagation();other=tog(other,id);ego=ego.filter(v=>v!==id);renderThumbs();draw();check();};});
+}
+
+// ---------- run
+$('#run').onclick=async()=>{
+  const body={calibration:calibReq(),ego_track:ego,other_track:other.length?other:null,lane_width_m:+$('#lane').value,
+    crash_type:$('#ctype').value||null,collided:$('#col').value==='auto'?null:$('#col').value==='1',n:+$('#n').value,seed:0};
+  $('#run').disabled=true;$('#runStatus').textContent='Measuring trajectories, fanning Monte Carlo out to Modal…';const t0=performance.now();
+  try{const r=await fetch(`api/video/${vid}/analyze`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+    if(!r.ok){let m=await r.text();try{m=JSON.parse(m).detail}catch(e){}throw new Error(m);}
+    last=await r.json();other=last.other_ids;renderThumbs();draw();renderOut(last);
+    $('#runStatus').textContent=`Done in ${((performance.now()-t0)/1000).toFixed(1)} s.`;}
+  catch(e){$('#runStatus').innerHTML='<span class="warn">'+esc(e.message)+'</span>';}finally{const keep=$('#runStatus').innerHTML;check();if(!$('#runStatus').textContent)$('#runStatus').innerHTML=keep;}
+};
+
+const pct=x=>(100*x).toFixed(1)+'%';
+const f1=x=>(+x).toFixed(1), f2=x=>(+x).toFixed(2);
+function pcard(name,color,d){const[lo,hi]=d.ci90;return `<div class="card"><div class="k">${name}</div><div class="v" style="color:${color}">${pct(d.p_avoid)}</div>
+ <div class="ci">90% CI ${pct(lo)}–${pct(hi)} · n=${d.n_samples}</div><div class="bar"><i style="left:${lo*100}%;width:${(hi-lo)*100}%;background:${color}"></i><b style="left:calc(${d.p_avoid*100}% - 1px);background:${color}"></b></div>
+ <div class="ci" style="margin-top:6px">${esc(d.model)}</div></div>`;}
+
+function chart(series,{xl,yl,vlines=[],h=220}){
+  const W=560,H=h,ml=44,mr=10,mt=10,mb=32,iw=W-ml-mr,ih=H-mt-mb;
+  let xs=[],ys=[];series.forEach(s=>{xs.push(...s.t);s.y.forEach((y,i)=>{ys.push(y+(s.sd?2*s.sd[i]:0),y-(s.sd?2*s.sd[i]:0));});});
+  const x0=Math.min(...xs),x1=Math.max(...xs);let y0=Math.min(0,...ys),y1=Math.max(...ys);if(y1-y0<1)y1=y0+1;
+  const X=x=>ml+(x-x0)/(x1-x0||1)*iw,Y=y=>mt+ih-(y-y0)/(y1-y0)*ih;
+  const tick=(a,b,n)=>{const st=Math.pow(10,Math.floor(Math.log10((b-a)/n)));const m=[1,2,5,10].find(m=>(b-a)/(st*m)<=n)*st;const out=[];for(let v=Math.ceil(a/m)*m;v<=b+1e-9;v+=m)out.push(+v.toFixed(6));return out;};
+  let o=`<svg viewBox="0 0 ${W} ${H}" width="100%">`;
+  tick(y0,y1,5).forEach(v=>{o+=`<line x1="${ml}" x2="${W-mr}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${ml-6}" y="${Y(v)+4}" text-anchor="end">${v}</text>`;});
+  tick(x0,x1,8).forEach(v=>{o+=`<text x="${X(v)}" y="${H-14}" text-anchor="middle">${v}</text>`;});
+  o+=`<text x="${ml+iw/2}" y="${H-1}" text-anchor="middle">${xl}</text><text x="12" y="${mt+ih/2}" transform="rotate(-90 12 ${mt+ih/2})" text-anchor="middle">${yl}</text>`;
+  vlines.forEach(([x,lab])=>{if(x>=x0&&x<=x1)o+=`<line x1="${X(x)}" x2="${X(x)}" y1="${mt}" y2="${mt+ih}" stroke="var(--muted)" stroke-dasharray="4 4"/><text x="${X(x)+4}" y="${mt+11}">${lab}</text>`;});
+  series.forEach(s=>{
+    if(s.sd){[2,1].forEach(k=>{const up=s.t.map((t,i)=>`${X(t)},${Y(s.y[i]+k*s.sd[i])}`),dn=s.t.map((t,i)=>`${X(t)},${Y(s.y[i]-k*s.sd[i])}`).reverse();
+      o+=`<polygon points="${up.concat(dn).join(' ')}" fill="${s.color}" opacity="${k===2?0.12:0.22}"/>`;});}
+    o+=`<polyline points="${s.t.map((t,i)=>`${X(t)},${Y(s.y[i])}`).join(' ')}" fill="none" stroke="${s.color}" stroke-width="2" ${s.dash?'stroke-dasharray="6 4"':''}/>`;
+  });
+  return o+'</svg>';
+}
+function legend(items){return `<div class="note">${items.map(([c,l,d])=>`<span style="display:inline-block;width:16px;height:0;border-top:2px ${d?'dashed':'solid'} ${c};vertical-align:middle;margin:0 4px 0 10px"></span>${l}`).join('')}</div>`;}
+
+function renderOut(res){
+  const e=res.estimate,m=res.measured,b=res.bundle,dA=e.drivers.careful_a,dB=e.drivers.careful_b;
+  const av=css('--av'),oc=css('--oth');
+  const kmh=v=>(v*3.6).toFixed(0);
+  const spread=Math.abs(dA.p_avoid-dB.p_avoid);
+  const ds=e.data_sufficiency;
+  const rows=Object.entries(b.conflict_ranges).map(([k,r])=>`<tr><td>${esc(k)}</td><td class="mono">${f2(r.lo)} – ${f2(r.hi)}</td><td>${esc(r.source)}</td></tr>`).join('');
+  const simT=res.sim_av.t.map(t=>t),simE=res.sim_av.ego.map(r=>r[0]),simO=res.sim_av.other.map(r=>r[0]);
+  // Measured motion after impact is the crash itself, not driving: plot up to just after contact.
+  const tcut=b.t_crash!=null?b.t_crash-m.t_start+0.2:Infinity;
+  const cut=s=>{const n=s.t.findIndex(t=>t>tcut);if(n<0)return s;const o={};for(const k in s)o[k]=Array.isArray(s[k])?s[k].slice(0,n):s[k];return o;};
+  res={...res,ego:cut(res.ego),other:cut(res.other)};
+  const rep=e.reproduction;
+  $('#out').innerHTML=`
+  <div class="cards">${pcard('P(avoid): careful driver A','var(--a)',dA)}${pcard('P(avoid): careful driver B','var(--b)',dB)}
+   <div class="card"><div class="k">AV speed at conflict start (measured)</div><div class="v" style="color:var(--av)">${kmh(m.ego_speed_mps.value)} km/h</div>
+    <div class="ci">${f1(m.ego_speed_mps.value)} ± ${f1(m.ego_speed_mps.sd)} m/s (1σ) · ± ${kmh(2*m.ego_speed_mps.sd)} km/h at 2σ</div></div>
+   <div class="card"><div class="k">Data sufficiency</div><div class="v">${(ds.score*100).toFixed(0)}%</div>
+    <div class="ci">reported ${ds.reported.length} · narrative ${ds.narrative.length} · prior ${ds.prior.length}</div>
+    <div class="ci">evidence tier ${e.evidence_tier} (video)</div></div></div>
+  <p class="note">${esc(b.conflict.crash_type.replace(/_/g,' '))} · AV track #${res.ego_ids.join('+')} vs #${res.other_ids.join('+')} · A–B spread ${pct(spread)} ${spread>0.15?'<b class="warn">· model-dependent, flag for review</b>':''}
+   ${rep?` · AV replay reproduces the video outcome in ${pct(rep.rate)} of samples${rep.reproduced_flag?'':' <b class="warn">(low reconstruction confidence)</b>'}`:''}
+   ${e.top_sensitivity?` · most decisive fact: <b>${esc(e.top_sensitivity.param)}</b>`:''}. Supporting evidence only; the GBP figure comes from the insurance model.</p>
+  ${m.notes.length?`<div class="card" style="border-color:var(--warn);margin-top:10px"><div class="k warn">Measurement notes</div><ul class="as">${m.notes.map(n=>`<li>${esc(n)}</li>`).join('')}</ul>
+   <div class="note">Contact used: <b>${b.outcome.collided?'yes':'no'}</b> (${$('#col').value==='auto'?'auto':'set by you'}).</div></div>`:''}
+  <div class="actions"><a class="go" href="${res.viewer_url}" target="_blank" rel="noopener">Open 3D replay (AV vs careful A vs B) ↗</a>
+   <a href="api/bundle/${vid}/${res.run_id}" download>Download measured bundle JSON</a>
+   <button id="del">Delete this video</button></div>
+  <div class="grid2">
+   <div class="card"><div class="k">Speed vs time, measured from video (bands: ±1σ, ±2σ)</div>
+    ${chart([{t:res.ego.t,y:res.ego.speed,sd:res.ego.speed_sd,color:av},{t:res.other.t,y:res.other.speed,sd:res.other.speed_sd,color:oc}],{xl:'time from conflict start (s)',yl:'speed (m/s)',vlines:[[0,'conflict start'],[m.t_closest-m.t_start,b.outcome.collided?'contact':'closest']]})}
+    ${legend([[av,'AV (#'+res.ego_ids.join('+')+')'],[oc,'other (#'+res.other_ids.join('+')+')']])}</div>
+   <div class="card"><div class="k">Position along the road: video (solid) vs sim AV replay (dashed)</div>
+    ${chart([{t:res.ego.t,y:res.ego.x,color:av},{t:res.other.t,y:res.other.x,color:oc},{t:simT,y:simE,color:av,dash:1},{t:simT,y:simO,color:oc,dash:1}],{xl:'time from conflict start (s)',yl:'x along road (m)',vlines:[[0,'start']]})}
+    ${legend([[av,'AV video'],[oc,'other video'],[av,'AV sim',1],[oc,'other sim',1]])}</div>
+  </div>
+  <div class="grid2">
+   <div class="card"><div class="k">Measured facts → ranges fed to the Monte Carlo (± 2σ)</div>
+    <table class="tbl"><tr><th>parameter</th><th>range</th><th>evidence</th></tr>${rows}</table>
+    <p class="note">Gap ${f1(m.gap_m.value)} ± ${f1(m.gap_m.sd)} m · other vehicle ${f1(m.other_speed_mps.value)} ± ${f1(m.other_speed_mps.sd)} m/s · min gap ${f1(m.min_gap_m)} m${m.av_braking?` · AV braked ${f2(m.av_braking.decel_mps2)} m/s² from +${f2(m.av_braking.t_after_conflict_s)} s`:' · no AV braking measured'}.
+    Calibration: ${res.calibration.n_points} points, ${res.calibration.reprojection_rms_m==null?'exact fit (4 points), error from click and length σ':'reprojection RMS '+f2(res.calibration.reprojection_rms_m)+' m'}.</p></div>
+   <div class="card"><div class="k">Assumptions and limits (shown with every result)</div><ul class="as">${res.assumptions.map(a=>`<li>${esc(a)}</li>`).join('')}${(e.assumptions||[]).map(a=>`<li>${esc(a)}</li>`).join('')}
+    <li>Sim-to-real gap: 2D kinematic sim, constant speed plus one braking step per vehicle.</li></ul>
+    <p class="note"><b>${esc(e.disclaimer)}</b></p></div>
+  </div>`;
+  $('#del').onclick=async()=>{if(!confirm('Delete the uploaded video and all its results from the volume?'))return;
+    const r=await fetch(`api/video/${vid}`,{method:'DELETE'});if(r.ok){vid=null;info=null;img=null;last=null;$('#out').innerHTML='<p class="note">Deleted.</p>';$('#thumbs').innerHTML='';history.replaceState(null,'','cctv');draw();check();}};
+}
+
+setMode('rectangle');draw();
+const qv=new URLSearchParams(location.search).get('v');if(qv&&/^[0-9a-f]{32}$/.test(qv))openVideo(qv);
+</script>
+</body>
+</html>

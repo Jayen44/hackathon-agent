@@ -15,14 +15,55 @@ import pathlib
 import modal
 
 HERE = pathlib.Path(__file__).parent
+ROOT = HERE.parent.parent
 
 image = (
     modal.Image.debian_slim(python_version="3.12")
     .pip_install("numpy", "fastapi[standard]")
     .add_local_python_source("sim", "montecarlo")
+    .add_local_file(ROOT / "viz" / "export.py", "/root/viz/export.py")
+    .add_local_file(HERE / "cctv.py", "/root/viz/lab/cctv.py")
+    .add_local_dir(ROOT / "viz" / "web", "/viewer")
     .add_local_dir(HERE / "static", "/static")
 )
 app = modal.App("accel-simlab", image=image)
+
+# CCTV uploads, detector outputs and the HF weight cache live ONLY in this Modal volume
+# (not in the repo).
+video_vol = modal.Volume.from_name("accel-video", create_if_missing=True)
+VOL = "/vol"
+MAX_UPLOAD_BYTES = 200 * 1024 * 1024
+VIDEO_EXT = {".mp4", ".mov", ".avi", ".mkv", ".webm", ".m4v"}
+
+# GPU image: RT-DETR (Apache-2.0) via transformers + ByteTrack via supervision (MIT). No Ultralytics.
+gpu_image = (
+    modal.Image.debian_slim(python_version="3.12")
+    .apt_install("libglib2.0-0", "libgl1")   # supervision pulls full opencv-python
+    .pip_install("torch==2.5.1", "transformers==4.46.3", "supervision==0.25.1",
+                 "opencv-python-headless==4.10.0.84", "numpy<2.2", "pillow")
+    .env({"HF_HOME": f"{VOL}/hf"})
+    .add_local_python_source("sim", "montecarlo")
+)
+
+
+@app.function(image=gpu_image, gpu="L4", volumes={VOL: video_vol}, timeout=1800)
+def detect_video(vid: str, plates: bool = True) -> dict:
+    """Detect + track vehicles in /vol/uploads/<vid>/video.*, write tracks.json + blurred stills."""
+    import json
+    import traceback
+
+    from sim.video.detect import detect_and_track
+
+    video_vol.reload()
+    d = pathlib.Path(VOL) / "uploads" / vid
+    meta = json.loads((d / "meta.json").read_text())
+    try:
+        summary = {"ok": True, **detect_and_track(str(d / meta["file"]), str(d), plates=plates)}
+    except Exception as e:  # untrusted video: report the failure, never crash the app
+        summary = {"ok": False, "error": f"{type(e).__name__}: {e}", "trace": traceback.format_exc()[-800:]}
+    (d / "status.json").write_text(json.dumps(summary))
+    video_vol.commit()
+    return summary
 
 
 @app.function(cpu=1.0, memory=512, timeout=300)
@@ -35,7 +76,7 @@ def _modal_map(ranges, factories, chunks):
     return list(eval_chunk.starmap([(ranges, factories, c) for c in chunks], order_outputs=True))
 
 
-@app.function(cpu=2.0, memory=1024, timeout=600, min_containers=0)
+@app.function(cpu=2.0, memory=2048, timeout=900, min_containers=0, volumes={VOL: video_vol})
 @modal.concurrent(max_inputs=8)
 @modal.asgi_app()
 def web():
@@ -46,6 +87,8 @@ def web():
     from fastapi import FastAPI, HTTPException
     from fastapi.responses import FileResponse
     from fastapi.staticfiles import StaticFiles
+
+    from viz.lab.cctv import add_cctv_routes
 
     from montecarlo.counterfactual import compare
     from montecarlo.ranges import (PARAM_NAMES, ParamRange, ScenarioRanges, av_replay_policy,
@@ -117,5 +160,8 @@ def web():
     def index():
         return FileResponse("/static/index.html")
 
+    add_cctv_routes(api, video_vol, VOL, detect_video, _modal_map, MAX_UPLOAD_BYTES, VIDEO_EXT)
     api.mount("/static", StaticFiles(directory="/static"), name="static")
+    # 3D replay viewer (viz/web): /viewer/?data=/api/replay/<video id>/<run id>
+    api.mount("/viewer", StaticFiles(directory="/viewer", html=True), name="viewer")
     return api
