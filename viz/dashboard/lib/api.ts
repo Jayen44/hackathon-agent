@@ -77,6 +77,47 @@ export type Claim = {
   disclaimer: string;
   has_replay?: boolean;
   debate?: import("@/components/debate").Debate;
+  // Insurer pricing plug-in (viz/api/pricing.py). Absent on claims assessed before the feature was deployed.
+  pricing?: Pricing;
+  rules_applied?: RuleApplied[];
+  decision_final?: string;
+};
+
+// ---------------------------------------------------------------- insurer profiles, pricing plug-in, rules
+export type PricingOutput = {
+  claim_value_gbp: Interval | null; expected_recovery_gbp: Interval | null; legal_cost_gbp?: Interval | null;
+  decision: string; reasons: string[]; model_version: string;
+};
+export type Pricing = {
+  profile: { id: string; name: string };
+  source: "builtin" | "webhook" | "fallback";
+  model_version: string;
+  output: PricingOutput;
+  builtin: PricingOutput;
+  builtin_final: string;
+  insurer: PricingOutput | null;
+  insurer_final: string | null;
+  fallback_reason: string | null;
+  latency_ms: number | null;
+  webhook_version?: string | null;
+  comparison: null | { agree: boolean; decision_differs: boolean; claim_value_overlap: boolean | null; expected_recovery_overlap: boolean | null; why: string[] };
+};
+export type RuleApplied = { rule: string; value: number | boolean | string; fired: boolean; changed?: boolean; reason: string };
+export type Rule = { rule: string; value: number | boolean | string };
+export type Profile = {
+  id: string; name: string;
+  pricing: { type: "builtin" } | { type: "webhook"; url: string; version: string };
+  rules: Rule[];
+};
+export type RuleSpec = { type: "gbp" | "fraction" | "bool" | "enum"; label: string; help: string; options?: string[] };
+export type ProfilesView = {
+  active: string; profiles: Profile[]; rule_specs: Record<string, RuleSpec>;
+  allowed_webhook_hosts: string[]; demo_model_url: string;
+};
+export type PortfolioComparison = {
+  profile_id: string; n_priced: number; n_compared: number; n_fallback: number; agree: number; differ: number;
+  decisions_differ: number; pursue_builtin: number; pursue_insurer: number;
+  builtin_total_gbp: (Interval & { n: number }) | null; insurer_total_gbp: (Interval & { n: number }) | null;
 };
 export type InboxRow = {
   claim_id: string; crash_type?: string | null; evidence_tier?: number; synthetic?: boolean; source?: string; origin?: string;
@@ -84,6 +125,7 @@ export type InboxRow = {
   evidence_band?: [number, number] | null;
   expected_recovery_gbp?: Interval | null;
   decision: string | null; decision_label: string; reason?: string | null;
+  pricing?: null | { profile: { id: string; name: string }; source: string; model_version: string; agree: boolean | null };
 };
 
 async function j<T>(path: string, init?: RequestInit): Promise<T> {
@@ -111,3 +153,22 @@ export async function getClaim(id: string): Promise<{ status: "done"; claim: Cla
   if (!r.ok) throw new Error(b.error ?? `HTTP ${r.status}`);
   return { status: "done", claim: b as Claim };
 }
+
+const JSON_HDR = { "content-type": "application/json" };
+/** null when the deployed API does not have the pricing plug-in yet (the dashboard then hides the feature). */
+export async function getProfiles(): Promise<ProfilesView | null> {
+  const r = await fetch(API_BASE + "/api/profiles", { cache: "no-store" });
+  if (r.status === 404 || r.status === 405) return null;
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+export const putProfiles = (body: { profile?: Profile; active?: string; delete?: string; reset?: boolean }) =>
+  j<ProfilesView>("/api/profiles", { method: "PUT", headers: JSON_HDR, body: JSON.stringify(body) });
+export const testWebhook = (url: string) =>
+  j<{ ok: boolean; error?: string; latency_ms?: number; output?: PricingOutput }>("/api/profiles/test", { method: "POST", headers: JSON_HDR, body: JSON.stringify({ url }) });
+export const repriceClaim = (id: string, profile_id: string) =>
+  j<Claim>(`/api/claims/${encodeURIComponent(id)}/reprice`, { method: "POST", headers: JSON_HDR, body: JSON.stringify({ profile_id }) });
+export const repriceAll = (profile_id: string) =>
+  j<{ repriced: number; of: number; comparison: PortfolioComparison }>(`/api/profiles/${encodeURIComponent(profile_id)}/reprice-all`, { method: "POST" });
+export const portfolioComparison = (profile_id: string) =>
+  j<PortfolioComparison>(`/api/portfolio-comparison?profile_id=${encodeURIComponent(profile_id)}`);

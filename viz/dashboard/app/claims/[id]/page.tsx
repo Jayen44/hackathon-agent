@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CctvEvidencePanel, cctvViewerSrc } from "@/components/cctv";
 import { DebatePanel } from "@/components/debate";
+import { PricingPanel } from "@/components/pricing";
 import { DecisionBadge, Dl, GbpRange, Meter, Panel, PBar } from "@/components/ui";
 import { getClaim, replayUrl, type Claim, type Interval } from "@/lib/api";
 import { CRASH_LABEL, DRIVER_LABEL, gbp, pct, TIER_LABEL } from "@/lib/format";
@@ -39,7 +40,7 @@ function useClaim(id: string) {
     poll();
     return () => { alive = false; clearTimeout(timer); };
   }, [id]);
-  return { claim, state };
+  return { claim, state, setClaim };
 }
 
 function Running({ started }: { started?: number }) {
@@ -69,7 +70,7 @@ function IvRow({ iv, fmt }: { iv: Interval | null; fmt: (x: number) => string })
 export default function ClaimPage() {
   const { id } = useParams<{ id: string }>();
   const cid = decodeURIComponent(id);
-  const { claim, state } = useClaim(cid);
+  const { claim, state, setClaim } = useClaim(cid);
   const [done, setDone] = useState<Record<string, boolean>>({});
   const [replaySrc, setReplaySrc] = useState<"cctv" | "sim">("cctv");
 
@@ -111,13 +112,14 @@ export default function ClaimPage() {
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <DecisionBadge decision={claim.decision} label={claim.decision_label} size="lg" />
               {claim.engine_decision !== claim.decision && (
-                <span className="text-xs text-muted">engine: {claim.engine_decision.replaceAll("_", " ")}; held by the data-sufficiency gate</span>
+                <span className="text-xs text-muted">engine: {claim.engine_decision.replaceAll("_", " ")}; {claim.pricing ? "see pricing model and rules below" : "held by the data-sufficiency gate"}</span>
               )}
             </div>
             {v && <p className="mt-3 max-w-2xl text-sm">{v.summary} <span className="text-muted">Liability lean: {v.liable.replaceAll("_", " ").toLowerCase()}, {v.confidence.toLowerCase()} confidence.</span></p>}
           </div>
           <div className="text-right">
             <div className="text-xs uppercase tracking-wide text-muted">Expected recovery, net of legal cost</div>
+            {claim.pricing && <div className="text-[11px] text-muted">Priced by: {claim.pricing.profile.name} · {claim.pricing.model_version}</div>}
             {claim.expected_recovery_gbp ? (
               <div className="mt-1"><GbpRange iv={claim.expected_recovery_gbp} /></div>
             ) : (
@@ -130,6 +132,8 @@ export default function ClaimPage() {
           Triage, not a ruling. {claim.disclaimer}
         </p>
       </section>
+
+      <PricingPanel claim={claim} onClaim={setClaim} />
 
       {/* Middle: replay + evidence */}
       <div className="space-y-5">
@@ -201,7 +205,7 @@ export default function ClaimPage() {
       </div>
 
       {/* Money breakdown */}
-      <Panel title="How the GBP figure is built" aside={<span className="text-[11px] text-muted">finance engine (insurance branch), read-only</span>}>
+      <Panel title="How the GBP figure is built" aside={<span className="text-[11px] text-muted">built-in UK engine (finance team, insurance branch), read-only</span>}>
         {rec ? (
           <div className="grid gap-5 md:grid-cols-2">
             <Dl rows={[

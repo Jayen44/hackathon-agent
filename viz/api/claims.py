@@ -802,10 +802,47 @@ def viewer_json(claim_id: str, sim: dict | None, title: str) -> dict | None:
 
 DECISION_LABEL = {"pursue": "Pursue", "dont_pursue": "Don't pursue", "pull_logs_first": "Get more evidence",
                   "not_av_recovery": "Don't pursue", "cannot_price": "Cannot price",
-                  "get_more_evidence": "Get more evidence"}
+                  "get_more_evidence": "Get more evidence", "pursue_after_signoff": "Pursue after sign-off"}
 
 
-def assess_claim(bundle: dict, meta: dict | None = None, map_fn=None, seed: int = 0, debate_client=None) -> dict:
+def claim_facts_dict(bundle: dict, sim: dict | None, meta: dict | None = None) -> dict | None:
+    """The claim facts we send to an insurer's pricing model, via their bridge (read-only). None if unavailable."""
+    if not insurance_available():
+        return None
+    from insurance.bridge import claim_facts
+    from insurance.bundle import BundleError, load_bundle
+    try:
+        b = load_bundle(bundle)
+    except BundleError:
+        return None
+    reproduced = bool(((sim or {}).get("reproduction") or {}).get("reproduced_flag", False))
+    f = claim_facts(b, reproduced)
+    override = (meta or {}).get("engagement_override")
+    return {"severity": f.injury_severity, "paid_gbp": f.paid_claim_gbp,
+            "cn_range": list(f.third_party_share) if f.third_party_share is not None else None,
+            "engagement": override or f.engagement_status, "odd": f.within_odd, "software": f.software_status}
+
+
+def apply_profile(r: dict, profile: dict, post=None) -> dict:
+    """Price an assessed claim under an insurer profile (viz/api/pricing.py) and set the final decision. In place."""
+    from viz.api.pricing import price_claim
+    suff = (r.get("sufficiency_gate") or {}).get("score")
+    low = suff is not None and suff < SUFFICIENCY_MIN
+
+    def gate(d: str) -> str:
+        return "get_more_evidence" if low and d in ("pursue", "dont_pursue") else d
+
+    out = price_claim(r, r.get("claim_facts"), profile, gate=gate, post=post)
+    final = out["decision_final"]
+    r.update(pricing=out["pricing"], rules_applied=out["rules_applied"], decision_final=final, decision=final,
+             decision_label=DECISION_LABEL.get(final, final),
+             expected_recovery_gbp=out["pricing"]["output"].get("expected_recovery_gbp"))
+    r["sufficiency_gate"]["applied"] = low and out["pricing"]["output"]["decision"] in ("pursue", "dont_pursue")
+    return r
+
+
+def assess_claim(bundle: dict, meta: dict | None = None, map_fn=None, seed: int = 0, debate_client=None,
+                 profile: dict | None = None, post=None) -> dict:
     meta = meta or {}
     tier = meta.get("tier")
     tier_used = tier if tier is not None else evidence_tier(bundle)
@@ -843,7 +880,7 @@ def assess_claim(bundle: dict, meta: dict | None = None, map_fn=None, seed: int 
     if sim is not None:
         sim.pop("replays", None)
     rec = (gbp.get("recovery") or {})
-    return _plain({
+    r = _plain({
         "claim_id": cid,
         "synthetic": bundle.get("synthetic"),
         "source": "form" if bundle.get("intake") else "cctv" if bundle.get("cctv_evidence") else "bundle",
@@ -873,7 +910,11 @@ def assess_claim(bundle: dict, meta: dict | None = None, map_fn=None, seed: int 
         ],
         "disclaimer": DISCLAIMER,
         "viewer": view,
+        "claim_facts": claim_facts_dict(bundle, sim, meta) if not sim_error else None,
     })
+    if profile is not None:
+        apply_profile(r, profile, post)
+    return r
 
 
 def summary_row(r: dict) -> dict:
@@ -884,4 +925,41 @@ def summary_row(r: dict) -> dict:
             "evidence_band": (r.get("sim") or {}).get("evidence_band"),
             "expected_recovery_gbp": r.get("expected_recovery_gbp"),
             "decision": r["decision"], "decision_label": r["decision_label"],
-            "reason": (r.get("gbp") or {}).get("reason")}
+            "reason": (r.get("gbp") or {}).get("reason"),
+            "pricing": pricing_summary(r)}
+
+
+def pricing_summary(r: dict) -> dict | None:
+    """Inbox/portfolio view of the profile pricing: figures copied from the claim's two outputs, nothing new."""
+    p = r.get("pricing")
+    if not p:
+        return None
+    b, i = p.get("builtin") or {}, p.get("insurer")
+    return {"profile": p["profile"], "source": p["source"], "model_version": p["model_version"],
+            "builtin_decision": p.get("builtin_final"), "builtin_expected_recovery_gbp": b.get("expected_recovery_gbp"),
+            "insurer_decision": p.get("insurer_final"),
+            "insurer_expected_recovery_gbp": (i or {}).get("expected_recovery_gbp"),
+            "agree": (p.get("comparison") or {}).get("agree")}
+
+
+def portfolio_comparison(rows: list[dict], profile_id: str) -> dict:
+    """Agree/differ counts and total expected recovery (central, and low-high) under each model, over the claims
+    currently priced by `profile_id`'s insurer model. Sums of figures already in the claim results."""
+    ps = [row["pricing"] for row in rows if (row.get("pricing") or {}).get("profile", {}).get("id") == profile_id]
+    compared = [p for p in ps if p["source"] == "webhook"]
+
+    def total(key: str) -> dict | None:
+        ivs = [p[key] for p in compared if p.get(key)]
+        if not ivs:
+            return None
+        return {k: sum(iv[k] for iv in ivs) for k in ("low", "mid", "high")} | {"n": len(ivs)}
+
+    return {"profile_id": profile_id, "n_priced": len(ps), "n_compared": len(compared),
+            "n_fallback": sum(p["source"] == "fallback" for p in ps),
+            "agree": sum(p.get("agree") is True for p in compared),
+            "differ": sum(p.get("agree") is False for p in compared),
+            "decisions_differ": sum(p["builtin_decision"] != p["insurer_decision"] for p in compared),
+            "builtin_total_gbp": total("builtin_expected_recovery_gbp"),
+            "insurer_total_gbp": total("insurer_expected_recovery_gbp"),
+            "pursue_builtin": sum(p["builtin_decision"] in ("pursue", "pursue_after_signoff") for p in compared),
+            "pursue_insurer": sum(p["insurer_decision"] in ("pursue", "pursue_after_signoff") for p in compared)}

@@ -34,6 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/run" className="hover:text-fg">Agent run</Link>
               <Link href="/" className="hover:text-fg">Claims</Link>
               <Link href="/new" className="hover:text-fg">New claim</Link>
+              <Link href="/settings" className="hover:text-fg">Pricing &amp; rules</Link>
             </nav>
             <div className="ml-auto flex items-center gap-3">
               <span className="hidden text-xs text-muted sm:inline">Triage, not a ruling</span>

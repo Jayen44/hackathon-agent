@@ -26,7 +26,8 @@ export function gbp(x: number): string {
 export type Tone = "pursue" | "dont" | "evidence" | "cannot" | "none";
 export function decisionTone(d: string | null | undefined): Tone {
   switch (d) {
-    case "pursue": return "pursue";
+    case "pursue":
+    case "pursue_after_signoff": return "pursue";
     case "dont_pursue":
     case "not_av_recovery": return "dont";
     case "pull_logs_first":
@@ -37,3 +38,10 @@ export function decisionTone(d: string | null | undefined): Tone {
 }
 
 export const TIER_LABEL = ["Tier 0 · report only", "Tier 1 · video", "Tier 2 · AV logs"];
+
+export const DECISION_TEXT: Record<string, string> = {
+  pursue: "Pursue", pursue_after_signoff: "Pursue after sign-off", dont_pursue: "Don't pursue",
+  pull_logs_first: "Get more evidence", get_more_evidence: "Get more evidence", not_av_recovery: "Don't pursue",
+  cannot_price: "Cannot price",
+};
+export const decisionText = (d: string | null | undefined) => (d ? DECISION_TEXT[d] ?? d.replaceAll("_", " ") : "–");
