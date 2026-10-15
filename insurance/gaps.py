@@ -75,7 +75,7 @@ def _pricing_cells() -> list[Gap]:
     except Exception:  # finance missing: nothing to audit
         return []
     out: list[Gap] = []
-    unpriced = [k for k, v in tables.CLAIM_VALUE_BY_UK_SEVERITY.items() if not v.priced]
+    unpriced = [k for k, v in tables.CLAIM_VALUE_BY_UK_SEVERITY.items() if not v.priced and k != "Unknown"]  # Unknown is unpriced by design
     if unpriced:
         out.append(Gap("pricing:claim_value", "finance", 1,
                        f"{len(unpriced)} UK severities cannot be priced: {', '.join(unpriced[:4])}...",
