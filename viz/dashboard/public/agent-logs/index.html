@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Recovery Engine Agent Logs</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600&display=swap">
+<style>
+/* Layout: an audit ledger. Summary and verification links first, then two filterable timelines (live run, debate batch). */
+:root{
+  --bg:#f6f7f9; --panel:#ffffff; --sunk:#eef0f4; --fg:#16181d; --muted:#5d6472; --line:#dde1e8; --accent:#2b5bd7;
+  --lead:#2b5bd7; --investigator:#0f8a7e; --reconstructor:#b8650a; --counterfactual:#7b4fd6; --adjuster:#1f6fd1;
+  --defence:#c23b30; --rebuttal:#8a46c4; --referee:#6b7280; --runner:#8a8f99; --ok:#2e7d4f; --warn:#a8650b;
+  --display:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111318; --panel:#181b22; --sunk:#1f232c; --fg:#e7e9ee; --muted:#9aa1ae; --line:#2b303b; --accent:#7ea2ff;
+  --lead:#7ea2ff; --investigator:#4cc2b5; --reconstructor:#e3a050; --counterfactual:#ad8cf0; --adjuster:#6aa8f2;
+  --defence:#f07a6f; --rebuttal:#c193ec; --referee:#a3a9b5; --runner:#8f95a1; --ok:#5fbf86; --warn:#e3a050; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111318; --panel:#181b22; --sunk:#1f232c; --fg:#e7e9ee; --muted:#9aa1ae; --line:#2b303b; --accent:#7ea2ff;
+  --lead:#7ea2ff; --investigator:#4cc2b5; --reconstructor:#e3a050; --counterfactual:#ad8cf0; --adjuster:#6aa8f2;
+  --defence:#f07a6f; --rebuttal:#c193ec; --referee:#a3a9b5; --runner:#8f95a1; --ok:#5fbf86; --warn:#e3a050; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:15px/1.55 var(--body);margin:0;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px}
+main{max-width:1040px;margin:0 auto;display:grid;gap:22px}
+h1{font:600 30px/1.15 var(--display);letter-spacing:.01em;margin:0;text-wrap:balance}
+h2{font:600 19px/1.2 var(--display);margin:0;letter-spacing:.01em}
+.lede{color:var(--muted);margin:6px 0 0;max-width:68ch}
+.eyebrow{font:500 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+a{color:var(--accent)} code,.mono{font-family:var(--mono);font-size:12.5px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px 18px;min-width:0}
+.verify{display:grid;gap:10px}
+.links{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px 18px}
+.link{display:grid;gap:2px;min-width:0}
+.link a{font-family:var(--mono);font-size:12px;word-break:break-all}
+.link span{font-size:13px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.stat{background:var(--sunk);border-radius:6px;padding:10px 12px}
+.stat b{display:block;font:600 22px/1.1 var(--display);font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.tab{font:500 14px var(--body);background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);padding:8px 10px;cursor:pointer}
+.tab[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+.tab:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{font:500 12px var(--body);border:1px solid var(--line);background:var(--panel);color:var(--fg);border-radius:999px;padding:4px 10px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.chip[aria-pressed="false"]{opacity:.45}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--c,var(--runner));flex:none}
+input[type=search]{font:14px var(--body);background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:6px 10px;min-width:0;flex:1 1 220px}
+label.toggle{font-size:13px;color:var(--muted);display:inline-flex;gap:6px;align-items:center}
+.count{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+ol.log{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.row{border:1px solid var(--line);border-left:3px solid var(--c,var(--runner));border-radius:6px;background:var(--panel);min-width:0}
+.row summary{display:grid;grid-template-columns:auto auto 1fr;gap:4px 10px;padding:6px 10px;cursor:pointer;list-style:none;align-items:baseline}
+.row summary::-webkit-details-marker{display:none}
+.t{font:12px var(--mono);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.who{font-weight:600;font-size:13px;white-space:nowrap}
+.what{font-size:13px;min-width:0;overflow-wrap:anywhere}
+.kind{font:11px var(--mono);color:var(--muted);margin-right:6px}
+.row pre{margin:0;padding:8px 10px;border-top:1px solid var(--line);background:var(--sunk);font:12px/1.45 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere;max-height:420px;overflow:auto}
+.more{justify-self:start;font:500 13px var(--body);border:1px solid var(--line);background:var(--panel);color:var(--fg);border-radius:6px;padding:6px 12px;cursor:pointer}
+.claim{display:grid;gap:10px}
+.claimhead{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:baseline}
+.pill{font:500 11px var(--mono);letter-spacing:.04em;text-transform:uppercase;border-radius:4px;padding:2px 6px;background:var(--sunk);color:var(--ok)}
+.pill.contested{color:var(--warn)}
+.bottom{font-weight:600}
+.small{font-size:13px;color:var(--muted)}
+.turn{border-left:3px solid var(--c);padding:6px 0 6px 12px;display:grid;gap:4px}
+.turn p{margin:0}
+.note{font-size:13px;color:var(--muted);margin:0}
+[hidden]{display:none!important}
+@media (max-width:560px){.row summary{grid-template-columns:1fr}.t{order:3}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<main>
+  <header>
+    <div class="eyebrow">Accel AI Innovate · Recovery Engine · 15 Oct 2026</div>
+    <h1>Agent logs for verification</h1>
+    <p class="lede">Every agent in the project and what it did, step by step. Two systems: a long-running Claude Managed Agents team that works a queue of crash claims, and the adjuster vs defence-counsel debate that challenges each recovery decision. Every £ figure in these logs comes from the deterministic finance engine, never from a model. All claims are synthetic demo claims.</p>
+  </header>
+
+  <section class="panel verify" aria-labelledby="verify-h">
+    <h2 id="verify-h">Check it yourself: live public endpoints</h2>
+    <p class="note">These are the team's live services (read-only, no login). The logs below are copies taken from them on 15 Oct 2026.</p>
+    <div class="links">
+      <div class="link"><span>Live Managed Agents run: full event trace (paged JSON, add <code>?since=N</code>)</span><a href="https://termvato--accel-fleet-web.us-east.modal.run/api/runs/20261015-113918-f201/trace" target="_blank" rel="noopener">…/api/runs/20261015-113918-f201/trace</a></div>
+      <div class="link"><span>That run's summary: agents, tool calls, token use, cost, finish reason</span><a href="https://termvato--accel-fleet-web.us-east.modal.run/api/runs/20261015-113918-f201" target="_blank" rel="noopener">…/api/runs/20261015-113918-f201</a></div>
+      <div class="link"><span>All runs, including the earlier live run and the dry run</span><a href="https://termvato--accel-fleet-web.us-east.modal.run/api/runs" target="_blank" rel="noopener">…/api/runs</a></div>
+      <div class="link"><span>The agent run, live in the dashboard</span><a href="https://accel-claims-dashboard.vercel.app/run" target="_blank" rel="noopener">accel-claims-dashboard.vercel.app/run</a></div>
+      <div class="link"><span>One claim with its debate and agent trace (JSON: <code>debate.trace</code>)</span><a href="https://termvato--accel-claims-api-web.us-east.modal.run/api/claims/DEMO-1_queue_late_brake" target="_blank" rel="noopener">…/api/claims/DEMO-1_queue_late_brake</a></div>
+      <div class="link"><span>The same claim in the dashboard: debate panel and "View agent log"</span><a href="https://accel-claims-dashboard.vercel.app/claims/DEMO-1_queue_late_brake" target="_blank" rel="noopener">accel-claims-dashboard.vercel.app/claims/DEMO-1_queue_late_brake</a></div>
+    </div>
+    <p class="note">Claude Console session for the live run (visible to the team's workspace): <code id="session">loading…</code></p>
+  </section>
+
+  <section class="stats" id="stats" aria-label="Live run at a glance"></section>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-run" aria-controls="pane-run" aria-selected="true">Managed Agents run (live)</button>
+    <button class="tab" role="tab" id="tab-debate" aria-controls="pane-debate" aria-selected="false">Adjuster vs defence counsel (10 claims)</button>
+  </div>
+
+  <section id="pane-run" role="tabpanel" aria-labelledby="tab-run" class="panel" style="display:grid;gap:12px">
+    <p class="note">The Recovery portfolio lead (Claude Opus 5.5) works the claim queue and hands each claim to the Investigator, Reconstructor and Counterfactual analyst (Claude Sonnet 5.5). Then it calls the pricing tool, which runs the adjuster vs defence-counsel debate. Messages between agents, tool calls with their inputs and results, and every debate step are below. Click a row to see the full payload.</p>
+    <div class="controls" id="agentChips" aria-label="Filter by agent"></div>
+    <div class="controls">
+      <input type="search" id="q" placeholder="Search: claim id, tool name, words in a message" aria-label="Search the log">
+      <label class="toggle"><input type="checkbox" id="noise" checked> Hide session status and usage pings</label>
+      <span class="count" id="runCount"></span>
+    </div>
+    <ol class="log" id="runLog"></ol>
+    <button class="more" id="runMore" hidden>Show 300 more</button>
+  </section>
+
+  <section id="pane-debate" role="tabpanel" aria-labelledby="tab-debate" class="panel" hidden style="display:grid;gap:18px">
+    <p class="note">A batch of 10 synthetic UK claims (highest value first), each debated live on Claude Opus 5.5. The adjuster prices the claim, defence counsel argues for the AV company and tests attacks on the finance engine, and the adjuster accepts, partly accepts or rejects. The final figure is re-priced by the engine from what was accepted.</p>
+    <div id="debates" style="display:grid;gap:18px"></div>
+  </section>
+</main>
+
+<script>
+const AGENTS = {
+  "Recovery portfolio lead": "--lead", "Investigator": "--investigator", "Reconstructor": "--reconstructor",
+  "Counterfactual analyst": "--counterfactual", "Adjuster": "--adjuster", "Defence counsel": "--defence",
+  "Adjuster (rebuttal)": "--rebuttal", "Debate referee": "--referee", "runner": "--runner",
+  adjuster: "--adjuster", defence_counsel: "--defence", adjuster_rebuttal: "--rebuttal", orchestrator: "--referee",
+};
+const DEBATE_NAMES = { adjuster: "Adjuster", defence_counsel: "Defence counsel", adjuster_rebuttal: "Adjuster rebuttal", orchestrator: "Engine" };
+const NOISE = /^session\.(thread_status_|status_|usage)/;
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const gbp = (x) => (x < 0 ? "-£" : "£") + Math.abs(Math.round(x)).toLocaleString("en-GB");
+const range = (p) => p && p.expected_recovery ? `${gbp(p.expected_recovery.low)} to ${gbp(p.expected_recovery.high)}, most likely ${gbp(p.expected_recovery.mid)}` : "n/a";
+const color = (a) => `var(${AGENTS[a] || "--runner"})`;
+const time = (ts) => ts ? ts.slice(11, 19) : "";
+const kindLabel = (t) => ({
+  "agent.custom_tool_use": "tool call", tool_result: "tool result", "agent.thread_message_sent": "message sent",
+  "agent.thread_message_received": "message received", "agent.message": "says", "debate.answer": "debate answer",
+  "debate.final": "debate final", "user.message": "instruction", "session.thread_created": "thread created",
+}[t] || (t.startsWith("debate.tool:") ? "debate tool " + t.slice(12) : t));
+
+let RUN = null, shown = 300, active = new Set();
+
+function tabs() {
+  const set = (run) => {
+    document.getElementById("tab-run").setAttribute("aria-selected", run);
+    document.getElementById("tab-debate").setAttribute("aria-selected", !run);
+    document.getElementById("pane-run").hidden = !run;
+    document.getElementById("pane-debate").hidden = run;
+    try { localStorage.setItem("agentlog-tab", run ? "run" : "debate"); } catch (e) {}
+  };
+  document.getElementById("tab-run").onclick = () => set(true);
+  document.getElementById("tab-debate").onclick = () => set(false);
+  let saved = null; try { saved = localStorage.getItem("agentlog-tab"); } catch (e) {}
+  if (location.hash === "#debate" || saved === "debate") set(false);
+}
+
+function renderStats(meta, events) {
+  const mins = Math.round((new Date(meta.finished_at) - new Date(meta.created_at)) / 60000);
+  const types = {}; events.forEach((e) => (types[e.type] = (types[e.type] || 0) + 1));
+  const debate = events.filter((e) => e.type.startsWith("debate.")).length;
+  const stats = [
+    [`${mins} min`, "live run, " + time(meta.created_at) + " to " + time(meta.finished_at) + " UTC"],
+    [events.length.toLocaleString("en-GB"), "logged events"],
+    [(meta.agents || []).length + 3, "agents (team of 4 + debate's 3)"],
+    [String(meta.tool_calls ?? types["agent.custom_tool_use"]), "tool calls"],
+    [String(types["agent.thread_message_sent"] || 0), "messages between agents"],
+    [String(debate), "debate steps"],
+    ["$" + (meta.usage?.list_cost_usd ?? 0).toFixed(2), "list cost (stopped at its $25 budget)"],
+  ];
+  document.getElementById("stats").innerHTML = stats.map(([b, s]) => `<div class="stat"><b>${esc(b)}</b><span>${esc(s)}</span></div>`).join("");
+  document.getElementById("session").textContent = meta.session_id || "n/a";
+}
+
+function chips(events) {
+  const counts = {}; events.forEach((e) => (counts[e.agent] = (counts[e.agent] || 0) + 1));
+  const names = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+  active = new Set(names);
+  const el = document.getElementById("agentChips");
+  el.innerHTML = names.map((n) => `<button class="chip" aria-pressed="true" data-a="${esc(n)}" style="--c:${color(n)}"><span class="dot"></span>${esc(n)} <span class="count">${counts[n]}</span></button>`).join("");
+  el.onclick = (ev) => {
+    const b = ev.target.closest(".chip"); if (!b) return;
+    const a = b.dataset.a, on = b.getAttribute("aria-pressed") === "true";
+    b.setAttribute("aria-pressed", String(!on)); on ? active.delete(a) : active.add(a); shown = 300; renderRun();
+  };
+}
+
+function rowHTML(e) {
+  const body = e.output !== undefined ? JSON.stringify(e.output, null, 2) : "";
+  return `<li><details class="row" style="--c:${color(e.agent)}"><summary><span class="t">${time(e.ts)}</span><span class="who">${esc(e.agent)}</span>` +
+    `<span class="what"><span class="kind">${esc(kindLabel(e.type))}</span>${esc(e.summary)}</span></summary>` +
+    (body ? `<pre>${esc(body)}</pre>` : "") + `</details></li>`;
+}
+
+function renderRun() {
+  const q = document.getElementById("q").value.trim().toLowerCase();
+  const hide = document.getElementById("noise").checked;
+  const rows = RUN.events.filter((e) => active.has(e.agent) && !(hide && NOISE.test(e.type)) &&
+    (!q || (e.summary || "").toLowerCase().includes(q) || e.type.toLowerCase().includes(q) || JSON.stringify(e.output ?? "").toLowerCase().includes(q)));
+  document.getElementById("runLog").innerHTML = rows.slice(0, shown).map(rowHTML).join("");
+  document.getElementById("runCount").textContent = `${Math.min(shown, rows.length).toLocaleString("en-GB")} of ${rows.length.toLocaleString("en-GB")} events`;
+  document.getElementById("runMore").hidden = rows.length <= shown;
+}
+
+function stepHTML(s) {
+  const d = s.detail || {}, name = DEBATE_NAMES[s.agent] || s.agent;
+  let what;
+  if (s.step.startsWith("tool:")) {
+    const args = Object.entries(d.input || {}).filter(([, v]) => v !== null && v !== false).map(([k, v]) => `${k}: ${v}`).join(", ");
+    const out = d.output;
+    let res = "";
+    if (d.is_error) res = ` → rejected: ${out && out.error}`;
+    else if (out && out.decision) res = ` → ${out.decision.replaceAll("_", " ")}, ${range(out)}`;
+    else if (Array.isArray(out)) res = " → " + out.slice(0, 5).map((a) => a.assumption + (a.flips_decision ? " (flips the decision)" : "")).join("; ");
+    what = `<span class="kind">uses ${esc(s.step.slice(5))}</span>${esc(args)}${esc(res)}`;
+  } else if (s.step === "answer") {
+    const main = d.recommendation || d.argument || d.reasoning || "";
+    const head = d.assumption ? `Attacks: ${d.assumption}. ` : d.verdict ? `Verdict: ${String(d.verdict).replaceAll("_", " ")}. ` : "";
+    what = `<span class="kind">answers</span>${esc(head + main)}`;
+  } else if (s.step === "final") {
+    what = `<span class="kind">final</span>${esc((d.decision || "").replaceAll("_", " "))}${d.contested ? " · contested" : ""}`;
+  } else {
+    what = `<span class="kind">${esc(s.step.replaceAll("_", " "))}</span>${esc(d.error || "")}`;
+  }
+  return `<li><details class="row" style="--c:${color(s.agent)}"><summary><span class="t">#</span><span class="who">${esc(name)}</span><span class="what">${what}</span></summary>` +
+    `<pre>${esc(JSON.stringify(d, null, 2))}</pre></details></li>`;
+}
+
+function renderDebates(data) {
+  document.getElementById("debates").innerHTML = data.claims.map((c) => {
+    const h = c.handler_summary || {};
+    return `<article class="claim"><div class="claimhead"><h2>${esc(c.claim_id)}</h2>` +
+      `<span class="pill ${c.contested ? "contested" : ""}">${c.contested ? "contested: human decides" : "agreed after challenge"}</span>` +
+      `<span class="small">$${(c.cost_usd || 0).toFixed(2)} · ${c.steps.length} steps</span></div>` +
+      `<div class="bottom">${esc(h.bottom_line || "")}</div>` +
+      `<p class="small" style="margin:0">${esc(h.what_the_challenge_changed || "")}</p>` +
+      `<div class="turn" style="--c:var(--adjuster)"><b>Adjuster</b><p>${esc(c.adjuster?.recommendation)}</p><p class="small">Engine price: ${esc((c.original?.decision || "").replaceAll("_", " "))}, ${esc(range(c.original))}</p></div>` +
+      `<div class="turn" style="--c:var(--defence)"><b>Defence counsel</b><p class="small">Attacks: ${esc(c.challenge?.assumption)}</p><p>${esc(c.challenge?.argument)}</p><p class="small">Re-priced: ${esc((c.challenged?.decision || "").replaceAll("_", " "))}, ${esc(range(c.challenged))}</p></div>` +
+      `<div class="turn" style="--c:var(--rebuttal)"><b>Adjuster rebuttal · ${esc(String(c.rebuttal?.verdict || "").replaceAll("_", " "))}</b><p>${esc(c.rebuttal?.reasoning)}</p><p class="small">Final: ${esc((c.final?.decision || "").replaceAll("_", " "))}, ${esc(range(c.final))}</p></div>` +
+      `<details><summary class="small" style="cursor:pointer">Full agent log (${c.steps.length} steps)</summary><ol class="log" style="margin-top:8px">${c.steps.map(stepHTML).join("")}</ol></details>` +
+      `</article>`;
+  }).join("");
+}
+
+tabs();
+fetch("fleet_run.json").then((r) => r.json()).then((d) => {
+  RUN = d; renderStats(d.meta, d.events); chips(d.events); renderRun();
+  document.getElementById("q").addEventListener("input", () => { shown = 300; renderRun(); });
+  document.getElementById("noise").addEventListener("change", () => { shown = 300; renderRun(); });
+  document.getElementById("runMore").onclick = () => { shown += 300; renderRun(); };
+}).catch((e) => { document.getElementById("runLog").innerHTML = `<li class="note">Could not load the run log (${esc(e.message)}). Use the live trace link above.</li>`; });
+fetch("debate_batch.json").then((r) => r.json()).then(renderDebates)
+  .catch((e) => { document.getElementById("debates").innerHTML = `<p class="note">Could not load the debate log (${esc(e.message)}).</p>`; });
+</script>
+</body>
+</html>
