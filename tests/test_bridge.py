@@ -144,7 +144,10 @@ def test_one_model_or_unreproduced_holds_at_pull_logs():
 
 
 def test_legal_cost_todo_means_cannot_price_not_a_guess():
-    r = assess_bundle(bundle("01_av_late_detection"))  # no legal cost supplied; table is TODO
+    # Legal costs up to GBP 100k come from CPR PD 45; above that (multi-track) they are still TODO.
+    d = raw("01_av_late_detection")
+    d["outcome"]["paid_claim_gbp"] = 250000.0
+    r = assess_bundle(load_bundle(d))  # no legal cost supplied
     assert r.recovery.decision == "cannot_price"
     assert r.recovery.expected_recovery is None
 
