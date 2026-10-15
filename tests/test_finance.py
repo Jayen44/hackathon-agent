@@ -72,10 +72,11 @@ def test_bad_software_status_is_rejected():
         r.assess(facts(software_status="fine"), BOTH_HIGH)
 
 
-def test_legacy_sgo_strings_still_accepted():
-    a = r.assess(facts(engagement_status="Verified Engaged", within_odd="Yes",
-                       injury_severity="Property Damage, No Injury"), BOTH_HIGH)
-    assert a.decision == "pursue"
+@pytest.mark.parametrize("kw", [dict(engagement_status="Verified Engaged"), dict(within_odd="Yes"),
+                                dict(injury_severity="Property Damage, No Injury"), dict(engagement_status="engaged")])
+def test_us_sgo_and_unknown_codes_are_rejected(kw):
+    with pytest.raises(ValueError):
+        r.assess(facts(**kw), BOTH_HIGH)
 
 
 @pytest.mark.parametrize("kw", [dict(engagement_status="engaged_alleged"),
@@ -197,11 +198,6 @@ def test_every_gate_has_a_code(kw, code):
     gate_codes = {"ENGAGEMENT_UNVERIFIED", "ODD_OUTSIDE", "ODD_UNKNOWN", "NOT_REPRODUCED", "CN_NOT_ASSESSED", "ONE_MODEL"}
     gate_reasons = [x for x in a.reasons if x in r._gates(facts(**kw)) or "not assessed" in x]
     assert len(gate_reasons) == len(gate_codes & set(a.codes))
-
-
-def test_legacy_severity_gets_general_damages_note():
-    a = r.assess(facts(paid_claim_gbp=None, injury_severity="Fatality", third_party_share=(0, 0)), BOTH_HIGH)
-    assert any("general damages only" in x for x in a.reasons)
 
 
 def test_what_if_bounds_match_validate_facts():

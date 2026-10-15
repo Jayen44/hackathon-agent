@@ -22,8 +22,8 @@ PROFILE = Path(__file__).parent / "profile_2024.json"
 
 # Demo knobs for the made-up AV facts (UK codes, see finance.recovery). Not data: change them to stage different stories.
 DEMO_KNOBS = {
-    "p_engagement_verified": 0.8,   # else "Alleged Engaged"
-    "p_within_odd": 0.85,           # else "Unknown, see Narrative"
+    "p_engagement_verified": 0.8,   # else "engaged_alleged"
+    "p_within_odd": 0.85,           # else "unknown"
     "p_reproduced": 0.9,
     "third_party_share": None,      # injured party's contributory negligence; None = not assessed
 }

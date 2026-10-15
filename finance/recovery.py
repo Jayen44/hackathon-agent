@@ -48,20 +48,20 @@ ENGAGEMENT = ("engaged_verified", "engaged_alleged", "not_engaged", "unknown")
 ODD = ("inside", "outside", "exiting", "unknown")
 SOFTWARE = ("compliant", "unauthorised_alteration", "safety_update_missing", "unknown")
 
-# Legacy input: NHTSA SGO strings (US), still sent by insurance/bridge.py. Remove once the bridge
-# sends UK codes (issue for Jayen).
-_LEGACY_ENGAGEMENT = {"Verified Engaged": "engaged_verified", "Alleged Engaged": "engaged_alleged",
-                      "Verified Not Engaged": "not_engaged", "Unknown, see Narrative": "unknown"}
-_LEGACY_ODD = {"Yes": "inside", "No, see Narrative": "outside", "Exiting ODD": "exiting",
-               "Unknown, see Narrative": "unknown"}
 
 
 def engagement_code(v: str) -> str:
-    return v if v in ENGAGEMENT else _LEGACY_ENGAGEMENT.get(v, "unknown")
+    """The UK engagement code, validated. Unrecognised values are rejected, never guessed."""
+    if v not in ENGAGEMENT:
+        raise ValueError(f"engagement_status must be one of {ENGAGEMENT}, got {v!r}")
+    return v
 
 
 def odd_code(v: str) -> str:
-    return v if v in ODD else _LEGACY_ODD.get(v, "unknown")
+    """The UK ODD code, validated. Unrecognised values are rejected, never guessed."""
+    if v not in ODD:
+        raise ValueError(f"within_odd must be one of {ODD}, got {v!r}")
+    return v
 
 
 @dataclass(frozen=True)
@@ -95,9 +95,9 @@ class AvoidanceResult:
 class ClaimFacts:
     claim_id: str                 # insurer's claim reference
     crash_type: str               # e.g. "cut_in", "lead_vehicle_decel", "other"
-    injury_severity: str          # UK: "Fatal" | "Serious" | "Slight" | "Damage only" | "Unknown" (legacy SGO accepted)
-    engagement_status: str        # ENGAGEMENT code (legacy SGO accepted)
-    within_odd: str               # ODD code (legacy SGO accepted)
+    injury_severity: str          # UK (DfT STATS19): "Fatal" | "Serious" | "Slight" | "Damage only" | "Unknown"
+    engagement_status: str        # ENGAGEMENT code
+    within_odd: str               # ODD code
     reproduced: bool              # Reconstructor reproduced the reported crash
     # The INJURED PARTY's contributory negligence share, low..high (AEVA s.3(1), 1945 Act).
     # None = not assessed. Not other drivers' fault. Name kept for the bridge contract.
@@ -184,6 +184,9 @@ def validate_facts(f: ClaimFacts) -> None:
         lo, hi = f.legal_cost_gbp
         if not (finite(lo) and finite(hi) and 0 < lo <= hi):
             raise ValueError(f"legal_cost_gbp must be (low, high) with 0 < low <= high, got {f.legal_cost_gbp!r}")
+    engagement_code(f.engagement_status)
+    odd_code(f.within_odd)
+    tables.claim_value_for_severity(f.injury_severity)
     if f.third_party_share is not None:
         lo, hi = f.third_party_share
         if not (finite(lo) and finite(hi) and 0 <= lo <= hi <= 1):
@@ -192,8 +195,7 @@ def validate_facts(f: ClaimFacts) -> None:
 
 def _special_damages_note(f: ClaimFacts) -> list[str]:
     """Table values for Serious/Fatal are general damages only; flag that real claims run higher."""
-    if f.paid_claim_gbp is None and f.injury_severity in ("Serious", "Fatal", "Serious With Hospitalization",
-                                                          "Serious Without Hospitalization", "Fatality"):
+    if f.paid_claim_gbp is None and f.injury_severity in ("Serious", "Fatal"):
         return [f"{f.injury_severity} claim value is general damages only (care, lost earnings, dependency excluded): "
                 "the real claim is likely higher; use the insurer's paid amount if known"]
     return []

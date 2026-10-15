@@ -4,7 +4,7 @@ Read the root CLAUDE.md first (on `sim` until merged). This file adds rules for 
 
 ## What is here
 - `recovery.py`: culpability and money. `assess(ClaimFacts, [AvoidanceResult]) -> RecoveryAssessment` gives the AV share of fault, expected recovery in GBP (low / central / high) and a decision: `pursue`, `dont_pursue`, `pull_logs_first`, `not_av_recovery`, `cannot_price`. `weakest_assumption()` feeds Defence counsel. `rank()` and `recoverability_map()` feed the orchestrator and UI.
-- `tables.py`: claim value by UK injury severity (STATS19: Fatal / Serious / Slight / Damage only; legacy SGO keys kept until the bridge switches), and legal cost from CPR PD 45 fixed recoverable costs (band 2 settled pre-issue to band 4 one-day trial; fast track <= £25k, intermediate <= £100k). Every figure has a source and a status (`statutory` / `secondary` / `TODO`).
+- `tables.py`: claim value by UK injury severity (STATS19: Fatal / Serious / Slight / Damage only), and legal cost from CPR PD 45 fixed recoverable costs (band 2 settled pre-issue to band 4 one-day trial; fast track <= £25k, intermediate <= £100k). Every figure has a source and a status (`statutory` / `secondary` / `TODO`).
 - UK foundation lives in `ukcrash/` (STATS19 profile + synthetic demo crashes); see its docstrings.
 
 ## The calculation
@@ -24,7 +24,7 @@ No tuned weights: every input is a physical result, a fact from the vehicle data
 ## Rules
 - Never put a GBP figure in `tables.py` without a source. Unknown means `None` + `TODO`; the engine then returns `cannot_price` rather than guessing.
 - An insurer's actual paid amount (`paid_claim_gbp`) always beats the table.
-- UK data only. Codes: `ENGAGEMENT`, `ODD`, `SOFTWARE` in `recovery.py`; severity keys in `tables.CLAIM_VALUE_BY_UK_SEVERITY`. US SGO strings are accepted as legacy input only, until `insurance/bridge.py` sends UK codes.
+- UK data only. Codes: `ENGAGEMENT`, `ODD`, `SOFTWARE` in `recovery.py`; severity keys in `tables.CLAIM_VALUE_BY_UK_SEVERITY`. Anything else, including the old US (NHTSA SGO) strings, is rejected with ValueError.
 - Every number is an `Interval`. Every assessment carries `DISCLAIMER`.
 - Keep it pure: no I/O, no LLM calls. Run `python -m pytest -q` before every commit.
 

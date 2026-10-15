@@ -86,49 +86,6 @@ CLAIM_VALUE_BY_UK_SEVERITY: dict[str, GBPRange] = {
     "Unknown": GBPRange(None, None, "Severity unknown: needs insurer claim file", "TODO"),
 }
 
-# LEGACY (US input): exact NHTSA SGO "Highest Injury Severity Alleged" values, still sent by
-# insurance/bridge.py and pinned by tests/test_bridge.py. Remove once the bridge sends UK values.
-CLAIM_VALUE_BY_SGO_SEVERITY: dict[str, GBPRange] = {
-    "Property Damage, No Injury": GBPRange(
-        FCA_AVG_MOTOR_CLAIM_2025, FCA_AVG_MOTOR_CLAIM_2025,
-        "FCA GI Value Measures 2025, average motor claim payout (all claim types, used as a "
-        "property-damage proxy)", "secondary"),
-    "No Injuries Reported": GBPRange(
-        FCA_AVG_MOTOR_CLAIM_2025, FCA_AVG_MOTOR_CLAIM_2025,
-        "FCA GI Value Measures 2025, average motor claim payout (property-damage proxy)", "secondary"),
-    # Assumption (finance to confirm): minor injury = whiplash tariff, up to 12 months, plus the
-    # average property claim. Lower bound <=3m tariff, upper bound 9-12m tariff.
-    "Minor Without Hospitalization": GBPRange(
-        WHIPLASH_TARIFF_2025["<=3m"] + FCA_AVG_MOTOR_CLAIM_2025,
-        WHIPLASH_TARIFF_2025["9-12m"] + FCA_AVG_MOTOR_CLAIM_2025,
-        f"{_SI_2025_615} (<=3m to 9-12m) + FCA 2025 average claim", "secondary"),
-    "Minor With Hospitalization": GBPRange(
-        WHIPLASH_TARIFF_2025["3-6m"] + FCA_AVG_MOTOR_CLAIM_2025,
-        WHIPLASH_TARIFF_2025["18-24m"] + FCA_AVG_MOTOR_CLAIM_2025,
-        f"{_SI_2025_615} (3-6m to 18-24m) + FCA 2025 average claim", "secondary"),
-    # TODO(finance): JCG 18th ed. brackets for moderate injuries (no source read yet).
-    "Moderate Without Hospitalization": GBPRange(None, None, "TODO: JCG 18th ed.", "TODO"),
-    "Moderate With Hospitalization": GBPRange(None, None, "TODO: JCG 18th ed.", "TODO"),
-    # Serious (STATS19: fracture, internal injury, crushing, burns, concussion, in-patient) spans
-    # a minor back injury up to tetraplegia. General damages (PSLA) only: care, lost earnings and
-    # other special damages are case-specific and NOT included, so real claims run higher.
-    "Serious Without Hospitalization": GBPRange(
-        JCG18_BACK_7Bcii[0], JCG18_TETRAPLEGIA_2A[1],
-        f"{_JCG18}: 7(B)(c)(ii) back injury low end to 2A tetraplegia top end; general damages only",
-        "secondary"),
-    "Serious With Hospitalization": GBPRange(
-        JCG18_BACK_7Bcii[0], JCG18_TETRAPLEGIA_2A[1],
-        f"{_JCG18}: 7(B)(c)(ii) back injury low end to 2A tetraplegia top end; general damages only",
-        "secondary"),
-    # Fatality: statutory bereavement award, plus the estate's PSLA if the person was aware before
-    # death. Dependency (lost support), funeral and estate losses are case-specific and NOT included.
-    "Fatality": GBPRange(
-        BEREAVEMENT_AWARD, BEREAVEMENT_AWARD + JCG18_DEATH_FULL_AWARENESS[1],
-        "Fatal Accidents Act 1976 s.1A(3) bereavement GBP 15,120 (statutory) + "
-        f"{_JCG18} death with full awareness; dependency excluded", "secondary"),
-    "Unknown": GBPRange(None, None, "Severity unknown: needs insurer claim file", "TODO"),
-}
-
 # Legal cost of the recovery action (insurer v manufacturer/operator under AEVA 2018 s.5).
 # Proxy: the fixed recoverable costs (FRC) a court allows for a claim of that size, from
 # CPR Practice Direction 45 (justice.gov.uk, 2024 text). Real spend can exceed FRC.
@@ -203,11 +160,10 @@ def legal_cost_for_claim(value_low: float, value_high: float) -> GBPRange:
 
 
 def claim_value_for_severity(severity: str) -> GBPRange:
-    """UK severity (STATS19 categories); legacy SGO strings are still accepted."""
-    if severity in CLAIM_VALUE_BY_UK_SEVERITY:
+    """UK severity (DfT STATS19 categories plus 'Damage only' and 'Unknown')."""
+    try:
         return CLAIM_VALUE_BY_UK_SEVERITY[severity]
-    if severity in CLAIM_VALUE_BY_SGO_SEVERITY:
-        return CLAIM_VALUE_BY_SGO_SEVERITY[severity]
-    raise ValueError(f"not a UK (or legacy SGO) injury severity value: {severity!r}")
+    except KeyError:
+        raise ValueError(f"injury_severity must be one of {list(CLAIM_VALUE_BY_UK_SEVERITY)}, got {severity!r}") from None
 
 
