@@ -218,3 +218,48 @@ def test_every_gate_has_a_code(kw, code):
 def test_what_if_bounds_match_validate_facts():
     with pytest.raises(r.ChangeError):
         r.apply_change(facts(), BOTH_HIGH, {"legal_cost_low": 0, "legal_cost_high": 0})
+
+
+# ---------------------------------------------------------------- claim-value scope (#23): AEVA s.2(3)/(4), CPA s.5
+def test_s2_3_excluded_damage_is_not_recoverable():
+    a = r.assess(facts(excluded_damage_gbp=10_000), BOTH_HIGH)          # paid 50,000
+    assert a.claim_value.high == 40_000 and "SCOPE_EXCLUDED" in a.codes
+
+
+def test_s2_4_property_cap_at_1_2m():
+    a = r.assess(facts(paid_claim_gbp=2_000_000, property_damage_gbp=1_500_000,
+                       legal_cost_gbp=(20_000, 60_000)), BOTH_HIGH)
+    assert a.claim_value.high == 2_000_000 - 300_000 and "PROPERTY_CAP" in a.codes
+
+
+@pytest.mark.parametrize("prop,private,expected_high,code", [
+    (200, True, 50_000 - 200, "CPA_PROPERTY_EXCLUDED"),        # s.5(4): GBP 275 or less
+    (8_000, False, 50_000 - 8_000, "CPA_PROPERTY_EXCLUDED"),   # s.5(3): not for private use
+    (8_000, True, 50_000, None),                               # private, above threshold: recoverable
+])
+def test_cpa_property_rules(prop, private, expected_high, code):
+    a = r.assess(facts(recovery_route="CPA_1987", property_damage_gbp=prop, property_private=private), BOTH_HIGH)
+    assert a.claim_value.high == expected_high
+    assert (code in a.codes) if code else not {"CPA_PROPERTY_EXCLUDED", "CPA_PRIVATE_UNKNOWN"} & set(a.codes)
+
+
+def test_cpa_private_use_unknown_widens_the_range():
+    a = r.assess(facts(recovery_route="CPA_1987", property_damage_gbp=8_000), BOTH_HIGH)
+    assert (a.claim_value.low, a.claim_value.high) == (42_000, 50_000) and "CPA_PRIVATE_UNKNOWN" in a.codes
+
+
+def test_s5_route_keeps_property():
+    a = r.assess(facts(recovery_route="AEVA_s5", property_damage_gbp=200), BOTH_HIGH)
+    assert a.claim_value.high == 50_000
+
+
+@pytest.mark.parametrize("kw", [dict(recovery_route="magic"), dict(excluded_damage_gbp=50_000),
+                                dict(excluded_damage_gbp=-1), dict(property_damage_gbp=60_000)])
+def test_scope_inputs_validated(kw):
+    with pytest.raises(ValueError):
+        r.assess(facts(**kw), BOTH_HIGH)
+
+
+def test_scope_not_applied_to_table_estimates():
+    a = r.assess(facts(paid_claim_gbp=None, injury_severity="Fatal", excluded_damage_gbp=1_000), BOTH_HIGH)
+    assert any("table estimate" in x for x in a.reasons) and "SCOPE_EXCLUDED" not in a.codes
