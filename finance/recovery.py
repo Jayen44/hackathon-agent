@@ -43,7 +43,7 @@ DISCLAIMER = (
 Decision = Literal["pursue", "dont_pursue", "pull_logs_first", "not_av_recovery", "cannot_price"]
 
 # UK input codes. Engagement comes from the vehicle's data storage system (DSSAD, UN R157 as
-# applied in GB); ODD is the operating conditions the self-driving feature is authorised for.
+# applied in GB); ODD is the operating conditions the automated driving system (ADS) is authorised for.
 ENGAGEMENT = ("engaged_verified", "engaged_alleged", "not_engaged", "unknown")
 ODD = ("inside", "outside", "exiting", "unknown")
 SOFTWARE = ("compliant", "unauthorised_alteration", "safety_update_missing", "unknown")
@@ -229,7 +229,7 @@ def _gates(f: ClaimFacts) -> list[str]:
     g = []
     eng, odd = engagement_code(f.engagement_status), odd_code(f.within_odd)
     if eng != "engaged_verified":
-        g.append(f"self-driving engagement not verified from the vehicle data ({f.engagement_status})")
+        g.append(f"ADS engagement not verified from the vehicle data ({f.engagement_status})")
     if odd in ("outside", "exiting"):
         g.append(f"outside ODD, its authorised operating conditions ({f.within_odd}): recovery target may be "
                  "the operator, not the manufacturer")
@@ -297,7 +297,7 @@ def assess(f: ClaimFacts, avoidance: list[AvoidanceResult], min_net_gbp: float =
 
     if engagement_code(f.engagement_status) == "not_engaged":
         return RecoveryAssessment(**base, decision="not_av_recovery",
-                                  reasons=["self-driving verified not engaged: ordinary motor claim, no s.5 recovery"],
+                                  reasons=["ADS verified not engaged: ordinary motor claim, no s.5 recovery"],
                                   claim_value=None, legal_cost=None, expected_recovery=None, codes=["NOT_ENGAGED"])
     if f.software_status in ("unauthorised_alteration", "safety_update_missing"):
         return RecoveryAssessment(**base, decision="not_av_recovery",
