@@ -42,6 +42,18 @@ _SI_2025_615 = "Whiplash Injury (Amendment) Regulations 2025, SI 2025/615, Table
 # (reported via ABI/trade press Feb 2026; verify against the FCA data release).
 FCA_AVG_MOTOR_CLAIM_2025 = 3858
 
+# Judicial College Guidelines, 18th edition (published 9 April 2026, RPI at August 2025).
+# The book is not freely available; figures read from law firms quoting it. Tetraplegia agrees
+# across Keoghs and Exchange Chambers; the other two come from Exchange Chambers only. Verify
+# against the official text before relying on them.
+_JCG18 = "JCG 18th ed. (via Keoghs / Exchange Chambers, Apr 2026)"
+JCG18_TETRAPLEGIA_2A = (428_850, 533_720)       # highest general damages bracket
+JCG18_BACK_7Bcii = (5_750, 10_420)              # minor back injury, about 17 months' recovery
+JCG18_DEATH_FULL_AWARENESS = (16_570, 31_460)   # estate's PSLA where the person was aware
+
+# Fatal Accidents Act 1976 s.1A(3), as varied by SI 2020/316 from 1 May 2020 (legislation.gov.uk).
+BEREAVEMENT_AWARD = 15_120
+
 # Keys are the exact SGO "Highest Injury Severity Alleged" drop-down values
 # (NHTSA SGO-2021-01 Data Element Definitions, field 73).
 CLAIM_VALUE_BY_SGO_SEVERITY: dict[str, GBPRange] = {
@@ -62,13 +74,26 @@ CLAIM_VALUE_BY_SGO_SEVERITY: dict[str, GBPRange] = {
         WHIPLASH_TARIFF_2025["3-6m"] + FCA_AVG_MOTOR_CLAIM_2025,
         WHIPLASH_TARIFF_2025["18-24m"] + FCA_AVG_MOTOR_CLAIM_2025,
         f"{_SI_2025_615} (3-6m to 18-24m) + FCA 2025 average claim", "secondary"),
-    # TODO(finance): Judicial College Guidelines, 18th edition (April 2026) brackets.
-    # Needs the official text; web snippets disagree, so nothing is entered yet.
+    # TODO(finance): JCG 18th ed. brackets for moderate injuries (no source read yet).
     "Moderate Without Hospitalization": GBPRange(None, None, "TODO: JCG 18th ed.", "TODO"),
     "Moderate With Hospitalization": GBPRange(None, None, "TODO: JCG 18th ed.", "TODO"),
-    "Serious Without Hospitalization": GBPRange(None, None, "TODO: JCG 18th ed.", "TODO"),
-    "Serious With Hospitalization": GBPRange(None, None, "TODO: JCG 18th ed.", "TODO"),
-    "Fatality": GBPRange(None, None, "TODO: Fatal Accidents Act 1976 bereavement + dependency", "TODO"),
+    # Serious (STATS19: fracture, internal injury, crushing, burns, concussion, in-patient) spans
+    # a minor back injury up to tetraplegia. General damages (PSLA) only: care, lost earnings and
+    # other special damages are case-specific and NOT included, so real claims run higher.
+    "Serious Without Hospitalization": GBPRange(
+        JCG18_BACK_7Bcii[0], JCG18_TETRAPLEGIA_2A[1],
+        f"{_JCG18}: 7(B)(c)(ii) back injury low end to 2A tetraplegia top end; general damages only",
+        "secondary"),
+    "Serious With Hospitalization": GBPRange(
+        JCG18_BACK_7Bcii[0], JCG18_TETRAPLEGIA_2A[1],
+        f"{_JCG18}: 7(B)(c)(ii) back injury low end to 2A tetraplegia top end; general damages only",
+        "secondary"),
+    # Fatality: statutory bereavement award, plus the estate's PSLA if the person was aware before
+    # death. Dependency (lost support), funeral and estate losses are case-specific and NOT included.
+    "Fatality": GBPRange(
+        BEREAVEMENT_AWARD, BEREAVEMENT_AWARD + JCG18_DEATH_FULL_AWARENESS[1],
+        "Fatal Accidents Act 1976 s.1A(3) bereavement GBP 15,120 (statutory) + "
+        f"{_JCG18} death with full awareness; dependency excluded", "secondary"),
     "Unknown": GBPRange(None, None, "Severity unknown: needs insurer claim file", "TODO"),
 }
 

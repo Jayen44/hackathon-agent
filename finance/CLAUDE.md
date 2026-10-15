@@ -27,7 +27,7 @@ No tuned weights: every input is a physical result, an SGO fact or a sourced GBP
 - Keep it pure: no I/O, no LLM calls. Run `python -m pytest -q` before every commit.
 
 ## Open TODOs for the finance owner
-1. Judicial College Guidelines 18th ed. (April 2026) brackets for Moderate / Serious / Fatality.
+1. JCG 18th ed. brackets for Moderate; check the Serious/Fatal figures against the book (read via law firms). Serious and fatal values are general damages only: the insurer's paid amount is far better when available.
 2. Legal cost above £100k (multi-track: no fixed costs, needs a budget estimate).
 3. Verify the FCA 2025 average motor claim (GBP 3,858) against the FCA release.
 4. `eval/labels.csv`: 20 hand-labelled SGO crashes (preventable? pursue?).

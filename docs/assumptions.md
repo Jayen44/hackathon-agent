@@ -11,7 +11,9 @@ Marking scheme: [hackathon-marking-rubric.png](hackathon-marking-rubric.png). Ca
 | Other party's fault reduces recovery proportionally | Contributory negligence | Law Reform (Contributory Negligence) Act 1945 |
 | Minor injury value | Whiplash tariff GBP 275 to 1,510 (up to 12 months), plus property | SI 2025/615, Table 2 |
 | Property damage only | GBP 3,858 average motor claim (proxy) | FCA GI Value Measures 2025 (via secondary source, to verify) |
-| Moderate / serious / fatal values | TODO | Judicial College Guidelines 18th ed. |
+| Serious injury value | GBP 5,750 to 533,720 general damages only (minor back injury to tetraplegia); care and lost earnings excluded | JCG 18th ed. 7(B)(c)(ii), 2A via Keoghs / Exchange Chambers (verify vs book) |
+| Fatal claim value | GBP 15,120 to 46,580: bereavement award + estate PSLA if aware; dependency and funeral excluded | Fatal Accidents Act 1976 s.1A(3) (SI 2020/316); JCG 18th ed. death with full awareness |
+| Moderate injury value | TODO | JCG 18th ed. |
 | Legal cost of the recovery action (<= £100k) | Fixed recoverable costs, band 2 settled pre-issue to band 4 one-day trial | CPR PD 45 Tables 12 and 14; CPR 26.9 and 26.15 |
 | Legal cost above £100k | TODO | Multi-track has no fixed costs |
 | Legal cost is spent whether or not recovery succeeds; no cost-shifting modelled | Simplification | Team |

@@ -57,7 +57,7 @@ def test_not_engaged_is_not_an_av_recovery():
 
 
 def test_unsourced_value_refuses_to_price():
-    a = r.assess(facts(paid_claim_gbp=None, injury_severity="Fatality"), BOTH_HIGH)
+    a = r.assess(facts(paid_claim_gbp=None, injury_severity="Moderate With Hospitalization"), BOTH_HIGH)
     assert a.decision == "cannot_price" and a.expected_recovery is None
 
 
@@ -96,7 +96,7 @@ def test_weakest_assumption_finds_the_flip():
 def test_rank_and_map():
     a1 = r.assess(facts(claim_id="A"), BOTH_HIGH)
     a2 = r.assess(facts(claim_id="B", paid_claim_gbp=10_000), BOTH_HIGH)
-    a3 = r.assess(facts(claim_id="C", injury_severity="Fatality", paid_claim_gbp=None), BOTH_HIGH)
+    a3 = r.assess(facts(claim_id="C", injury_severity="Moderate With Hospitalization", paid_claim_gbp=None), BOTH_HIGH)
     assert [a.claim_id for a in r.rank([a3, a2, a1])] == ["A", "B", "C"]
     m = r.recoverability_map([a1, a2, a3])
     assert m["cut_in"].mid == pytest.approx(a1.expected_recovery.mid + a2.expected_recovery.mid)
@@ -104,3 +104,21 @@ def test_rank_and_map():
 
 def test_fmt_gbp():
     assert r.fmt_gbp(12345.6) == "£12,346" and r.fmt_gbp(-500) == "-£500"
+
+
+def test_serious_and_fatal_are_priced_with_sources():
+    s = tables.claim_value_for_severity("Serious With Hospitalization")
+    assert s.priced and (s.low, s.high) == (5_750, 533_720) and "JCG 18th" in s.source
+    f = tables.claim_value_for_severity("Fatality")
+    assert f.priced and (f.low, f.high) == (15_120, 15_120 + 31_460) and "s.1A(3)" in f.source
+
+
+def test_fatal_claim_prices_end_to_end_on_intermediate_track():
+    a = r.assess(facts(injury_severity="Fatality", paid_claim_gbp=None, legal_cost_gbp=None), BOTH_HIGH)
+    assert a.decision in ("pursue", "pull_logs_first", "dont_pursue") and a.expected_recovery is not None
+
+
+def test_serious_range_above_100k_needs_multi_track_costs():
+    a = r.assess(facts(injury_severity="Serious With Hospitalization", paid_claim_gbp=None,
+                       legal_cost_gbp=None), BOTH_HIGH)
+    assert a.decision == "cannot_price" and "multi-track" in a.reasons[0]
