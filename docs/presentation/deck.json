@@ -3,7 +3,7 @@
   "createdOnFiles": {"v": 1, "at": "2026-10-15T15:00:00Z"},
   "lists": "css",
   "title": "Automated Vehicle Recovery Desk",
-  "order": ["cover", "problem", "customer", "whynow", "flow", "agents", "claim", "bc-model", "bc-risk", "roadmap"],
+  "order": ["cover", "problem", "customer", "whynow", "flow", "agents", "demo", "bc-model", "bc-risk", "roadmap"],
   "sections": {
     "s1": {"description": "Why it is needed and who it is for.", "start": "cover"},
     "s2": {"description": "Why we start in the United States.", "start": "whynow"},

@@ -1,35 +1,35 @@
-<section id="flow" data-transition="fade" style="background:#F6F4EE;color:#1A2433;font-family:'Public Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
-<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#17697A;font-weight:600">A claim, start to finish</p>
+<section id="flow" data-transition="fade" style="background:#F6F4EE;color:#1A2433;font-family:'Public Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:44px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#17697A;font-weight:600">How a claim runs</p>
 <h2 style="font-family:'Libre Baskerville', Georgia, serif;font-size:60px;font-weight:700;line-height:1.15;width:1600px">One claim, start to finish</h2>
 <div style="display:flex;align-items:stretch;gap:10px">
 <div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FDFCF8;padding:24px 16px;border:1px solid #DDD8CC;border-radius:16px">
 <x-icon name="Database" style="width:48px;height:48px;color:#17697A"></x-icon>
 <h3 style="font-size:30px;font-weight:700;color:#17697A">1. Intake</h3>
-<p style="font-size:24px;line-height:1.35">Logs, video, report; integrity checked</p>
+<p style="font-size:24px;line-height:1.35">Logs and video, integrity checked</p>
 </div>
 <x-shape kind="arrow-right" style="align-self:center;width:36px;height:20px;background:#17697A"></x-shape>
 <div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FDFCF8;padding:24px 16px;border:1px solid #DDD8CC;border-radius:16px">
 <x-icon name="Verified" style="width:48px;height:48px;color:#17697A"></x-icon>
 <h3 style="font-size:30px;font-weight:700;color:#17697A">2. Liability</h3>
-<p style="font-size:24px;line-height:1.35">Control, software, handover, faults</p>
+<p style="font-size:24px;line-height:1.35">Who was in control</p>
 </div>
 <x-shape kind="arrow-right" style="align-self:center;width:36px;height:20px;background:#17697A"></x-shape>
 <div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FDFCF8;padding:24px 16px;border:1px solid #DDD8CC;border-radius:16px">
 <x-icon name="Activity" style="width:48px;height:48px;color:#17697A"></x-icon>
-<h3 style="font-size:30px;font-weight:700;color:#17697A">3. Careful driver</h3>
-<p style="font-size:24px;line-height:1.35">Two reference drivers in the simulator</p>
+<h3 style="font-size:30px;font-weight:700;color:#17697A">3. Simulate</h3>
+<p style="font-size:24px;line-height:1.35">Would a careful driver avoid it?</p>
 </div>
 <x-shape kind="arrow-right" style="align-self:center;width:36px;height:20px;background:#17697A"></x-shape>
 <div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FDFCF8;padding:24px 16px;border:1px solid #DDD8CC;border-radius:16px">
 <x-icon name="Chart" style="width:48px;height:48px;color:#17697A"></x-icon>
-<h3 style="font-size:30px;font-weight:700;color:#17697A">4. Pricing</h3>
-<p style="font-size:24px;line-height:1.35">Recoverable range after legal cost</p>
+<h3 style="font-size:30px;font-weight:700;color:#17697A">4. Price</h3>
+<p style="font-size:24px;line-height:1.35">Recoverable range</p>
 </div>
 <x-shape kind="arrow-right" style="align-self:center;width:36px;height:20px;background:#17697A"></x-shape>
 <div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FDFCF8;padding:24px 16px;border:1px solid #DDD8CC;border-radius:16px">
 <x-icon name="CheckCircle" style="width:48px;height:48px;color:#17697A"></x-icon>
 <h3 style="font-size:30px;font-weight:700;color:#17697A">5. Outcome</h3>
-<p style="font-size:24px;line-height:1.35">One of eight, with next steps</p>
+<p style="font-size:24px;line-height:1.35">Next steps and deadline</p>
 </div>
 <x-shape kind="arrow-right" style="align-self:center;width:36px;height:20px;background:#17697A"></x-shape>
 <div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#0F1B2D;color:#F6F4EE;padding:24px 16px;border-radius:16px">
@@ -40,9 +40,9 @@
 </div>
 <div style="display:flex;align-items:center;gap:24px;background:#FDFCF8;border:1px solid #DDD8CC;padding:22px 32px;border-radius:16px">
 <x-icon name="Clock" style="width:52px;height:52px;color:#17697A"></x-icon>
-<p style="font-size:28px;line-height:1.35;width:1480px"><b>Then it loops:</b> when new evidence arrives, the claim re-runs and a ledger shows what changed. The limitation deadline stays first on the list.</p>
+<p style="font-size:30px;line-height:1.35;width:1480px"><b>Then it loops:</b> new evidence re-runs the claim; a ledger shows what changed.</p>
 </div>
-<p style="font-size:30px;line-height:1.4;width:1600px;color:#17697A;font-weight:600">Deterministic code produces every number. The agents only challenge it.</p>
-<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#5B6573;width:1664px">The eight outcomes: pursue, pull logs, needs inputs, human review, settle without recovery, recover from insured, motor claim, close. Automated Vehicle Recovery Desk</p>
-<aside>Walk the six steps. Intake: the crash bundle arrives and passes an integrity gate; tampering, clock drift or log gaps stop the case. Liability: who was in control, the software version, the handover, any faults. Careful driver: the simulator runs two published reference drivers, A and B, and checks it can reproduce the reported crash. Pricing: recoverable money as a range after legal cost. Outcome: one of eight, with named next steps, an owner and the limitation deadline first. Sign-off: a named human approves the spend. Then the loop: new evidence re-runs the claim and the ledger shows what changed. Code produces every number; the agents only challenge it. Scoring cues: demo clarity, architecture.</aside>
+<p style="font-size:30px;line-height:1.4;width:1600px;color:#17697A;font-weight:600">Code produces every number. The agents only challenge it.</p>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#5B6573;width:1664px">Every claim ends in one of eight outcomes, from pursue to close.</p>
+<aside>Walk the six steps. Intake: the crash bundle arrives and passes an integrity gate; tampering, clock drift or log gaps stop the case. Liability: who was in control, the software, the handover, any faults. Simulate: the simulator runs two published reference drivers, A and B, and checks it can reproduce the reported crash. Price: recoverable money as a range after legal cost. Outcome: one of eight, with named next steps, an owner and the limitation deadline first. Sign-off: a named human approves the spend. Then it loops: new evidence re-runs the claim and a ledger shows what changed. Code produces every number; the agents only challenge it.</aside>
 </section>

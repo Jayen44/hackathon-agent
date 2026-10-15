@@ -32,9 +32,9 @@ The slides are shown below as images so they display on GitHub.
 
 ![Slide 6: Four agents, built to run for hours](images/slide-06.png)
 
-### 7. Live demo: one claim
+### 7. Cue the demo
 
-![Slide 7: Live demo: one claim](images/slide-07.png)
+![Slide 7: Cue the demo](images/slide-07.png)
 
 ### 8. Three ways to charge
 
@@ -44,9 +44,9 @@ The slides are shown below as images so they display on GitHub.
 
 ![Slide 9: Risks, and how we address each](images/slide-09.png)
 
-### 10. Where we are, and the ask
+### 10. Ready for real claims (the ask)
 
-![Slide 10: Where we are, and the ask](images/slide-10.png)
+![Slide 10: Ready for real claims (the ask)](images/slide-10.png)
 
 ---
 
