@@ -52,11 +52,13 @@ def engagement_status(b: CrashBundle, policy: Policy = Policy()) -> str:
         return "Verified Engaged"
     if state in ("manual", "assisted"):
         return "Verified Not Engaged"
-    return "Unknown"  # human_override: engagement at the moment of the crash is ambiguous
+    # human_override: engagement at the moment of the crash is ambiguous
+    return "Unknown, see Narrative"
 
 
 def within_odd_status(b: CrashBundle) -> str:
-    return {True: "Yes", False: "No, see Narrative", None: "Unknown"}[b.vehicle.odd_inside]
+    """SGO field 113 values: Yes | No, see Narrative | Unknown, see Narrative | Exiting ODD."""
+    return {True: "Yes", False: "No, see Narrative", None: "Unknown, see Narrative"}[b.vehicle.odd_inside]
 
 
 def claim_facts(b: CrashBundle, reproduced: bool, third_party_share: tuple[float, float] = (0.0, 0.0),

@@ -66,6 +66,33 @@ def test_contract_engagement_and_odd_strings_match_finance_gates():
         assert s in src, f"finance/ no longer uses {s!r}: update insurance/bridge.py"
 
 
+# Verbatim from the official NHTSA "SGO-2021-01 Data Element Definitions" (dictionary dated 17 Aug 2026):
+# field 22 (engagement status), field 73 (Highest Injury Severity Alleged), field 113 (Within ODD?).
+SGO_ENGAGEMENT = {"Verified Engaged", "Alleged Engaged", "Verified Not Engaged", "Unknown, see Narrative"}
+SGO_ODD = {"Yes", "No, see Narrative", "Unknown, see Narrative", "Exiting ODD"}
+SGO_SEVERITY = {"Fatality", "Serious With Hospitalization", "Serious Without Hospitalization",
+                "Moderate With Hospitalization", "Moderate Without Hospitalization",
+                "Minor With Hospitalization", "Minor Without Hospitalization",
+                "No Injuries Reported", "Property Damage, No Injury", "Unknown"}
+
+
+def test_finance_severity_keys_are_exactly_the_official_sgo_values():
+    assert set(tables.CLAIM_VALUE_BY_SGO_SEVERITY) == SGO_SEVERITY
+
+
+def test_bridge_only_emits_official_sgo_strings():
+    seen_eng, seen_odd = set(), set()
+    for p in EX.glob("*.json"):
+        b = load_bundle_file(p)
+        seen_eng.add(engagement_status(b))
+        seen_odd.add(within_odd_status(b))
+    assert seen_eng <= SGO_ENGAGEMENT and seen_odd <= SGO_ODD
+    d = raw("01_av_late_detection")
+    d["vehicle"]["odd_inside"] = None
+    assert within_odd_status(load_bundle(d)) in SGO_ODD
+    assert load_bundle(d).outcome.injury_severity in SGO_SEVERITY
+
+
 # ------------------------------------------------------------- bridge behaviour
 def test_wilson_interval_properties():
     lo, hi = wilson_ci90(0.5, 100)

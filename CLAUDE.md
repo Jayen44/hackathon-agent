@@ -128,8 +128,10 @@ The user-in-charge immunity does **not** cover non-driving failures such as bein
 4. Output: liable party, confidence, evidence list, items needing human review.
 ```
 
-### 3.3 Paying the victim first, then recovering [Knowledge: verify]
-In the UK, the Automated and Electric Vehicles Act 2018 is understood to make the **insurer** pay an injured party quickly when an automated vehicle causes an accident, with the insurer then able to **recover from the manufacturer/responsible party**. I did not verify this in this session, and my search didn't return the insurer provisions. Check legislation.gov.uk before using it.
+### 3.3 Paying the victim first, then recovering [Verified: see docs/verification.md]
+UK Automated and Electric Vehicles Act 2018: s.2 makes the **insurer** liable when a listed automated vehicle driving itself causes an accident in Great Britain. s.5 lets the insurer recover from any other person liable to the injured party, but only once the insurer's liability is **settled**, and never more than that person's liability to the victim. s.3(1) applies contributory negligence; s.3(2) removes cover for the person in charge if the accident was wholly due to their negligence in letting the car drive itself when inappropriate; s.4 allows policy exclusions for unauthorised software changes or missed safety-critical updates.
+
+Note: "careful and competent human driver" is the AV Act 2024 *authorisation* benchmark, not the civil test under s.5 (which asks who is liable to the injured party). Using our counterfactual as a proxy for that is a modelling assumption.
 
 The practical model: pay the victim fast, then run subrogation against the tech company if the counterfactual and evidence show the system fell short. Jurisdictions differ (US states, EU, Germany), so keep the UK as the default assumption for the prototype and label it.
 
@@ -165,7 +167,7 @@ Run a case: `python -m insurance insurance/examples/01_av_late_detection.json` (
 
 How it relates to the `sim` branch: the engine never imports `sim`. It only needs something with `estimate(conflict) -> CounterfactualResult`. The default is a closed-form placeholder. After merging `sim`, pass `SimEstimator()` to `decide()`. Both use PLACEHOLDER driver parameters until Vakhtang fills in the UN R157 Annex 3 values in `sim/policies/careful_a.py` / `careful_b.py`. Never put guessed numbers in those files.
 
-Thresholds (`engine.Policy`) are illustrative, not from law: 10 s minimum handover warning, 2 s override window, P(human avoids) >= 0.8 means the system fell short, <= 0.2 means unavoidable.
+Thresholds (`engine.Policy`) are illustrative, not from law (see docs/verification.md; the 10 s echoes UN R157's earliest-fallback timing but is not a standard for human takeover): 10 s minimum handover warning, 2 s override window, P(human avoids) >= 0.8 means the system fell short, <= 0.2 means unavoidable.
 
 ## 5. Working rules
 - **Staying in sync with Antonio (finance):** read `coord/PROTOCOL.md`. At the start of every session run `scripts/sync.ps1` (or `.sh`), then read the open GitHub issues labelled `for:<you>`. `insurance/bridge.py` is the seam between `insurance/` and `finance/`: both owners review it, and `tests/test_bridge.py` contract tests fail if either side drifts. Never edit the other owner's folder; open an issue instead. To split new work, use the `work-splitter` agent (`.claude/agents/work-splitter.md`).
