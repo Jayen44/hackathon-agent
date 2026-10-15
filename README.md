@@ -1,7 +1,8 @@
 # Hackathon Agent
 
 > One-line pitch: _what the agent does and for whom_ (edit me).
-
+> https://claude.ai/share/569e9601-3ace-4468-8e32-29f57d52d62c
+> 
 ## What it does
 - Runs continuously on a tick loop (`agent/loop.py`)
 - Keeps state in SQLite (`agent/store.py`) so it survives restarts
