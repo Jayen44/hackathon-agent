@@ -18,9 +18,12 @@ type Step = { path: (cid: string) => string; target: string; text: (c: Claim | n
 const claimPath = (cid: string) => `/claims/${encodeURIComponent(cid)}`;
 const STEPS: Step[] = [
   { path: () => "/", target: "inbox-table", text: () => "Robotaxi claims the insurer has paid. Which can it recover from the AV company?" },
+  { path: () => `/new?cctv=${demoVideo()}`, target: "cctv", text: () => "New claim with CCTV: calibrate four road points, pick the AV, Measure. Speeds and gap fill the form with ±σ." },
+  { path: () => `/claims/${encodeURIComponent(load(ASSESSED_KEY) || "CHECK-blender")}`, target: "claim-decision",
+    text: () => "The decision from the video: pursue or not, the recoverable GBP range, and why. Triage for a human, not a ruling." },
   {
     path: claimPath, target: "claim-decision",
-    text: (c) => !c ? "Each claim ends in a decision and a GBP range. Triage, not a ruling."
+    text: (c) => !c ? "Now a fully evidenced claim: each ends in a decision and a GBP range. Triage, not a ruling."
       : c.expected_recovery_gbp
         ? `${c.decision_label}: expected recovery ${gbp(c.expected_recovery_gbp.low)} to ${gbp(c.expected_recovery_gbp.high)}, net of legal cost. Triage, not a ruling.`
         : `${c.decision_label}. Not priced: ${c.gbp.reason ?? "see the engine notes"}. Triage, not a ruling.`,
@@ -46,9 +49,6 @@ const STEPS: Step[] = [
     text: (c) => "Vision: insurers bring their own pricing models and rules; the system runs them alongside its own assessment and shows where they differ."
       + (c?.pricing ? ` Priced by: ${c.pricing.profile.name}.` : ""),
   },
-  { path: () => `/new?cctv=${demoVideo()}`, target: "cctv", text: () => "New claim with CCTV: calibrate four road points, pick the AV, Measure. Speeds and gap fill the form with ±σ." },
-  { path: () => `/claims/${encodeURIComponent(load(ASSESSED_KEY) || "CHECK-blender")}`, target: "claim-decision",
-    text: () => "The decision from the video: pursue or not, the recoverable GBP range, and why. Triage for a human, not a ruling." },
   { path: () => "/run", target: "lanes", text: () => "The long-running Managed Agents team, live: one lane per agent, hand-offs between them, recoverable GBP by crash type." },
 ];
 
@@ -104,7 +104,7 @@ export function Tour() {
       if (v && DEMO_CCTV[v]) store(VIDEO_KEY, v);
       // On /new with ?demo=1 go straight to the CCTV step; elsewhere start at the beginning.
       if (window.location.pathname.startsWith("/new")) store(KEY, String(CCTV_STEP));
-      else if (load(KEY) == null) store(KEY, "0");
+      else { store(KEY, "0"); store(ASSESSED_KEY, null); }  // ?demo=1 always restarts the tour from step 1
     }
     sync();
     window.addEventListener("accel-tour", sync);
