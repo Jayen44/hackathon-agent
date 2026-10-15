@@ -6,9 +6,10 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { getClaim, type Claim } from "@/lib/api";
+import { DEMO_CCTV, DEMO_FILL, DEMO_PROGRESS, type DemoProgress } from "@/lib/demo";
 import { gbp, pct } from "@/lib/format";
 
-const KEY = "accel-tour-step", CLAIM_KEY = "accel-tour-claim";
+const KEY = "accel-tour-step", CLAIM_KEY = "accel-tour-claim", VIDEO_KEY = "accel-tour-video";
 const PREFERRED = "22_pursue_lead_braking", FALLBACK = "DEMO-1_queue_late_brake";
 export const DEMO_VIDEO_ID = "ce5730a6facc4e34885a1a4f5c405fbc";
 
@@ -40,7 +41,7 @@ const STEPS: Step[] = [
     text: (c) => `What to obtain next, ranked by how much it narrows the answer.${c && c.evidence_tier >= 2 ? " Already tier 2 (AV logs)." : " AV logs = tier 2."}${c?.information_requests?.[0] ? ` First: ${c.information_requests[0].title}.` : ""}`,
   },
   { path: claimPath, target: "debate", text: () => "Adjuster vs defence counsel: the system argues against itself. Every GBP figure is re-priced by the finance engine, never by a model." },
-  { path: () => `/new?cctv=${DEMO_VIDEO_ID}`, target: "cctv", text: () => "New claim with CCTV: calibrate four road points, pick the AV, Measure. Speeds and gap fill the form with ±σ." },
+  { path: () => `/new?cctv=${demoVideo()}`, target: "cctv", text: () => "New claim with CCTV: calibrate four road points, pick the AV, Measure. Speeds and gap fill the form with ±σ." },
   { path: () => "/run", target: "lanes", text: () => "The long-running Managed Agents team, live: one lane per agent, hand-offs between them, recoverable GBP by crash type." },
 ];
 
@@ -48,6 +49,9 @@ function store(k: string, v: string | null) {
   try { if (v == null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch { /* private mode */ }
 }
 function load(k: string) { try { return sessionStorage.getItem(k); } catch { return null; } }
+// ?demo=1&video=<id> picks the DEMO_CCTV entry; default is the stage clip.
+function demoVideo() { const v = load(VIDEO_KEY); return v && DEMO_CCTV[v] ? v : DEMO_VIDEO_ID; }
+const CCTV_STEP = STEPS.findIndex((x) => x.target === "cctv");
 
 export function startTour() {
   store(KEY, "0");
@@ -73,11 +77,19 @@ export function Tour() {
   const [cid, setCid] = useState<string | null>(null);
   const [claim, setClaim] = useState<Claim | null>(null);
   const [rect, setRect] = useState<DOMRect | null>(null);
+  const [demo, setDemo] = useState<DemoProgress | null>(null);
 
   // Activation: ?demo=1, the Demo button, or a tour already in progress (sessionStorage).
   useEffect(() => {
     const sync = () => { const s = load(KEY); setStep(s == null ? null : Math.max(0, Math.min(STEPS.length - 1, Number(s) || 0))); };
-    if (new URLSearchParams(window.location.search).get("demo") === "1" && load(KEY) == null) store(KEY, "0");
+    const q = new URLSearchParams(window.location.search);
+    if (q.get("demo") === "1") {
+      const v = q.get("video");
+      if (v && DEMO_CCTV[v]) store(VIDEO_KEY, v);
+      // On /new with ?demo=1 go straight to the CCTV step; elsewhere start at the beginning.
+      if (window.location.pathname.startsWith("/new")) store(KEY, String(CCTV_STEP));
+      else if (load(KEY) == null) store(KEY, "0");
+    }
     sync();
     window.addEventListener("accel-tour", sync);
     return () => window.removeEventListener("accel-tour", sync);
@@ -103,6 +115,26 @@ export function Tour() {
     store(KEY, String(n)); setStep(n); setRect(null);
   }, []);
 
+  // Demo autofill progress from the /new page.
+  useEffect(() => {
+    const on = (e: Event) => setDemo((e as CustomEvent<DemoProgress>).detail);
+    window.addEventListener(DEMO_PROGRESS, on);
+    return () => window.removeEventListener(DEMO_PROGRESS, on);
+  }, []);
+  useEffect(() => { setDemo(null); }, [step]);
+  const onCctv = step === CCTV_STEP && pathname.startsWith("/new");
+  const fill = useCallback(() => {
+    setDemo({ text: "Starting…", target: "cctv", state: "running" });
+    window.dispatchEvent(new CustomEvent(DEMO_FILL, { detail: { videoId: demoVideo() } }));
+  }, []);
+  const next = useCallback(() => {
+    if (step == null) return;
+    // Next on the CCTV step runs the autofill first (once); after it is done, Next moves on.
+    if (onCctv && demo?.state !== "done") { if (demo?.state !== "running") fill(); return; }
+    go(step + 1 < STEPS.length ? step + 1 : null);
+  }, [step, onCctv, demo, fill, go]);
+  const target = onCctv && demo?.target ? demo.target : step != null ? STEPS[step].target : "";
+
   // Navigate to the step's page.
   useEffect(() => {
     if (step == null || !cid) return;
@@ -117,7 +149,7 @@ export function Tour() {
     let scrolled = false, alive = true;
     const tick = () => {
       if (!alive) return;
-      const el = document.querySelector(`[data-tour="${STEPS[step].target}"]`);
+      const el = document.querySelector(`[data-tour="${target}"]`);
       if (el) {
         if (!scrolled) { el.scrollIntoView({ block: "center", behavior: "smooth" }); scrolled = true; }
         setRect(el.getBoundingClientRect());
@@ -126,20 +158,20 @@ export function Tour() {
     tick();
     const t = setInterval(tick, 250);
     return () => { alive = false; clearInterval(t); };
-  }, [step, pathname]);
+  }, [step, pathname, target]);
 
   useEffect(() => {
     if (step == null) return;
     const onKey = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement | null)?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
-      if (e.key === "ArrowRight") go(step + 1 < STEPS.length ? step + 1 : null);
+      if (e.key === "ArrowRight") next();
       else if (e.key === "ArrowLeft") go(Math.max(0, step - 1));
       else if (e.key === "Escape") go(null);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [step, go]);
+  }, [step, go, next]);
 
   if (step == null) return null;
   const s = STEPS[step];
@@ -157,9 +189,19 @@ export function Tour() {
           <button type="button" onClick={() => go(null)} className="hover:text-fg">Exit</button>
         </div>
         <p className="mt-2">{s.text(step >= 1 && step <= 5 ? claim : null)}</p>
+        {onCctv && (
+          <div className="mt-2 space-y-2">
+            {demo && <p className={`text-xs ${demo.state === "error" ? "text-bad" : demo.state === "done" ? "font-medium" : "text-muted"}`}>{demo.text}</p>}
+            {demo?.state !== "done" && (
+              <button type="button" disabled={demo?.state === "running"} onClick={fill} className="rounded border border-accent px-3 py-1 text-accent disabled:opacity-50">
+                {demo?.state === "running" ? "Filling…" : "Fill demo data"}
+              </button>
+            )}
+          </div>
+        )}
         <div className="mt-3 flex justify-between">
           <button type="button" disabled={step === 0} onClick={() => go(step - 1)} className="rounded border border-line px-3 py-1 disabled:opacity-40">Back</button>
-          <button type="button" onClick={() => go(step + 1 < STEPS.length ? step + 1 : null)} className="rounded bg-accent px-3 py-1 font-medium text-on-accent">
+          <button type="button" onClick={next} disabled={onCctv && demo?.state === "running"} className="rounded bg-accent px-3 py-1 font-medium text-on-accent disabled:opacity-50">
             {step + 1 < STEPS.length ? "Next" : "Finish"}
           </button>
         </div>

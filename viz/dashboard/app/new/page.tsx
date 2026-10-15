@@ -1,9 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AgentTraceList, type TraceEntry } from "@/components/agent-trace";
-import { CctvIntake, type CctvFill } from "@/components/cctv-intake";
+import { CctvIntake, type CctvDemo, type CctvFill } from "@/components/cctv-intake";
+import { DEMO_CCTV, DEMO_FILL, flash, sayDemo, sleep, type DemoClaim } from "@/lib/demo";
 import { Panel } from "@/components/ui";
 import { submitAssessment } from "@/lib/api";
 
@@ -62,6 +63,48 @@ export default function NewClaim() {
     }
   }, []);
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setF((x) => ({ ...x, [k]: v }));
+
+  // Demo mode: the tour asks for an autofill of the CCTV part and the claim file (DEMO_CCTV entry for the video).
+  const demoRef = useRef<CctvDemo | null>(null);
+  const demoBusy = useRef(false);
+  const [demoFilled, setDemoFilled] = useState(false);
+  useEffect(() => {
+    const onFill = async (ev: Event) => {
+      if (demoBusy.current) return;
+      const id = (ev as CustomEvent<{ videoId?: string }>).detail?.videoId ?? presetVideo;
+      const entry = id ? DEMO_CCTV[id] : undefined;
+      if (!id || !entry) { sayDemo({ text: `No demo entry for video ${id ?? "(none)"}.`, state: "error" }); return; }
+      demoBusy.current = true;
+      const say = (text: string) => sayDemo({ text, target: "cctv", state: "running" });
+      try {
+        say("Ticking CCTV evidence…");
+        setF((cur) => ({ ...cur, evidence: { ...cur.evidence, cctv: true } }));
+        for (let i = 0; !demoRef.current && i < 50; i++) await sleep(100);
+        if (!demoRef.current || !(await demoRef.current.run(id, entry, say))) {
+          sayDemo({ text: "Autofill stopped. See the status line in the CCTV box.", target: "cctv", state: "error" }); return;
+        }
+        sayDemo({ text: "Speeds, gap and crash type measured. Now the demo claim-file values.", target: "claim-file", state: "running" });
+        setDemoFilled(true);
+        await sleep(700);
+        const c = entry.claim;
+        const steps: [keyof DemoClaim, string][] = [
+          ["av_engaged", "Self-driving engaged: yes"], ["within_odd", "Within ODD: yes"], ["injury_severity", `Injury: ${c.injury_severity}`],
+          ["claim_paid_gbp", `Claim paid: GBP ${c.claim_paid_gbp}`],
+          ["injured_party_share_low_pct", `Contributory negligence: ${c.injured_party_share_low_pct}–${c.injured_party_share_high_pct}%`],
+          ["injured_party_share_high_pct", `Contributory negligence: ${c.injured_party_share_low_pct}–${c.injured_party_share_high_pct}%`],
+          ["software_verified", `Software confirmed compliant: ${c.software_verified}`],
+        ];
+        for (const [k, label] of steps) {
+          sayDemo({ text: `Demo claim-file values. ${label}.`, target: "claim-file", state: "running" });
+          flash(k); setF((cur) => ({ ...cur, [k]: c[k] })); await sleep(550);
+        }
+        flash("assess", 2500);
+        sayDemo({ text: "Form filled: speeds and gap measured from CCTV, claim-file values from the demo file. Press Assess claim.", target: "assess", state: "done" });
+      } finally { demoBusy.current = false; }
+    };
+    window.addEventListener(DEMO_FILL, onFill);
+    return () => window.removeEventListener(DEMO_FILL, onFill);
+  }, [presetVideo]);
   const onMeasured = (x: CctvFill) => {
     setF((cur) => ({ ...cur, ...x.fields }));
     setHints(x.hints);
@@ -69,12 +112,12 @@ export default function NewClaim() {
   };
   const num = (k: keyof Form, label: string, unit: string, hint?: string) => (
     <Field label={`${label} (${unit})`} hint={hints[k] ?? hint}>
-      <input className={input} inputMode="decimal" placeholder="unknown" value={f[k] as string} onChange={(e) => set(k, e.target.value as never)} />
+      <input data-demo={k} className={input} inputMode="decimal" placeholder="unknown" value={f[k] as string} onChange={(e) => set(k, e.target.value as never)} />
     </Field>
   );
   const tri = (k: keyof Form, label: string) => (
     <Field label={label}>
-      <select className={input} value={f[k] as string} onChange={(e) => set(k, e.target.value as never)}>
+      <select data-demo={k} className={input} value={f[k] as string} onChange={(e) => set(k, e.target.value as never)}>
         <option value="unknown">Unknown</option><option value="yes">Yes</option><option value="no">No</option>
       </select>
     </Field>
@@ -191,18 +234,18 @@ export default function NewClaim() {
             </div>
           </Panel>
 
-          <Panel title="Claim and evidence">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <Panel title="Claim and evidence" aside={demoFilled ? <span className="text-[11px] text-muted">demo claim-file values</span> : undefined}>
+            <div data-tour="claim-file" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Field label="Injury severity (STATS19)">
-                <select className={input} value={f.injury_severity} onChange={(e) => set("injury_severity", e.target.value)}>
+                <select data-demo="injury_severity" className={input} value={f.injury_severity} onChange={(e) => set("injury_severity", e.target.value)}>
                   {["Unknown", "Damage only", "Slight", "Serious", "Fatal"].map((s) => <option key={s}>{s}</option>)}
                 </select>
               </Field>
               {num("claim_paid_gbp", "Claim paid", "GBP")}
               <Field label="Injured party's contributory negligence (%)" hint="Leave blank if not assessed">
                 <div className="flex gap-2">
-                  <input className={input} inputMode="decimal" placeholder="low" value={f.injured_party_share_low_pct} onChange={(e) => set("injured_party_share_low_pct", e.target.value)} />
-                  <input className={input} inputMode="decimal" placeholder="high" value={f.injured_party_share_high_pct} onChange={(e) => set("injured_party_share_high_pct", e.target.value)} />
+                  <input data-demo="injured_party_share_low_pct" className={input} inputMode="decimal" placeholder="low" value={f.injured_party_share_low_pct} onChange={(e) => set("injured_party_share_low_pct", e.target.value)} />
+                  <input data-demo="injured_party_share_high_pct" className={input} inputMode="decimal" placeholder="high" value={f.injured_party_share_high_pct} onChange={(e) => set("injured_party_share_high_pct", e.target.value)} />
                 </div>
               </Field>
               {tri("software_verified", "Software confirmed compliant (AEVA s.4)?")}
@@ -220,13 +263,13 @@ export default function NewClaim() {
                 ))}
               </div>
             </fieldset>
-            {f.evidence.cctv && <CctvIntake onMeasured={onMeasured} initialVideoId={presetVideo} />}
+            {f.evidence.cctv && <CctvIntake onMeasured={onMeasured} initialVideoId={presetVideo} demoRef={demoRef} />}
             </div>
           </Panel>
 
           {err && <p className="rounded border border-bad/30 bg-bad-soft p-3 text-sm text-bad">{err}</p>}
           <div className="flex flex-wrap items-center gap-3">
-            <button type="button" disabled={!!busy} onClick={() => submit({ form: formBody(), ...(f.evidence.cctv && cctv ? { cctv } : {}) })}
+            <button type="button" data-tour="assess" data-demo="assess" disabled={!!busy} onClick={() => submit({ form: formBody(), ...(f.evidence.cctv && cctv ? { cctv } : {}) })}
               className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-on-accent disabled:opacity-50">Assess claim</button>
             <label className="cursor-pointer rounded-md border border-line px-4 py-2 text-sm hover:border-accent">
               Upload crash bundle JSON
