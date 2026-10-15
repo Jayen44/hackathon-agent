@@ -200,6 +200,77 @@ class ChaseCam:
         return self._eye.update(eye, dt), self._look.update(look, dt)
 
 
+# --- fixed CCTV camera (pure maths, shared by render_trace.py and the ground-truth export) ----
+
+@dataclass(frozen=True)
+class CctvCamera:
+    """Fixed pole-mounted traffic camera. World frame = sim frame (x along road, y left, z up, m).
+
+    yaw_deg: heading of the optical axis from +x towards +y. pitch_deg: tilt below horizontal.
+    Pinhole, no distortion, square pixels, principal point at the image centre (USD camera
+    with zero aperture offsets). fx = focal_mm / h_aperture_mm * width.
+    """
+    # Defaults frame the cctv_cut_in sample: pole 9 m high, 9 m right of the AV lane centre,
+    # looking back down the road at oncoming traffic (yaw 160 deg), tilted 25 deg down.
+    x: float = 112.0
+    y: float = -9.0
+    z: float = 9.0
+    yaw_deg: float = 160.0
+    pitch_deg: float = 25.0
+    focal_mm: float = 24.0
+    h_aperture_mm: float = 36.0
+    width: int = 1920
+    height: int = 1080
+
+    @property
+    def fx(self) -> float:
+        return self.focal_mm / self.h_aperture_mm * self.width
+
+    @property
+    def v_aperture_mm(self) -> float:
+        return self.h_aperture_mm * self.height / self.width
+
+    def axes(self):
+        """(right, up, forward) unit vectors in world coordinates."""
+        cy, sy = math.cos(math.radians(self.yaw_deg)), math.sin(math.radians(self.yaw_deg))
+        cp, sp = math.cos(math.radians(self.pitch_deg)), math.sin(math.radians(self.pitch_deg))
+        fwd = (cp * cy, cp * sy, -sp)
+        right = (sy, -cy, 0.0)
+        up = (right[1] * fwd[2] - right[2] * fwd[1],
+              right[2] * fwd[0] - right[0] * fwd[2],
+              right[0] * fwd[1] - right[1] * fwd[0])
+        return right, up, fwd
+
+    def project(self, p) -> tuple[float, float, float]:
+        """World point -> (u, v, depth). u right, v down, pixels; depth > 0 in front of the camera."""
+        right, up, fwd = self.axes()
+        d = (p[0] - self.x, p[1] - self.y, (p[2] if len(p) > 2 else 0.0) - self.z)
+        xr = sum(a * b for a, b in zip(right, d))
+        yu = sum(a * b for a, b in zip(up, d))
+        zf = sum(a * b for a, b in zip(fwd, d))
+        return self.width / 2 + self.fx * xr / zf, self.height / 2 - self.fx * yu / zf, zf
+
+    def usd_matrix(self) -> list[list[float]]:
+        """Camera-to-world 4x4 in USD row-vector convention (camera looks down -Z, +Y up)."""
+        right, up, fwd = self.axes()
+        back = tuple(-c for c in fwd)
+        return [[*right, 0.0], [*up, 0.0], [*back, 0.0], [self.x, self.y, self.z, 1.0]]
+
+
+CCTV = CctvCamera()
+
+
+def cctv_timestamp_texts(seconds: float, start_hms: tuple[int, int, int] = (14, 22, 31),
+                         date: str = "2026-10-15", cam: str = "CAM 04") -> list[str]:
+    """One overlay string per whole second of clip (burned in by ffmpeg, one drawtext per second)."""
+    h, m, s = start_hms
+    out = []
+    for k in range(int(math.ceil(seconds)) + 1):
+        tot = h * 3600 + m * 60 + s + k
+        out.append(f"{cam} \u00b7 {date} {tot // 3600 % 24:02d}:{tot // 60 % 60:02d}:{tot % 60:02d}")
+    return out
+
+
 def _check() -> int:
     import urllib.request
     urls = [url(None, a.rel_path) for a in VEHICLES.values()] + [url(None, m) for m in MATERIALS.values()] \

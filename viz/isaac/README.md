@@ -44,6 +44,25 @@ ffmpeg -i viz/isaac/samples/cut_in_av_replay.mp4 -i viz/isaac/samples/cut_in_car
   -c:v libx264 -pix_fmt yuv420p viz/isaac/samples/side_by_side.mp4
 ```
 
+### Synthetic CCTV clip with known ground truth (`--camera cctv`)
+
+```bash
+.venv/bin/python -m viz.isaac.cctv_sample     # trace + answer key (already committed in samples/)
+modal run viz/isaac/modal_app.py --trace viz/isaac/samples/cctv_cut_in_trace.json --camera cctv --accept-eula
+#    -> viz/isaac/samples/cctv_cut_in_trace.mp4 (+ accel-isaac:/renders/cctv_cut_in/{mp4,poster.png,first_frame.png})
+```
+
+- Fixed pole camera (`assets.CctvCamera`): 9 m high, 9 m right of the AV lane centre, looking back
+  down a 3-lane road at oncoming traffic, 25 deg down, 24 mm / 36 mm aperture, 1920x1080, 25 fps.
+  The pose travels in the trace JSON (`cctv_camera`), so render and answer key cannot drift apart.
+- No lead-in/hold frames (frame time = true time). Grain, vignette, mild desaturation, a burned-in
+  `CAM 04 · 2026-10-15 14:22:31` timestamp and a small "SYNTHETIC RENDER" label (responsible design:
+  the clip must never pass as real footage). Overlay filtergraph is dry-run by `gpu_check`.
+- `samples/cctv_cut_in_truth.json`: calibration clicks (pixels, rectangle mode, L = 24 m, W = 3.5 m),
+  camera intrinsics/extrinsics, true speeds every frame, gap at cut-in, impact time and speeds.
+  Post-impact roll-out is illustrative, not simulated (flagged in the files). `tests/test_isaac_cctv.py`
+  checks clicks -> `sim/video/calibrate.py` homography -> true speeds round-trip.
+
 Without `--accept-eula`, `render` raises before anything Isaac-related starts.
 `ACCEPT_EULA` and `OMNI_KIT_ACCEPT_EULA` are set only in the environment of the Isaac
 subprocess. They are never baked into the image.
