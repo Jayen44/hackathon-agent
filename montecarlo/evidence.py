@@ -147,7 +147,7 @@ def ranges_from_bundle(bundle: dict, tier: int | None = None, duration: float = 
 
     ranges = ScenarioRanges(kind=kind, ego_geometry=DEFAULT_GEOMETRY, other_geometry=DEFAULT_GEOMETRY,
                             duration=duration, sgo_report_id=bundle.get("case_id"), **r)
-    info = {"friction_mu": mu, "timeline_check": timeline_check(bundle), "tier": tier, "kind": kind, "crash_type": c.get("crash_type", "other"),
+    info = {"hazard_kind": hk or "constant_hazard", "friction_mu": mu, "timeline_check": timeline_check(bundle), "tier": tier, "kind": kind, "crash_type": c.get("crash_type", "other"),
             "av_braking": None if av is None else {"t_after_conflict_s": av[0], "decel_mps2": av[1]},
             "assumptions": [f"tier {tier} half-widths {hw} (design assumption)",
                             "missing facts use labelled priors (design assumption)",

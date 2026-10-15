@@ -57,10 +57,13 @@ def _friction_capped(mu: float | None):
                                 b_comf=min(pb.b_comf, mu * careful_a.G)))
 
 
-def drivers(mu: float | None = None) -> tuple[dict, dict[str, str]]:
-    """Real R157 policies (decel capped at mu*g when mu < 1) where available, else placeholders."""
+def drivers(mu: float | None = None, perceive_at_start: bool = False) -> tuple[dict, dict[str, str]]:
+    """Real R157 policies (decel capped at mu*g when mu < 1) where available, else placeholders.
+    perceive_at_start: PM1 perceives an in-lane hazard visible at t=0 (constant-hazard bundles)."""
     facts, labels = {}, {}
     pa, pb = _friction_capped(mu)
+    if perceive_at_start and pa is not None:
+        pa = dataclasses.replace(pa, perceive_visible_at_start=True)
     for name, mod, p, cls in (("careful_a", careful_a, pa, "CCDMDriver"), ("careful_b", careful_b, pb, "FSMDriver")):
         try:
             mod.make_policy()
@@ -81,7 +84,7 @@ def _replay_json(res) -> dict:
 def estimate(bundle: dict, tier: int | None = None, n: int = 2000, seed: int = 0, map_fn=None,
              sensitivity: bool = True, replays: bool = False) -> dict:
     ranges, info = ranges_from_bundle(bundle, tier=tier)
-    facts, labels = drivers(info.get("friction_mu"))
+    facts, labels = drivers(info.get("friction_mu"), info.get("hazard_kind") == "constant_hazard")
     mc = compare(ranges, facts, n, seed, map_fn=map_fn)
 
     v_med = values_from_u(ranges, np.full(len(PARAM_NAMES), 0.5))

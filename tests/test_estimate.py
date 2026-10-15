@@ -68,3 +68,16 @@ def test_r157_decel_capped_by_friction():
     assert pa.full_decel_g == 0.5 and pa.full_wrap_decel_g == 0.5
     assert abs(pb.b_max - 0.5 * careful_a.G) < 1e-9
     assert _friction_capped(1.0) == (careful_a.PARAMS, careful_b.PARAMS)
+
+
+def test_pm1_perceives_visible_stationary_hazard_from_start():
+    import dataclasses
+    from sim.policies import careful_a
+    from sim.scenario import ScriptedActor, SimScenario
+    from sim.vehicle import Geometry, VehicleState
+    from sim.world import run
+    g = Geometry(4.6, 1.9, 2.8)
+    sc = SimScenario(g, VehicleState(0, 0, 0, 13.4), [ScriptedActor("h", g, VehicleState(44.6, 0, 0, 0.0))], 10.0)
+    assert run(sc, careful_a.make_policy()).collided            # literal: reacts only at TTC < 2 s
+    pa = dataclasses.replace(careful_a.PARAMS, perceive_visible_at_start=True)
+    assert not run(sc, careful_a.CCDMDriver(pa)).collided       # 40 m gap: 0.4 + 0.75 s, then brakes

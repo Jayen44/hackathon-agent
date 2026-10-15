@@ -67,6 +67,12 @@ class PM1Params:
     # (e.g. slow or stopped traffic) once TTC < cut_in_ttc_s. Without it PM1 never reacts to a
     # gently braking or stationary lead. Set False for the literal three-scenario model.
     in_lane_ttc_extension: bool = True
+    # INTERPRETATION, NOT R157: a hazard already in the ego lane and visible when the scenario
+    # starts is perceived from t=0. Used when the claim bundle defines t_start as "the earliest
+    # moment a competent human could perceive the hazard" (insurance bundle schema, constant
+    # hazards). R157 has no scenario for a stopped vehicle visible from far away; without this,
+    # PM1 only reacts at TTC < 2 s, which a careful driver seeing a stopped car would not wait for.
+    perceive_visible_at_start: bool = False
 
     @property
     def full_decel(self) -> float:
@@ -163,6 +169,9 @@ class CCDMDriver:
         braking_on: list[tuple[Seen, str]] = []
         for s in seen:
             name = s.actor.name
+            if (p.perceive_visible_at_start and t == 0.0 and name not in self.trigger
+                    and s.ego_lane_origin and not s.was_hidden and s.closing > 0):
+                self.trigger[name] = (t, "visible_at_start")  # INTERPRETATION, see PM1Params
             if name in self.trigger and not self._still_relevant(s, self.trigger[name][1]):
                 self.trigger.pop(name)
                 self.decided.pop(name, None)
