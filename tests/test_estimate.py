@@ -48,3 +48,23 @@ def test_timeline_check_flags_contradiction():
     b["vehicle"]["control_inputs"] = [{"t": 104.5, "source": "system", "brake": 0.4}]
     assert timeline_check(b)["consistent"] is False
     assert timeline_check(BUNDLE)["consistent"] is None  # equal speeds: not closing at t_start
+
+
+def test_reads_reported_lead_decel_and_cut_in_timing():
+    b = copy.deepcopy(BUNDLE)
+    b["conflict"].update(kind="lead_braking", hazard_decel_mps2=6.0)
+    r, _ = ranges_from_bundle(b, tier=2)
+    assert r.kind == "lead_brake" and r.other_decel.lo <= 6.0 <= r.other_decel.hi
+    assert r.other_decel.source == "reported" and r.other_brake_time.hi == 0.0
+    b["conflict"].update(kind="cut_in", t_in_path_s=2.0, hazard_speed_mps=10.0)
+    r, _ = ranges_from_bundle(b, tier=2)
+    assert r.kind == "cut_in" and r.cut_in_start.lo == 0.0 and r.cut_in_start.hi == 1.0
+
+
+def test_r157_decel_capped_by_friction():
+    from montecarlo.estimate import _friction_capped
+    from sim.policies import careful_a, careful_b
+    pa, pb = _friction_capped(0.5)
+    assert pa.full_decel_g == 0.5 and pa.full_wrap_decel_g == 0.5
+    assert abs(pb.b_max - 0.5 * careful_a.G) < 1e-9
+    assert _friction_capped(1.0) == (careful_a.PARAMS, careful_b.PARAMS)

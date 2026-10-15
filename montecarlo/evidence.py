@@ -41,6 +41,10 @@ PRIOR_LEAD_BRAKE_TIME_S = (0.0, 0.5)
 # DESIGN ASSUMPTION: generic car geometry when the bundle gives none.
 DEFAULT_GEOMETRY = Geometry(length=4.6, width=1.9, wheelbase=2.8)
 
+HAZARD_KIND = {"cut_in": "cut_in", "lead_braking": "lead_brake", "constant_hazard": "lead_brake"}
+# DESIGN ASSUMPTION: +/- half-width on a reported hazard deceleration, by tier.
+TIER_DECEL_HALF_WIDTH = {0: 1.5, 1: 0.7, 2: 0.2}
+
 CRASH_KIND = {"cut_in": "cut_in", "lead_vehicle_decel": "lead_brake",
               "cut_out": "lead_brake", "other": "lead_brake"}
 
@@ -98,7 +102,11 @@ def ranges_from_bundle(bundle: dict, tier: int | None = None, duration: float = 
     c = bundle["conflict"]
     tier = evidence_tier(bundle) if tier is None else tier
     hw, src = TIER_HALF_WIDTH[tier], TIER_SOURCE[tier]
-    kind = CRASH_KIND.get(c.get("crash_type", "other"), "lead_brake")
+    # Prefer the bundle's hazard kind (insurance schema: constant_hazard | lead_braking | cut_in),
+    # else fall back to crash_type.
+    hk = c.get("kind")
+    kind = (HAZARD_KIND[hk] if hk in HAZARD_KIND
+            else CRASH_KIND.get(c.get("crash_type", "other"), "lead_brake"))
     mu = float(c.get("friction_mu", 0.7))
 
     r: dict[str, ParamRange] = {
@@ -108,8 +116,19 @@ def ranges_from_bundle(bundle: dict, tier: int | None = None, duration: float = 
     }
     if kind == "cut_in":
         r["lateral_offset"] = ParamRange(*PRIOR_LATERAL_OFFSET_M, source="prior")
-        r["cut_in_start"] = ParamRange(*PRIOR_CUT_IN_START_S, source="prior")
         r["cut_in_duration"] = ParamRange(*PRIOR_CUT_IN_DURATION_S, source="prior")
+        t_in = float(c.get("t_in_path_s") or 0.0)
+        if t_in > 0:
+            # Bundle reports when the hazard is in the ego lane; we treat that as the end of the
+            # lane change, so the start is t_in minus the (prior) lane-change duration.
+            lo = max(0.0, t_in - PRIOR_CUT_IN_DURATION_S[1])
+            r["cut_in_start"] = ParamRange(lo, max(lo, t_in - PRIOR_CUT_IN_DURATION_S[0]), source="narrative")
+        else:
+            r["cut_in_start"] = ParamRange(*PRIOR_CUT_IN_START_S, source="prior")
+    elif hk == "lead_braking" and float(c.get("hazard_decel_mps2") or 0) > 0:
+        # Bundle schema: the vehicle ahead brakes at hazard_decel_mps2 from t_start until it stops.
+        r["other_decel"] = _around(float(c["hazard_decel_mps2"]), TIER_DECEL_HALF_WIDTH[tier], src, floor=0.1)
+        r["other_brake_time"] = ParamRange.point(0.0, source=src)
     elif c.get("crash_type") == "lead_vehicle_decel":
         r["other_decel"] = ParamRange(*PRIOR_LEAD_DECEL_MPS2, source="prior")
         r["other_brake_time"] = ParamRange(*PRIOR_LEAD_BRAKE_TIME_S, source="prior")
@@ -128,7 +147,7 @@ def ranges_from_bundle(bundle: dict, tier: int | None = None, duration: float = 
 
     ranges = ScenarioRanges(kind=kind, ego_geometry=DEFAULT_GEOMETRY, other_geometry=DEFAULT_GEOMETRY,
                             duration=duration, sgo_report_id=bundle.get("case_id"), **r)
-    info = {"timeline_check": timeline_check(bundle), "tier": tier, "kind": kind, "crash_type": c.get("crash_type", "other"),
+    info = {"friction_mu": mu, "timeline_check": timeline_check(bundle), "tier": tier, "kind": kind, "crash_type": c.get("crash_type", "other"),
             "av_braking": None if av is None else {"t_after_conflict_s": av[0], "decel_mps2": av[1]},
             "assumptions": [f"tier {tier} half-widths {hw} (design assumption)",
                             "missing facts use labelled priors (design assumption)",

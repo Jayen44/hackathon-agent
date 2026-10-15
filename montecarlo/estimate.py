@@ -13,6 +13,7 @@ ci90. avoids_at_p5/p95 are None: with several uncertain inputs there is no singl
 """
 from __future__ import annotations
 
+import dataclasses
 import functools
 import json
 import sys
@@ -43,14 +44,28 @@ IMPACT_SPEED_BAND_MPS = 2.0
 REPRODUCED_MIN_RATE = 0.5
 
 
-def drivers() -> tuple[dict, dict[str, str]]:
-    """Real R157 policies where available, else labelled placeholders."""
+def _friction_capped(mu: float | None):
+    """R157 Annex 3 decelerations are stated for "road friction 1.0" (Table 1, Table 3).
+    INTERPRETATION (not R157): on a lower-friction road no driver can brake harder than mu*g,
+    so cap each model's decelerations at mu*g. Returns (PM1 params, PM2 params)."""
+    pa, pb = careful_a.PARAMS, careful_b.PARAMS
+    if mu is None or pa is None or pb is None or mu >= 1.0:
+        return pa, pb
+    return (dataclasses.replace(pa, full_decel_g=min(pa.full_decel_g, mu),
+                                full_wrap_decel_g=min(pa.full_wrap_decel_g, mu)),
+            dataclasses.replace(pb, b_max=min(pb.b_max, mu * careful_a.G),
+                                b_comf=min(pb.b_comf, mu * careful_a.G)))
+
+
+def drivers(mu: float | None = None) -> tuple[dict, dict[str, str]]:
+    """Real R157 policies (decel capped at mu*g when mu < 1) where available, else placeholders."""
     facts, labels = {}, {}
-    for name, mod in (("careful_a", careful_a), ("careful_b", careful_b)):
+    pa, pb = _friction_capped(mu)
+    for name, mod, p, cls in (("careful_a", careful_a, pa, "CCDMDriver"), ("careful_b", careful_b, pb, "FSMDriver")):
         try:
             mod.make_policy()
-            facts[name] = mod.make_policy
-            labels[name] = mod.NAME
+            facts[name] = functools.partial(getattr(mod, cls), p)
+            labels[name] = mod.NAME + (f" (decel capped at mu={mu:g})" if mu is not None and mu < 1 else "")
         except ParamsMissing:
             facts[name] = functools.partial(ReactiveBrakingDriver, PLACEHOLDER[name])
             labels[name] = f"{name} PLACEHOLDER (not R157)"
@@ -66,7 +81,7 @@ def _replay_json(res) -> dict:
 def estimate(bundle: dict, tier: int | None = None, n: int = 2000, seed: int = 0, map_fn=None,
              sensitivity: bool = True, replays: bool = False) -> dict:
     ranges, info = ranges_from_bundle(bundle, tier=tier)
-    facts, labels = drivers()
+    facts, labels = drivers(info.get("friction_mu"))
     mc = compare(ranges, facts, n, seed, map_fn=map_fn)
 
     v_med = values_from_u(ranges, np.full(len(PARAM_NAMES), 0.5))
