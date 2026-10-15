@@ -152,7 +152,7 @@ def _claim_value(f: ClaimFacts) -> tuple[Interval | None, str]:
 def _legal_cost(f: ClaimFacts, value: Interval) -> tuple[Interval | None, str]:
     if f.legal_cost_gbp is not None:
         return Interval.span(*f.legal_cost_gbp), "legal cost supplied by caller"
-    row = tables.legal_cost_for_claim(value.high)
+    row = tables.legal_cost_for_claim(value.low, value.high)
     if not row.priced:
         return None, row.source
     return Interval.span(row.low, row.high), f"{row.source} [{row.status}]"

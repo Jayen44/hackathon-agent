@@ -12,8 +12,14 @@ Marking scheme: [hackathon-marking-rubric.png](hackathon-marking-rubric.png). Ca
 | Minor injury value | Whiplash tariff GBP 275 to 1,510 (up to 12 months), plus property | SI 2025/615, Table 2 |
 | Property damage only | GBP 3,858 average motor claim (proxy) | FCA GI Value Measures 2025 (via secondary source, to verify) |
 | Moderate / serious / fatal values | TODO | Judicial College Guidelines 18th ed. |
-| Legal cost of the recovery action | TODO | CPR Part 45 fixed recoverable costs |
+| Legal cost of the recovery action (<= £100k) | Fixed recoverable costs, band 2 settled pre-issue to band 4 one-day trial | CPR PD 45 Tables 12 and 14; CPR 26.9 and 26.15 |
+| Legal cost above £100k | TODO | Multi-track has no fixed costs |
 | Legal cost is spent whether or not recovery succeeds; no cost-shifting modelled | Simplification | Team |
+
+## Crash data
+- Demo crashes are SYNTHETIC (`ukcrash/synthetic.py`), sampled from real UK STATS19 2024 injury collisions (`ukcrash/profile_2024.json`): crash-type mix, severity, speed limit, light, surface, area.
+- AV facts (engagement, ODD) and paid amounts are made up and labelled; P(avoid) comes from the simulator.
+- STATS19 holds injury collisions only, so damage-only crashes are not in the profile.
 
 ## Scenarios for the demo
 1. Baseline: cut-in, ADS verified engaged, within ODD, both careful drivers avoid it, so pursue with a GBP range.

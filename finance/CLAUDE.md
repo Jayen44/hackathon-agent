@@ -4,7 +4,8 @@ Read the root CLAUDE.md first (on `sim` until merged). This file adds rules for 
 
 ## What is here
 - `recovery.py`: culpability and money. `assess(ClaimFacts, [AvoidanceResult]) -> RecoveryAssessment` gives the AV share of fault, expected recovery in GBP (low / central / high) and a decision: `pursue`, `dont_pursue`, `pull_logs_first`, `not_av_recovery`, `cannot_price`. `weakest_assumption()` feeds Defence counsel. `rank()` and `recoverability_map()` feed the orchestrator and UI.
-- `tables.py`: claim value by SGO injury severity, and legal cost by claim size. Every row has a source and a status (`statutory` / `secondary` / `TODO`).
+- `tables.py`: claim value by SGO injury severity, and legal cost from CPR PD 45 fixed recoverable costs (band 2 settled pre-issue to band 4 one-day trial; fast track <= £25k, intermediate <= £100k). Every figure has a source and a status (`statutory` / `secondary` / `TODO`).
+- UK foundation lives in `ukcrash/` (STATS19 profile + synthetic demo crashes); see its docstrings.
 
 ## The calculation
 ```
@@ -27,9 +28,12 @@ No tuned weights: every input is a physical result, an SGO fact or a sourced GBP
 
 ## Open TODOs for the finance owner
 1. Judicial College Guidelines 18th ed. (April 2026) brackets for Moderate / Serious / Fatality.
-2. Legal cost bands (CPR Part 45 fixed recoverable costs; multi-track estimate).
+2. Legal cost above £100k (multi-track: no fixed costs, needs a budget estimate).
 3. Verify the FCA 2025 average motor claim (GBP 3,858) against the FCA release.
 4. `eval/labels.csv`: 20 hand-labelled SGO crashes (preventable? pursue?).
+
+## Finding
+With PD 45 costs, a minor-injury claim (about £4-5k) never clears its own trial cost: single small claims land on `pull_logs_first` at best. The recovery money is in serious and fatal claims (TODO 1) or in bundling small claims. Say this in the pitch.
 
 ## Judged on (see `docs/hackathon-marking-rubric.png`)
 | Criterion | Weight | What finance/ contributes |

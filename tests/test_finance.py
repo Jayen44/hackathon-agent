@@ -61,8 +61,22 @@ def test_unsourced_value_refuses_to_price():
     assert a.decision == "cannot_price" and a.expected_recovery is None
 
 
-def test_unsourced_legal_cost_refuses_to_price():
-    a = r.assess(facts(legal_cost_gbp=None), BOTH_HIGH)
+def test_legal_cost_from_pd45_when_not_supplied():
+    a = r.assess(facts(legal_cost_gbp=None, paid_claim_gbp=20_000), BOTH_HIGH)
+    # PD 45 Table 12: band 2 pre-issue 2,374 + 10% over 10k; band 4 trial 8,155 + 40% + 2,994 advocacy
+    assert a.legal_cost.low == pytest.approx(3_374)
+    assert a.legal_cost.high == pytest.approx(19_149)
+    assert "Table 12" in a.sources[1]
+
+
+def test_intermediate_track_costs():
+    c = tables.legal_cost_for_claim(50_000, 80_000)
+    assert c.low == pytest.approx(5_162 + 3_000)
+    assert c.high == pytest.approx(29_938 + 17_600 + 1_445 + 5_988)
+
+
+def test_multi_track_legal_cost_refuses_to_price():
+    a = r.assess(facts(legal_cost_gbp=None, paid_claim_gbp=250_000), BOTH_HIGH)
     assert a.decision == "cannot_price"
 
 
