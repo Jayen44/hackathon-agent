@@ -128,6 +128,8 @@ The user-in-charge immunity does **not** cover non-driving failures such as bein
 ### 3.3 Paying the victim first, then recovering [Verified: see docs/verification.md]
 UK Automated and Electric Vehicles Act 2018: s.2 makes the **insurer** liable when a listed automated vehicle driving itself causes an accident in Great Britain. s.5 lets the insurer recover from any other person liable to the injured party, but only once the insurer's liability is **settled**, and never more than that person's liability to the victim. s.3(1) applies contributory negligence; s.3(2) removes cover for the person in charge if the accident was wholly due to their negligence in letting the car drive itself when inappropriate; s.4 allows policy exclusions for unauthorised software changes or missed safety-critical updates.
 
+**Regime caveat (see `docs/legal-basis.md`):** no vehicle is on the AEVA list today, so s.2/s.5 do not yet cover supervised pilots such as the London Uber + Wayve service; today's routes are contribution (1978 Act) or the Consumer Protection Act 1987. This spec models the AEVA s.5 route (the regime once vehicles are listed or authorised); a per-claim `regime` field is a to-do.
+
 Note: "careful and competent human driver" is the AV Act 2024 *authorisation* benchmark, not the civil test under s.5 (which asks who is liable to the injured party). Using our counterfactual as a proxy for that is a modelling assumption.
 
 The practical model: pay the victim fast, then run subrogation against the tech company if the counterfactual and evidence show the system fell short. Jurisdictions differ (US states, EU, Germany), so keep the UK as the default assumption for the prototype and label it.

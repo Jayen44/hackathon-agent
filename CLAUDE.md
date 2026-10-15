@@ -10,4 +10,4 @@ Decide who pays (human vs tech company) and price the insurer's recovery. Synthe
 | `sim/` (on `sim` branch) | Vakhtang |
 
 Rules: work from your `for:<you>` GitHub issue; don't edit another owner's folder (open an issue); `pytest -q` before push; `git pull --rebase origin insurance`; no guessed numbers (unknown = TODO); trim command output.
-Docs, read only on demand: `docs/liability-spec.md`, `docs/verification.md`, `docs/validation.md`, `coord/PROTOCOL.md`.
+Docs, read only on demand: `docs/liability-spec.md`, `docs/verification.md`, `docs/validation.md`, `coord/PROTOCOL.md`, `docs/legal-basis.md` (pitch dos/don'ts, regime caveat).

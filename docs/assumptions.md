@@ -41,3 +41,5 @@ Marking scheme: [hackathon-marking-rubric.png](hackathon-marking-rubric.png). Ca
 - Synthetic crashes built on UK STATS19; claim amounts are estimates unless the insurer supplies its paid amount.
 - Serious and fatal values are general damages only (care, earnings, dependency excluded), so they understate real claims.
 - Simulation-to-real gap: a 2D kinematic replay, not full vehicle logs.
+
+Legal regime: the table above assumes the AEVA s.2/s.5 route. No vehicle is listed today, so supervised pilots recover via contribution or CPA instead; see `docs/legal-basis.md` (what we may say in the pitch, and the to-do list).

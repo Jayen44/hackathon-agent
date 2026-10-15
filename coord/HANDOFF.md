@@ -33,6 +33,7 @@ scripts/sync.ps1 | scripts/sync.sh             python scripts/sensitivity.py
 - Waiting on Antonio's approve on #6 (nudged twice). No insurer UI exists yet on any branch (Streamlit scaffold on main; Sim Lab on sim).
 
 ## Known limits
+Legal regime: AEVA s.2/s.5 does not cover today's supervised pilots (no listed vehicles); the engine models the s.5 route. Pitch dos/don'ts and the to-do list (regime field, limitation clocks, disclaimer) are in `docs/legal-basis.md`.
 Human-driver model is a placeholder (optimistic reaction times, no swerving); friction values are unsourced physics; all crashes synthetic; recovery maths ignores cost-shifting and delay (see `docs/validation.md`).
 
 ## Token tips
