@@ -159,7 +159,10 @@ class FSMDriver:
                     continue
             u_other = s.actor.state.velocity()[0]
             f_p = pfs(s.gap, u_ego, u_other, p)
-            f_c = cfs(s.gap, u_ego, u_other, a_ego, p)
+            # INTERPRETATION (not literal 3.4.2.2.2): CFS is evaluated on the gap minus d1, Table 3's
+            # "safety distance when the two vehicles reach complete stop". Literal CFS has no stop
+            # margin, so the model brakes at b_comf to a zero-margin stop and grazes a stopped car.
+            f_c = cfs(s.gap - p.d1_m, u_ego, u_other, a_ego, p)
             max_pfs, max_cfs = max(max_pfs, f_p), max(max_cfs, f_c)
             if f_p > 0 or f_c > 0:     # 3.4.2.2.3
                 risk = True

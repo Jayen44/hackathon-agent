@@ -97,6 +97,9 @@ def tagged(b: dict, source: str, label: str) -> dict:
 
 def load_queue(n_synthetic: int = 30, seed: int = 7, n_tgsim: int = 30, examples: bool = True) -> list[dict]:
     q: list[dict] = []
+    demo = HERE / "data" / "demo_claims.json"
+    if demo.exists():
+        q += json.loads(demo.read_text())  # self-consistent synthetic demo claims (fleet/demo_claims.py)
     if examples:
         q += [tagged(b, "insurance_example", "synthetic example bundle (insurance team)")
               for b in insurance_link.example_bundles()]

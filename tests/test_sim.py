@@ -103,8 +103,8 @@ def test_record_trace_off_gives_same_outcome():
 
 
 def test_ended_closing_flags_unproven_avoidance():
-    short = cut_in(gap_m=60.0)
-    short = SimScenario(short.ego_geometry, short.ego_initial, short.actors, duration=3.0)  # cutter in lane, collision at ~8 s
+    short = cut_in(gap_m=28.0)  # 4 m gap left at 3 s, closing 8 m/s: TTC 0.5 s < 2 s
+    short = SimScenario(short.ego_geometry, short.ego_initial, short.actors, duration=3.0)
     r = run(short, AVReplayPolicy([]))
     assert not r.collided and r.ended_closing
 
