@@ -1,6 +1,6 @@
----
+﻿---
 name: work-splitter
-description: Splits remaining project work into chunks between the insurance side (Jayen) and the finance side (Antonio), keeping the seam in insurance/bridge.py in sync. Use when new work appears, a chunk finishes, or the two sides may be drifting.
+description: Proposes work chunks split between insurance (Jayen) and finance (Antonio). Use when new work appears.
 tools: Read, Grep, Glob, Bash
 model: sonnet
 ---

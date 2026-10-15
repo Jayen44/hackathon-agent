@@ -1,6 +1,6 @@
----
+﻿---
 name: gap-closer
-description: Iteratively finds and closes gaps on the insurance side (missing decision paths, scenarios, examples, deliverables) using the deterministic audit, and validates changes. Use when the user asks to fill out missing areas or check what is incomplete.
+description: Loops over the deterministic gap audit to fix insurance-side gaps, with tests. Use to fill missing areas.
 tools: Read, Edit, Write, Grep, Glob, Bash
 model: sonnet
 ---
