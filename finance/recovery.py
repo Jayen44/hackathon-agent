@@ -29,7 +29,7 @@ Every figure is an Interval (low, central, high), never a bare number.
 """
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from typing import Literal
 
 from finance import tables
@@ -251,40 +251,99 @@ def assess(f: ClaimFacts, avoidance: list[AvoidanceResult], min_net_gbp: float =
                               legal_cost=cost, expected_recovery=ev, sources=[value_src, cost_src])
 
 
+CHANGE_KEYS = ("keep_model", "p_avoid_at_low_bound", "cn_low", "cn_high", "claim_value_gbp",
+               "legal_cost_low", "legal_cost_high")
+
+
+def blank_change() -> dict:
+    """A 'what if' with nothing changed. Every challenge to a claim is expressed in these keys."""
+    return {"keep_model": None, "p_avoid_at_low_bound": False, "cn_low": None, "cn_high": None,
+            "claim_value_gbp": None, "legal_cost_low": None, "legal_cost_high": None}
+
+
+class ChangeError(ValueError):
+    """A proposed 'what if' outside what the evidence and sources allow."""
+
+
+def apply_change(f: ClaimFacts, avoidance: list[AvoidanceResult],
+                 change: dict) -> tuple[ClaimFacts, list[AvoidanceResult]]:
+    """Re-state a claim under a challenged assumption, within bounds the evidence allows.
+
+    keep_model            use one careful-driver model only (must be one we ran)
+    p_avoid_at_low_bound  each model's P(avoid) at the low end of its own 90% interval
+    cn_low / cn_high      injured party's contributory negligence range, 0..1
+    claim_value_gbp       recoverable loss; must sit inside the sourced range for the severity,
+                          or at most the amount paid
+    legal_cost_low/high   legal cost range, GBP >= 0
+    """
+    unknown = set(change) - set(CHANGE_KEYS)
+    if unknown:
+        raise ChangeError(f"unknown change keys: {sorted(unknown)}")
+    c = {**blank_change(), **change}
+    av = list(avoidance)
+    if c["keep_model"] is not None:
+        av = [r for r in avoidance if r.model == c["keep_model"]]
+        if not av:
+            raise ChangeError(f"keep_model {c['keep_model']!r} is not one of {[r.model for r in avoidance]}")
+    if c["p_avoid_at_low_bound"]:
+        av = [AvoidanceResult(r.model, r.ci90[0], r.ci90) for r in av]
+    repl: dict = {}
+    if (c["cn_low"] is None) != (c["cn_high"] is None):
+        raise ChangeError("give both cn_low and cn_high, or neither")
+    if c["cn_low"] is not None:
+        if not 0 <= c["cn_low"] <= c["cn_high"] <= 1:
+            raise ChangeError("contributory negligence must satisfy 0 <= cn_low <= cn_high <= 1")
+        repl["third_party_share"] = (float(c["cn_low"]), float(c["cn_high"]))
+    if c["claim_value_gbp"] is not None:
+        v = float(c["claim_value_gbp"])
+        row = tables.claim_value_for_severity(f.injury_severity)
+        lo = row.low if row.priced else 0.0
+        hi = max(f.paid_claim_gbp or 0.0, row.high if row.priced else 0.0)
+        if not (0 < v and lo <= v <= hi):
+            raise ChangeError(f"claim value {fmt_gbp(v)} outside the sourced range {fmt_gbp(lo)} to {fmt_gbp(hi)}")
+        repl["paid_claim_gbp"] = v
+    if (c["legal_cost_low"] is None) != (c["legal_cost_high"] is None):
+        raise ChangeError("give both legal_cost_low and legal_cost_high, or neither")
+    if c["legal_cost_low"] is not None:
+        if not 0 <= c["legal_cost_low"] <= c["legal_cost_high"]:
+            raise ChangeError("legal cost must satisfy 0 <= low <= high")
+        repl["legal_cost_gbp"] = (float(c["legal_cost_low"]), float(c["legal_cost_high"]))
+    return replace(f, **repl), av
+
+
 @dataclass(frozen=True)
 class Attack:
     assumption: str
     expected_recovery_mid: float
     flips_decision: bool
+    change: dict = field(default_factory=blank_change)  # the same attack as an apply_change() input
 
 
 def weakest_assumption(f: ClaimFacts, avoidance: list[AvoidanceResult],
                        min_net_gbp: float = 0.0) -> list[Attack]:
     """For Defence counsel: push each input to the AV company's best case, one at a time.
 
-    Returns attacks sorted most damaging first. flips_decision is True when the central
-    expected recovery crosses min_net_gbp under that attack.
+    Returns attacks sorted most damaging first. flips_decision is True when the decision
+    changes once the attack is applied through apply_change() and assess().
     """
     a = assess(f, avoidance, min_net_gbp)
     if a.expected_recovery is None:
         return []
     cn, _, _ = contributory_negligence(f)
-    tp = sum(cn) / 2
-    p, v, c = a.p_avoid.mid, a.claim_value.mid, a.legal_cost.mid
-
-    def ev(p_=p, tp_=tp, v_=v, c_=c) -> float:
-        return p_ * (1 - tp_) * v_ - c_
-
-    trials = [(f"use {r.model} only (p_avoid {r.p_avoid:.2f})", ev(p_=r.p_avoid)) for r in avoidance]
+    trials = [(f"use {r.model} only (p_avoid {r.p_avoid:.2f})", {"keep_model": r.model}) for r in avoidance]
     trials += [
-        (f"p_avoid at lower 90% bound ({a.p_avoid.low:.2f})", ev(p_=a.p_avoid.low)),
-        (f"injured party's contributory negligence at max ({cn[1]:.0%})", ev(tp_=cn[1])),
-        (f"claim value at low end ({fmt_gbp(a.claim_value.low)})", ev(v_=a.claim_value.low)),
-        (f"legal cost at high end ({fmt_gbp(a.legal_cost.high)})", ev(c_=a.legal_cost.high)),
+        (f"p_avoid at lower 90% bound ({a.p_avoid.low:.2f})", {"p_avoid_at_low_bound": True}),
+        (f"injured party's contributory negligence at max ({cn[1]:.0%})", {"cn_low": cn[1], "cn_high": cn[1]}),
+        (f"claim value at low end ({fmt_gbp(a.claim_value.low)})", {"claim_value_gbp": a.claim_value.low}),
+        (f"legal cost at high end ({fmt_gbp(a.legal_cost.high)})",
+         {"legal_cost_low": a.legal_cost.high, "legal_cost_high": a.legal_cost.high}),
     ]
-    central = ev() > min_net_gbp
-    return sorted((Attack(name, x, (x > min_net_gbp) != central) for name, x in trials),
-                  key=lambda t: t.expected_recovery_mid)
+    out = []
+    for name, ch in trials:
+        b = assess(*apply_change(f, avoidance, ch), min_net_gbp)
+        mid = b.expected_recovery.mid if b.expected_recovery else float("-inf")
+        out.append(Attack(name, mid, b.decision != a.decision, {**blank_change(), **ch}))
+    return sorted(out, key=lambda t: (not t.flips_decision, t.expected_recovery_mid))
 
 
 def rank(assessments: list[RecoveryAssessment]) -> list[RecoveryAssessment]:
