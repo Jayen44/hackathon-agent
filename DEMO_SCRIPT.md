@@ -1,5 +1,7 @@
 # Demo script (5 min)
 
+**One-line pitch:** Would a careful human have avoided the crash? The law asks it of every self-driving car. We answer it, and price the recovery.
+
 Draft. Edit freely. Follows the guided tour: https://accel-claims-dashboard.vercel.app/?demo=1
 
 **Speakers:** Antonio (finance), Jayen (insurance), Vakhtang (sim). **Vakhtang drives the laptop the whole time**; the speaker cue says who talks.
@@ -22,7 +24,8 @@ Numbers marked *live* are read off the screen on the day. Every other number bel
 
 ### 0:00-0:40 · The problem · **Antonio**
 *(Inbox on screen.)*
-> "Robotaxis are on London's roads: Uber and Wayve started paid rides in September. When one crashes, the injured person's insurer pays. Then it has to decide whether it can recover that money from the AV company. The UK test, in the Automated Vehicles Act 2024, is whether the car was as safe as a careful and competent human driver. Nobody gives insurers a way to check that on a single claim. That's what we built."
+> "Would a careful human driver have avoided this crash? The law asks that of every self-driving car. We answer it, and tell the insurer what it can recover.
+> Robotaxis are on London's roads: Uber and Wayve started paid rides in September. When one crashes, the injured person's insurer pays. Then it has to decide whether it can recover that money from the AV company. The UK test, in the Automated Vehicles Act 2024, is whether the car was as safe as a careful and competent human driver. Nobody gives insurers a way to check that on a single claim. That's what we built."
 
 ### 0:40-1:20 · Reconstruction · **Vakhtang**
 *(Tour steps 2-4: open DEMO-1, 3D replay, press C to change camera.)*
