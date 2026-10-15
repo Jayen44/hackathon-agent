@@ -1,14 +1,64 @@
 # Pitch deck: Automated Vehicle Recovery Desk
 
-Source for the 10-slide, 5-minute pitch deck (need, target market, why the United States first, claim workflow, agents, live demo, ways to charge, risks, ask). One HTML file per slide in `slides/`, the slide order and
-sections in `deck.json`, and the speaker plan with the marking-scheme mapping in `pitch-outline.md`.
+10 slides, about 5 minutes, United States first (decision #32).
 
-- **Viewing:** the deck was built as a Claude "Slides" artifact (private link held by the author). These files are its source: each
-  slide is a 1920x1080 `<section>` using that slide format's custom elements (`x-icon`, `x-shape`, `x-connector`), so a plain browser
-  will not render them correctly. Import them into a Slides artifact, or ask the author for a PDF export.
-- **Positioning (decision #32):** United States first, United Kingdom when the Automated Vehicles Act 2024 regime is live. Market and
-  financial figures come from `market/MARKET.md` (branch `sim`, 43 sources); shares, prices and the three-year plan are labelled
-  assumptions on the slides. The worked unit-economics example uses UK court costs because they are the sourced ones; a United States
-  legal and cost model is not built yet, and the slides say so.
-- **Wording rules (#32):** say "recovery case" and "triage evidence"; do not call a named company "liable" or "defective"; quote
-  careful drivers A and B together; no "self-driving" for unauthorised vehicles.
+- **Present it live (with speaker notes):** [Claude Slides artifact](https://claude.ai/artifact/Q96PgYWxN8CTCcgpCuNbcP)
+- **Download:** [PDF](Automated-Vehicle-Recovery-Desk.pdf)
+- **Open offline:** download [`deck.html`](deck.html) and open it in a browser (arrow keys move between slides; print for one slide per page)
+
+The slides are shown below as images so they display on GitHub.
+
+### 1. Cover
+
+![Slide 1: Cover](images/slide-01.png)
+
+### 2. Why it is needed
+
+![Slide 2: Why it is needed](images/slide-02.png)
+
+### 3. Target market
+
+![Slide 3: Target market](images/slide-03.png)
+
+### 4. Why start in the United States
+
+![Slide 4: Why start in the United States](images/slide-04.png)
+
+### 5. One claim, start to finish
+
+![Slide 5: One claim, start to finish](images/slide-05.png)
+
+### 6. Four agents, built to run for hours
+
+![Slide 6: Four agents, built to run for hours](images/slide-06.png)
+
+### 7. Live demo: one claim
+
+![Slide 7: Live demo: one claim](images/slide-07.png)
+
+### 8. Three ways to charge
+
+![Slide 8: Three ways to charge](images/slide-08.png)
+
+### 9. Risks, and how we address each
+
+![Slide 9: Risks, and how we address each](images/slide-09.png)
+
+### 10. Where we are, and the ask
+
+![Slide 10: Where we are, and the ask](images/slide-10.png)
+
+---
+
+**Source and rebuilding.** `deck.json` (order and sections) and `slides/*.html` are the deck source in the Slides-artifact format.
+After editing them, run `python build_deck.py docs/presentation` to rebuild `deck.html`, then re-render the images and PDF with
+headless Chrome, for example:
+
+```
+chrome --headless=new --window-size=1920,1080 --virtual-time-budget=6000 --screenshot=images/slide-01.png "file:///<path>/deck.html?slide=1"
+chrome --headless=new --virtual-time-budget=6000 --no-pdf-header-footer --print-to-pdf=Automated-Vehicle-Recovery-Desk.pdf "file:///<path>/deck.html"
+```
+
+**Wording rules (#32):** say "recovery case" and "triage evidence"; never call a named company "liable" or "defective"; quote careful
+drivers A and B together. Figures come from `market/MARKET.md` (branch `sim`); prices, shares and the plan are assumptions and the slides
+say so. `pitch-outline.md` holds the earlier long-form outline and the marking-scheme mapping.

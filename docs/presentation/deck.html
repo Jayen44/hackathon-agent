@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Automated Vehicle Recovery Desk</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap">
+<style>
+*{box-sizing:border-box;margin:0}
+html,body{background:#2B2F36}
+body{font-family:Arial,sans-serif;padding:24px 0}
+#deck{display:flex;flex-direction:column;align-items:center;gap:24px}
+.frame{width:min(96vw,1600px);aspect-ratio:16/9;position:relative;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+section{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden}
+section > *{position:relative}
+section aside{display:none}
+x-icon,x-shape{display:block;flex:none}
+x-shape[kind=ellipse]{border-radius:50%}
+x-shape[kind=arrow-right]{clip-path:polygon(0 30%,60% 30%,60% 0,100% 50%,60% 100%,60% 70%,0 70%)}
+hr{border:none}
+.solo body,.solo{padding:0;background:transparent}
+.solo #deck{gap:0}
+.solo .frame{width:1920px;box-shadow:none}
+@media print{@page{size:1920px 1080px;margin:0} body{padding:0;background:none} #deck{gap:0}
+ .frame{width:1920px;box-shadow:none;break-after:page}}
+</style></head>
+<body><div id="deck">
+<section id="cover" data-transition="fade" style="background:#0F1B2D;color:#F6F4EE;font-family:'Public Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;justify-content:center;gap:36px">
+<svg width="672" height="640" viewBox="0 0 672 640" aria-label="Illustration of an automated vehicle on a road, with sensor arcs and a check badge" style="position:absolute;left:1120px;top:180px;width:672px;height:640px">
+<rect width="672" height="640" rx="28" fill="#17283F"/>
+<polygon points="226,0 446,0 650,640 22,640" fill="#22364F"/>
+<line x1="336" y1="30" x2="336" y2="90" stroke="#A9B6C6" stroke-width="8" stroke-linecap="round"/>
+<line x1="336" y1="130" x2="336" y2="200" stroke="#A9B6C6" stroke-width="9" stroke-linecap="round"/>
+<line x1="336" y1="250" x2="336" y2="330" stroke="#A9B6C6" stroke-width="10" stroke-linecap="round"/>
+<line x1="336" y1="380" x2="336" y2="430" stroke="#A9B6C6" stroke-width="10" stroke-linecap="round"/>
+<rect x="288" y="150" width="96" height="124" rx="22" fill="#A9B6C6"/>
+<rect x="302" y="168" width="68" height="34" rx="10" fill="#0F1B2D" opacity="0.7"/>
+<path d="M214 430 Q336 270 458 430" fill="none" stroke="#E9A94B" stroke-width="7" stroke-linecap="round"/>
+<path d="M176 410 Q336 210 496 410" fill="none" stroke="#E9A94B" stroke-width="6" stroke-linecap="round" opacity="0.7"/>
+<path d="M140 390 Q336 150 532 390" fill="none" stroke="#E9A94B" stroke-width="5" stroke-linecap="round" opacity="0.45"/>
+<rect x="262" y="440" width="148" height="176" rx="30" fill="#17697A"/>
+<rect x="284" y="466" width="104" height="54" rx="14" fill="#0F1B2D" opacity="0.8"/>
+<circle cx="292" cy="590" r="9" fill="#F6F4EE"/>
+<circle cx="380" cy="590" r="9" fill="#F6F4EE"/>
+<circle cx="568" cy="100" r="58" fill="#E9A94B"/>
+<path d="M540 102 L560 124 L598 78" fill="none" stroke="#0F1B2D" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#E9A94B;font-weight:600;width:960px">Driverless-vehicle liability · United States first, United Kingdom ready</p>
+<h1 style="font-family:'Libre Baskerville', Georgia, serif;font-size:80px;font-weight:700;line-height:1.1;width:960px">Automated Vehicle Recovery Desk</h1>
+<p style="font-size:36px;line-height:1.3;color:#F6F4EE;width:960px">When a driverless car crashes, who pays, and can the insurer get the money back?</p>
+<p style="font-size:30px;line-height:1.4;color:#A9B6C6;width:960px">A fast, auditable first read on every crash: what happened, what is recoverable, what to do next.</p>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#A9B6C6;width:1664px">Jayen · Antonio · Vakhtang · Triage evidence for a claims handler, not legal advice. Synthetic data.</p>
+<aside>Open with the one-liner: when a driverless car crashes, someone pays, and the insurer needs to know whether it can recover from the company behind the automated vehicle. We start in the United States, where driverless fleets already run at scale, and we are built for the United Kingdom when its Automated Vehicles Act 2024 regime is live. We give the claims team a fast, auditable first read on every crash. Five minutes: problem, live demo, the agent team, the business case, the ask. Scoring cues: pitch clarity (15%), business viability (20%).</aside>
+</section>
+
+<section id="problem" data-transition="fade" style="background:#F6F4EE;color:#1A2433;font-family:'Public Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#17697A;font-weight:600">Why it is needed</p>
+<h2 style="font-family:'Libre Baskerville', Georgia, serif;font-size:60px;font-weight:700;line-height:1.15;width:1600px">Few claims, high stakes, hidden proof</h2>
+<div style="display:flex;align-items:stretch;gap:16px">
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#FDFCF8;padding:32px;border:1px solid #DDD8CC;border-radius:16px">
+<x-icon name="Activity" style="width:60px;height:60px;color:#17697A"></x-icon>
+<h3 style="font-size:36px;font-weight:700;color:#17697A">Few, but high-stakes</h3>
+<p style="font-size:28px;line-height:1.4">88% fewer property and 92% fewer injury claims than human drivers. The few left are contested.</p>
+</div>
+<x-shape kind="arrow-right" style="align-self:center;width:48px;height:24px;background:#17697A"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#FDFCF8;padding:32px;border:1px solid #DDD8CC;border-radius:16px">
+<x-icon name="Lock" style="width:60px;height:60px;color:#17697A"></x-icon>
+<h3 style="font-size:36px;font-weight:700;color:#17697A">The proof is theirs</h3>
+<p style="font-size:28px;line-height:1.4">Driving logs sit with the operator. The insurer must request or compel them before it can judge a claim.</p>
+</div>
+<x-shape kind="arrow-right" style="align-self:center;width:48px;height:24px;background:#17697A"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#0F1B2D;color:#F6F4EE;padding:32px;border-radius:16px">
+<x-icon name="Chart" style="width:60px;height:60px;color:#E9A94B"></x-icon>
+<h3 style="font-size:36px;font-weight:700;color:#E9A94B">Recovery is a real market</h3>
+<p style="font-size:28px;line-height:1.4">About $27bn of US subrogation demands in 2025. Recovery firms keep 15% to 33%.</p>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:24px;background:#FDFCF8;border:1px solid #DDD8CC;padding:22px 32px;border-radius:16px">
+<x-icon name="Warning" style="width:48px;height:48px;color:#B4651F"></x-icon>
+<p style="font-size:28px;line-height:1.35;width:1500px"><b>Two expensive mistakes:</b> chasing a claim that fails, and missing one that would succeed. A fast, evidenced first read prevents both.</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#5B6573;width:1664px">Sources: Swiss Re and Waymo study (25.3 million miles); Arbitration Forums 2025 (all auto, not driverless only). market/MARKET.md. Automated Vehicle Recovery Desk</p>
+<aside>Why it is needed. Driverless vehicles crash far less often, so there are few claims, and each one is contested and high-stakes. The evidence is held by the party you would be chasing. Recovery is a large market: about 27 billion dollars of subrogation demands were filed in the US in 2025 across all auto claims, with recovery firms keeping 15 to 33 percent. Two mistakes cost money: chasing a claim that fails, and missing one that would succeed. A fast, evidenced first read prevents both. Scoring cue: business viability, a real problem (20%).</aside>
+</section>
+
+<section id="customer" data-transition="fade" style="background:#F6F4EE;color:#1A2433;font-family:'Public Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#17697A;font-weight:600">Target market</p>
+<h2 style="font-family:'Libre Baskerville', Georgia, serif;font-size:60px;font-weight:700;line-height:1.15;width:1600px">Sold across the liability chain</h2>
+<div style="display:flex;gap:28px">
+<div style="flex:1;display:flex;flex-direction:column;gap:18px;background:#0F1B2D;color:#F6F4EE;padding:40px;border-radius:16px">
+<div style="display:flex;align-items:center;gap:20px">
+<x-icon name="Users" style="width:60px;height:60px;color:#E9A94B"></x-icon>
+<h3 style="font-size:36px;font-weight:700;color:#E9A94B">Who buys it</h3>
+</div>
+<p style="font-size:30px;line-height:1.35">Insurers of driverless fleets, and their reinsurers</p>
+<p style="font-size:30px;line-height:1.35">Operators such as robotaxi companies, for defence and incident review</p>
+<p style="font-size:30px;line-height:1.35">Fleet managing general agents</p>
+<p style="font-size:24px;line-height:1.35;color:#A9B6C6">Day to day: claims handlers, recoveries counsel, and managers who sign off spend</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;flex-direction:column;gap:6px;background:#FDFCF8;padding:24px 32px;border:1px solid #DDD8CC;border-radius:16px">
+<p style="font-size:60px;font-weight:700;color:#17697A;line-height:1.05">$27bn</p>
+<p style="font-size:26px;line-height:1.3">US subrogation demands, 2025 (all auto)</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#FDFCF8;padding:24px 32px;border:1px solid #DDD8CC;border-radius:16px">
+<p style="font-size:60px;font-weight:700;color:#17697A;line-height:1.05">about $7.7M</p>
+<p style="font-size:26px;line-height:1.3">Driverless-only market by 2030 (range $1.4M to $45M)</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#FDFCF8;padding:24px 32px;border:1px solid #DDD8CC;border-radius:16px">
+<p style="font-size:60px;font-weight:700;color:#17697A;line-height:1.05">15–20×</p>
+<p style="font-size:26px;line-height:1.3">More driver-assist than driverless claims today</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#5B6573;width:1664px">Source: market/MARKET.md (43 sources; the 2030 sizing and the volume ratio use stated assumptions). Automated Vehicle Recovery Desk</p>
+<aside>Target market. The buyer is not one team. Insurers of driverless fleets and their reinsurers need to know whether to pursue recovery. Operators need the same analysis to defend themselves and review incidents. Fleet managing general agents sit between them. Day to day the users are claims handlers, recoveries counsel and managers who sign the spend. The driverless-only claim market is about 7.7 million dollars a year by 2030 in the base case, range 1.4 to 45 million, so on its own it is small; we sell across the chain and use driver-assist claims, about 15 to 20 times more numerous today, as the volume wedge. The 27 billion dollar figure is all auto subrogation, the market we sit inside. Scoring cue: clear customer (business viability).</aside>
+</section>
+
+<section id="whynow" data-transition="fade" style="background:#F6F4EE;color:#1A2433;font-family:'Public Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#17697A;font-weight:600">Where we start</p>
+<h2 style="font-family:'Libre Baskerville', Georgia, serif;font-size:60px;font-weight:700;line-height:1.15;width:1600px">Why start in the United States</h2>
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#FDFCF8;padding:32px;border:1px solid #DDD8CC;border-radius:16px">
+<h3 style="font-size:36px;font-weight:700;color:#17697A">Waymo: driverless</h3>
+<p style="font-size:30px;line-height:1.35">500,000 paid rides a week, in 10 cities</p>
+<p style="font-size:30px;line-height:1.35">About 200 million driverless miles a year</p>
+<p style="font-size:24px;line-height:1.35;color:#5B6573">The real driverless claims</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#FDFCF8;padding:32px;border:1px solid #DDD8CC;border-radius:16px">
+<h3 style="font-size:36px;font-weight:700;color:#17697A">Tesla: driver-assist</h3>
+<p style="font-size:30px;line-height:1.35">8 billion supervised-driving miles (Tesla’s own figure)</p>
+<p style="font-size:24px;line-height:1.35;color:#5B6573">Volume for screening; liability sits mostly with the driver</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#0F1B2D;color:#F6F4EE;padding:32px;border-radius:16px">
+<h3 style="font-size:36px;font-weight:700;color:#E9A94B">The data it gives us</h3>
+<p style="font-size:30px;line-height:1.35">Public federal crash reports (the regulator says they may be incomplete)</p>
+<p style="font-size:30px;line-height:1.35">Our simulator reproduces 88% of real crashes in a public study</p>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:24px;background:#FDFCF8;border:1px solid #DDD8CC;padding:22px 32px;border-radius:16px">
+<x-icon name="Globe" style="width:52px;height:52px;color:#17697A"></x-icon>
+<p style="font-size:28px;line-height:1.35;width:1480px"><b>United Kingdom next:</b> no vehicle is on the government’s self-driving list today. We are ready for the Automated Vehicles Act 2024 regime, expected late 2027.</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#5B6573;width:1664px">Sources: market/MARKET.md (operator figures; Tesla’s are its own); eval/REAL_CRASH_EVAL.md (100-Car study, public domain). Automated Vehicle Recovery Desk</p>
+<aside>Why the United States first. Waymo runs about 500,000 paid rides a week in 10 cities, roughly 200 million driverless miles a year: that is where real driverless claims are. Tesla's supervised driving system has 8 billion miles on Tesla's own figures: volume for screening, though liability sits mostly with the driver, so we sell triage there, not guaranteed recovery. The United States also publishes crash reports under a federal reporting order, which the regulator says may be incomplete, and public real-crash studies to validate against: our simulator reproduces 88 percent of crashes and 94 percent of near-crashes in the 100-Car study. The United Kingdom has 15 supervised vehicles and none on the government list, so little volume until its regime is live, expected late 2027 from secondary reporting. Scoring cues: business viability, pitch.</aside>
+</section>
+
+<section id="flow" data-transition="fade" style="background:#F6F4EE;color:#1A2433;font-family:'Public Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#17697A;font-weight:600">A claim, start to finish</p>
+<h2 style="font-family:'Libre Baskerville', Georgia, serif;font-size:60px;font-weight:700;line-height:1.15;width:1600px">One claim, start to finish</h2>
+<div style="display:flex;align-items:stretch;gap:10px">
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FDFCF8;padding:24px 16px;border:1px solid #DDD8CC;border-radius:16px">
+<x-icon name="Database" style="width:48px;height:48px;color:#17697A"></x-icon>
+<h3 style="font-size:30px;font-weight:700;color:#17697A">1. Intake</h3>
+<p style="font-size:24px;line-height:1.35">Logs, video, report; integrity checked</p>
+</div>
+<x-shape kind="arrow-right" style="align-self:center;width:36px;height:20px;background:#17697A"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FDFCF8;padding:24px 16px;border:1px solid #DDD8CC;border-radius:16px">
+<x-icon name="Verified" style="width:48px;height:48px;color:#17697A"></x-icon>
+<h3 style="font-size:30px;font-weight:700;color:#17697A">2. Liability</h3>
+<p style="font-size:24px;line-height:1.35">Control, software, handover, faults</p>
+</div>
+<x-shape kind="arrow-right" style="align-self:center;width:36px;height:20px;background:#17697A"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FDFCF8;padding:24px 16px;border:1px solid #DDD8CC;border-radius:16px">
+<x-icon name="Activity" style="width:48px;height:48px;color:#17697A"></x-icon>
+<h3 style="font-size:30px;font-weight:700;color:#17697A">3. Careful driver</h3>
+<p style="font-size:24px;line-height:1.35">Two reference drivers in the simulator</p>
+</div>
+<x-shape kind="arrow-right" style="align-self:center;width:36px;height:20px;background:#17697A"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FDFCF8;padding:24px 16px;border:1px solid #DDD8CC;border-radius:16px">
+<x-icon name="Chart" style="width:48px;height:48px;color:#17697A"></x-icon>
+<h3 style="font-size:30px;font-weight:700;color:#17697A">4. Pricing</h3>
+<p style="font-size:24px;line-height:1.35">Recoverable range after legal cost</p>
+</div>
+<x-shape kind="arrow-right" style="align-self:center;width:36px;height:20px;background:#17697A"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FDFCF8;padding:24px 16px;border:1px solid #DDD8CC;border-radius:16px">
+<x-icon name="CheckCircle" style="width:48px;height:48px;color:#17697A"></x-icon>
+<h3 style="font-size:30px;font-weight:700;color:#17697A">5. Outcome</h3>
+<p style="font-size:24px;line-height:1.35">One of eight, with next steps</p>
+</div>
+<x-shape kind="arrow-right" style="align-self:center;width:36px;height:20px;background:#17697A"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#0F1B2D;color:#F6F4EE;padding:24px 16px;border-radius:16px">
+<x-icon name="Users" style="width:48px;height:48px;color:#E9A94B"></x-icon>
+<h3 style="font-size:30px;font-weight:700;color:#E9A94B">6. Sign-off</h3>
+<p style="font-size:24px;line-height:1.35">A named human approves</p>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:24px;background:#FDFCF8;border:1px solid #DDD8CC;padding:22px 32px;border-radius:16px">
+<x-icon name="Clock" style="width:52px;height:52px;color:#17697A"></x-icon>
+<p style="font-size:28px;line-height:1.35;width:1480px"><b>Then it loops:</b> when new evidence arrives, the claim re-runs and a ledger shows what changed. The limitation deadline stays first on the list.</p>
+</div>
+<p style="font-size:30px;line-height:1.4;width:1600px;color:#17697A;font-weight:600">Deterministic code produces every number. The agents only challenge it.</p>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#5B6573;width:1664px">The eight outcomes: pursue, pull logs, needs inputs, human review, settle without recovery, recover from insured, motor claim, close. Automated Vehicle Recovery Desk</p>
+<aside>Walk the six steps. Intake: the crash bundle arrives and passes an integrity gate; tampering, clock drift or log gaps stop the case. Liability: who was in control, the software version, the handover, any faults. Careful driver: the simulator runs two published reference drivers, A and B, and checks it can reproduce the reported crash. Pricing: recoverable money as a range after legal cost. Outcome: one of eight, with named next steps, an owner and the limitation deadline first. Sign-off: a named human approves the spend. Then the loop: new evidence re-runs the claim and the ledger shows what changed. Code produces every number; the agents only challenge it. Scoring cues: demo clarity, architecture.</aside>
+</section>
+
+<section id="agents" data-transition="fade" style="background:#F6F4EE;color:#1A2433;font-family:'Public Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#17697A;font-weight:600">The agent team, built for long runs</p>
+<h2 style="font-family:'Libre Baskerville', Georgia, serif;font-size:60px;font-weight:700;line-height:1.15;width:1650px">Four agents, built to run for hours</h2>
+<x-connector x1="960" y1="470" x2="388" y2="540" route="vh" head="end" head-end="filled" style="color:#17697A;border-width:4px"></x-connector>
+<x-connector x1="960" y1="470" x2="960" y2="540" route="vh" head="end" head-end="filled" style="color:#17697A;border-width:4px"></x-connector>
+<x-connector x1="960" y1="470" x2="1532" y2="540" route="vh" head="end" head-end="filled" style="color:#17697A;border-width:4px"></x-connector>
+<div style="position:absolute;left:480px;top:300px;width:960px;height:170px;display:flex;flex-direction:column;gap:8px;background:#0F1B2D;color:#F6F4EE;padding:22px 32px;border-radius:16px;align-items:center;text-align:center">
+<h3 style="font-size:36px;font-weight:700;color:#E9A94B">Portfolio lead</h3>
+<p style="font-size:24px;line-height:1.35">Takes the next claim, hands it out, records the finding, writes a portfolio note every three claims</p>
+</div>
+<div style="position:absolute;left:128px;top:540px;width:520px;height:250px;display:flex;flex-direction:column;gap:10px;background:#FDFCF8;padding:24px 28px;border:1px solid #DDD8CC;border-radius:16px">
+<x-icon name="Search" style="width:44px;height:44px;color:#17697A"></x-icon>
+<h3 style="font-size:34px;font-weight:700;color:#17697A">Investigator</h3>
+<p style="font-size:24px;line-height:1.35">Reads the bundle: facts, evidence tier, unknowns and red flags</p>
+</div>
+<div style="position:absolute;left:700px;top:540px;width:520px;height:250px;display:flex;flex-direction:column;gap:10px;background:#FDFCF8;padding:24px 28px;border:1px solid #DDD8CC;border-radius:16px">
+<x-icon name="Tool" style="width:44px;height:44px;color:#17697A"></x-icon>
+<h3 style="font-size:34px;font-weight:700;color:#17697A">Reconstructor</h3>
+<p style="font-size:24px;line-height:1.35">Checks the simulator reproduces the crash; revises ranges it can justify, five attempts at most</p>
+</div>
+<div style="position:absolute;left:1272px;top:540px;width:520px;height:250px;display:flex;flex-direction:column;gap:10px;background:#FDFCF8;padding:24px 28px;border:1px solid #DDD8CC;border-radius:16px">
+<x-icon name="Activity" style="width:44px;height:44px;color:#17697A"></x-icon>
+<h3 style="font-size:34px;font-weight:700;color:#17697A">Counterfactual analyst</h3>
+<p style="font-size:24px;line-height:1.35">Chance of avoiding the crash for two reference drivers, then one evidence tier up</p>
+</div>
+<div style="position:absolute;left:128px;top:810px;width:1664px;display:flex;gap:16px">
+<div style="flex:1;background:#0F1B2D;color:#F6F4EE;padding:16px 20px;border-radius:12px"><p style="font-size:24px;line-height:1.3"><b style="color:#E9A94B">Queue and budget cap</b></p></div>
+<div style="flex:1;background:#0F1B2D;color:#F6F4EE;padding:16px 20px;border-radius:12px"><p style="font-size:24px;line-height:1.3"><b style="color:#E9A94B">Reused worker threads</b></p></div>
+<div style="flex:1;background:#0F1B2D;color:#F6F4EE;padding:16px 20px;border-radius:12px"><p style="font-size:24px;line-height:1.3"><b style="color:#E9A94B">Five retries, then flagged</b></p></div>
+<div style="flex:1;background:#0F1B2D;color:#F6F4EE;padding:16px 20px;border-radius:12px"><p style="font-size:24px;line-height:1.3"><b style="color:#E9A94B">Debate, then human if contested</b></p></div>
+<div style="flex:1;background:#0F1B2D;color:#F6F4EE;padding:16px 20px;border-radius:12px"><p style="font-size:24px;line-height:1.3"><b style="color:#E9A94B">Trace and ledger of every run</b></p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#5B6573;width:1664px">Debate: adjuster prices, defence counsel attacks, adjuster rebuts; the finance engine recomputes every number. Automated Vehicle Recovery Desk</p>
+<aside>How the agents interact for long-term running. The portfolio lead takes the next claim from the queue and hands it to the investigator and the reconstructor in parallel, then to the counterfactual analyst, then calls the insurance engine and records a finding; it reuses the same three worker threads for every claim. Long runs are made safe by: a queue with a budget cap; reused worker threads; a limit of five reconstruction attempts after which the claim is flagged low confidence rather than forced; a debate in which an adjuster prices the claim, defence counsel argues for the other side and the adjuster rebuts, with a claim marked CONTESTED and sent to a human if a rejected challenge would flip the decision; and a trace and ledger of every run so a restart or a re-run shows what changed. Agents never produce numbers; the finance engine recomputes every figure. Scoring cue: agent design and architecture (15%).</aside>
+</section>
+
+<section id="claim" data-transition="fade" style="background:#F6F4EE;color:#1A2433;font-family:'Public Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:34px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#17697A;font-weight:600">Live demo</p>
+<h2 style="font-family:'Libre Baskerville', Georgia, serif;font-size:60px;font-weight:700;line-height:1.15;width:1500px">One claim, three numbers, one outcome</h2>
+<div style="display:flex;gap:28px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FDFCF8;padding:28px 32px;border:1px solid #DDD8CC;border-radius:16px">
+<p style="font-size:80px;font-weight:700;color:#17697A;line-height:1">99–100%</p>
+<h3 style="font-size:34px;font-weight:700">Chance of avoiding the crash</h3>
+<p style="font-size:24px;line-height:1.35;color:#5B6573">A careful driver would have avoided it (two reference models)</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FDFCF8;padding:28px 32px;border:1px solid #DDD8CC;border-radius:16px">
+<p style="font-size:80px;font-weight:700;color:#17697A;line-height:1">99–100%</p>
+<h3 style="font-size:34px;font-weight:700">Automated vehicle’s share of fault</h3>
+<p style="font-size:24px;line-height:1.35;color:#5B6573">After the injured party’s own share, if any</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#0F1B2D;color:#F6F4EE;padding:28px 32px;border-radius:16px">
+<p style="font-size:60px;font-weight:700;color:#E9A94B;line-height:1.1">£8.9k to £51.2k</p>
+<h3 style="font-size:34px;font-weight:700">Expected recovery</h3>
+<p style="font-size:24px;line-height:1.35;color:#A9B6C6">On a £60k paid claim, after legal cost</p>
+</div>
+</div>
+<div style="position:relative;width:1664px;height:150px">
+<svg width="1664" height="70" viewBox="0 0 1664 70" aria-label="Scale from 0 to 60 thousand pounds with the expected recovery band from 8.9 to 51.2 thousand and the central case at 41.9 thousand" style="width:1664px;height:70px">
+<rect x="40" y="26" width="1584" height="18" rx="9" fill="#DDD8CC"/>
+<rect x="275" y="26" width="1117" height="18" rx="9" fill="#17697A"/>
+<circle cx="1146" cy="35" r="17" fill="#E9A94B" stroke="#0F1B2D" stroke-width="4"/>
+</svg>
+<p style="position:absolute;left:0px;top:84px;width:200px;font-size:24px;color:#5B6573">£0</p>
+<p style="position:absolute;left:215px;top:84px;width:240px;font-size:24px;color:#17697A;font-weight:600">£8.9k low</p>
+<p style="position:absolute;left:1010px;top:84px;width:300px;font-size:24px;color:#B4651F;font-weight:700">£41.9k central</p>
+<p style="position:absolute;left:1290px;top:84px;width:240px;font-size:24px;color:#17697A;font-weight:600">£51.2k high</p>
+<p style="position:absolute;left:1544px;top:84px;width:120px;font-size:24px;color:#5B6573;text-align:right">£60k</p>
+</div>
+<p style="font-size:30px;line-height:1.4;width:1664px"><b>Outcome: pursue.</b> Send a letter before action, preserve the logs, mind the deadline. Then: the claims inbox, an evidence-gated claim, the agent run and the debate.</p>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#5B6573;width:1664px">Example 21, a synthetic cut-in crash. Costs: UK court rules (worked example). Dashboard: accel-claims-dashboard.vercel.app</p>
+<aside>Switch to the dashboard now, about two minutes: the claims inbox of 27 claims, this pursue claim, then a claim held for evidence, the agent run and the debate. Keep the terminal ready for the one-command proof: python -m insurance insurance/examples/21_pursue_cut_in.json --price. The numbers here are the live output for example 21, a synthetic cut-in crash. The chance of avoiding the crash is 99 to 100 percent for both careful-driver models. Expected recovery is 8.9 thousand pounds in the worst case, 41.9 thousand central, 51.2 thousand best, after legal cost, on a 60 thousand pound paid claim; the bar shows that range on a zero to sixty thousand scale. Always say ranges, never a point. The dashboard still uses older decision labels (Get more evidence, Don't pursue). Scoring cues: real output (20%), demo and pitch (15%), demo clarity (15%).</aside>
+</section>
+
+<section id="bc-model" data-transition="fade" style="background:#F6F4EE;color:#1A2433;font-family:'Public Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:34px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#17697A;font-weight:600">Business case · How we charge</p>
+<h2 style="font-family:'Libre Baskerville', Georgia, serif;font-size:60px;font-weight:700;line-height:1.15;width:1600px">Three ways to charge, margins that hold</h2>
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#FDFCF8;padding:30px;border:1px solid #DDD8CC;border-radius:16px">
+<x-icon name="Check" style="width:52px;height:52px;color:#17697A"></x-icon>
+<h3 style="font-size:36px;font-weight:700;color:#17697A">Per claim</h3>
+<p style="font-size:28px;line-height:1.35">Deep analysis of a driverless claim.</p>
+<p style="font-size:36px;font-weight:700;color:#B4651F">£300 (about $400)</p>
+<p style="font-size:24px;line-height:1.35;color:#5B6573">Driver-assist screening: £75</p>
+<p style="font-size:24px;line-height:1.35;color:#5B6573">Best for: occasional or pilot customers</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#FDFCF8;padding:30px;border:1px solid #DDD8CC;border-radius:16px">
+<x-icon name="Chart" style="width:52px;height:52px;color:#17697A"></x-icon>
+<h3 style="font-size:36px;font-weight:700;color:#17697A">Success fee</h3>
+<p style="font-size:28px;line-height:1.35">A share of what is recovered, below the 15% to 33% recovery firms keep.</p>
+<p style="font-size:36px;font-weight:700;color:#B4651F">10% of recovery</p>
+<p style="font-size:24px;line-height:1.35;color:#5B6573">Best for: insurers who want aligned incentives. Money arrives years later</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#FDFCF8;padding:30px;border:1px solid #DDD8CC;border-radius:16px">
+<x-icon name="Database" style="width:52px;height:52px;color:#17697A"></x-icon>
+<h3 style="font-size:36px;font-weight:700;color:#17697A">Platform subscription</h3>
+<p style="font-size:28px;line-height:1.35">Trace, evidence packs and a recoverability map. Operators use it for defence too.</p>
+<p style="font-size:36px;font-weight:700;color:#B4651F">£40k to £80k a year</p>
+<p style="font-size:24px;line-height:1.35;color:#5B6573">Best for: operators, insurers and managing general agents. The scalable one</p>
+</div>
+</div>
+<div style="display:flex;gap:24px;align-items:stretch">
+<div style="flex:1;background:#0F1B2D;color:#F6F4EE;padding:22px 30px;border-radius:16px">
+<p style="font-size:28px;line-height:1.35"><b style="color:#E9A94B">$0.27</b> of AI compute per claim, measured, including the debate. Human review is about 99% of cost.</p>
+</div>
+<div style="flex:1;background:#0F1B2D;color:#F6F4EE;padding:22px 30px;border-radius:16px">
+<p style="font-size:28px;line-height:1.35"><b style="color:#E9A94B">About 87% to 90%</b> gross margin. Plan: £240k revenue in 2027, £2.22M in 2029, on a £2M seed.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#5B6573;width:1664px">Prices, review cost and the plan are assumptions in market/MARKET.md ($1.33 to £1 assumed); compute cost is measured. Automated Vehicle Recovery Desk</p>
+<aside>Business case: three ways to charge. Per claim: three hundred pounds for a deep analysis of a driverless claim and seventy-five for a driver-assist screen; suits pilots and occasional customers. A success fee of 10 percent of recovery undercuts the 15 to 33 percent that recovery firms keep and aligns incentives, but the money arrives years later. A platform subscription of 40 to 80 thousand pounds a year suits operators, insurers and managing general agents, and is the scalable one because per-claim alone is too small before 2030. Unit costs: the AI run costs 27 cents per claim, measured in our prototype including the debate; the real cost is an hour of human review, about 99 percent of the total, which we keep for responsible design. Gross margin about 87 to 90 percent. The plan: 240 thousand pounds of revenue in 2027 rising to 2.22 million in 2029 with break-even in 2029, on a 2 million pound seed, all assumptions that the first customer will test. Scoring cue: business viability (20%).</aside>
+</section>
+
+<section id="bc-risk" data-transition="fade" style="background:#F6F4EE;color:#1A2433;font-family:'Public Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:26px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#17697A;font-weight:600">Risks and how we address them</p>
+<h2 style="font-family:'Libre Baskerville', Georgia, serif;font-size:60px;font-weight:700;line-height:1.15;width:1600px">Risks, and how we address each</h2>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:stretch;gap:14px">
+<div style="width:700px;display:flex;align-items:center;gap:18px;background:#0F1B2D;color:#F6F4EE;padding:14px 24px;border-radius:12px">
+<x-icon name="Warning" style="width:40px;height:40px;color:#E9A94B"></x-icon>
+<p style="font-size:28px;line-height:1.25;width:580px">The driverless-only market is small before 2030</p>
+</div>
+<x-shape kind="arrow-right" style="align-self:center;width:44px;height:22px;background:#17697A"></x-shape>
+<div style="flex:1;background:#FDFCF8;border:1px solid #DDD8CC;padding:14px 24px;border-radius:12px;display:flex;align-items:center">
+<p style="font-size:26px;line-height:1.3;width:840px">United States first; subscriptions across the chain; driver-assist screening for volume</p>
+</div>
+</div>
+<div style="display:flex;align-items:stretch;gap:14px">
+<div style="width:700px;display:flex;align-items:center;gap:18px;background:#0F1B2D;color:#F6F4EE;padding:14px 24px;border-radius:12px">
+<x-icon name="Warning" style="width:40px;height:40px;color:#E9A94B"></x-icon>
+<p style="font-size:28px;line-height:1.25;width:580px">Our engine models UK law, not yet United States law</p>
+</div>
+<x-shape kind="arrow-right" style="align-self:center;width:44px;height:22px;background:#17697A"></x-shape>
+<div style="flex:1;background:#FDFCF8;border:1px solid #DDD8CC;padding:14px 24px;border-radius:12px;display:flex;align-items:center">
+<p style="font-size:26px;line-height:1.3;width:840px">Build a United States legal and cost model with counsel; the liability test and simulator carry over</p>
+</div>
+</div>
+<div style="display:flex;align-items:stretch;gap:14px">
+<div style="width:700px;display:flex;align-items:center;gap:18px;background:#0F1B2D;color:#F6F4EE;padding:14px 24px;border-radius:12px">
+<x-icon name="Warning" style="width:40px;height:40px;color:#E9A94B"></x-icon>
+<p style="font-size:28px;line-height:1.25;width:580px">The operator or manufacturer holds the evidence</p>
+</div>
+<x-shape kind="arrow-right" style="align-self:center;width:44px;height:22px;background:#17697A"></x-shape>
+<div style="flex:1;background:#FDFCF8;border:1px solid #DDD8CC;padding:14px 24px;border-radius:12px;display:flex;align-items:center">
+<p style="font-size:26px;line-height:1.3;width:840px">Preservation letter, then a court disclosure request; show what better evidence would change</p>
+</div>
+</div>
+<div style="display:flex;align-items:stretch;gap:14px">
+<div style="width:700px;display:flex;align-items:center;gap:18px;background:#0F1B2D;color:#F6F4EE;padding:14px 24px;border-radius:12px">
+<x-icon name="Warning" style="width:40px;height:40px;color:#E9A94B"></x-icon>
+<p style="font-size:28px;line-height:1.25;width:580px">The reference models are guidance, not law</p>
+</div>
+<x-shape kind="arrow-right" style="align-self:center;width:44px;height:22px;background:#17697A"></x-shape>
+<div style="flex:1;background:#FDFCF8;border:1px solid #DDD8CC;padding:14px 24px;border-radius:12px;display:flex;align-items:center">
+<p style="font-size:26px;line-height:1.3;width:840px">Always quote careful drivers A and B together; flag “model-dependent”; a human signs off</p>
+</div>
+</div>
+<div style="display:flex;align-items:stretch;gap:14px">
+<div style="width:700px;display:flex;align-items:center;gap:18px;background:#0F1B2D;color:#F6F4EE;padding:14px 24px;border-radius:12px">
+<x-icon name="Warning" style="width:40px;height:40px;color:#E9A94B"></x-icon>
+<p style="font-size:28px;line-height:1.25;width:580px">A triage number misused to deny or pressure a victim</p>
+</div>
+<x-shape kind="arrow-right" style="align-self:center;width:44px;height:22px;background:#17697A"></x-shape>
+<div style="flex:1;background:#FDFCF8;border:1px solid #DDD8CC;padding:14px 24px;border-radius:12px;display:flex;align-items:center">
+<p style="font-size:26px;line-height:1.3;width:840px">Victims are paid before any recovery decision; outputs are triage evidence, never a liability finding</p>
+</div>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:20px;background:#17697A;color:#F6F4EE;padding:16px 28px;border-radius:12px">
+<x-icon name="Verified" style="width:44px;height:44px;color:#F6F4EE"></x-icon>
+<p style="font-size:26px;line-height:1.3;width:1500px"><b>Built in:</b> ranges not points · refuses to guess · humans decide · evidence integrity gate · audit trail · synthetic data only</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#5B6573;width:1664px">Automated Vehicle Recovery Desk · Risks</p>
+<aside>Name the risks before the judges do. The driverless-only market is small before 2030: United States first, subscriptions across the chain, driver-assist screening for volume. Our engine models United Kingdom law today and a United States legal and cost model is still to be built with counsel; the liability test and the simulator carry over. The evidence is held by the other side, so the desk routes to a preservation letter and a disclosure request and shows what better evidence would change. The reference models are guidance, so always quote drivers A and B together and flag model-dependent answers. And the misuse risk we name ourselves: a triage number used to deny or pressure a victim; victims are paid before any recovery decision and outputs are triage evidence, never a liability finding. Built in: ranges not points, refusal to guess, humans decide, an evidence integrity gate, an audit trail, synthetic data only. Scoring cues: business viability, responsible design (15%).</aside>
+</section>
+
+<section id="roadmap" data-transition="fade" style="background:#0F1B2D;color:#F6F4EE;font-family:'Public Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#E9A94B;font-weight:600">Where we are, and the ask</p>
+<h2 style="font-family:'Libre Baskerville', Georgia, serif;font-size:60px;font-weight:700;line-height:1.15;width:1600px">A working answer, ready for real claims</h2>
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#17283F;padding:34px;border-radius:16px">
+<h3 style="font-size:36px;font-weight:700;color:#E9A94B">Working now</h3>
+<div style="display:flex;align-items:center;gap:14px"><x-icon name="CheckCircle" style="width:36px;height:36px;color:#E9A94B"></x-icon><p style="font-size:26px;line-height:1.3;width:420px">22 example crashes, all reproduced by the simulator</p></div>
+<div style="display:flex;align-items:center;gap:14px"><x-icon name="CheckCircle" style="width:36px;height:36px;color:#E9A94B"></x-icon><p style="font-size:26px;line-height:1.3;width:420px">Two agent systems, live dashboard, one-command run</p></div>
+<div style="display:flex;align-items:center;gap:14px"><x-icon name="CheckCircle" style="width:36px;height:36px;color:#E9A94B"></x-icon><p style="font-size:26px;line-height:1.3;width:420px">Deadline clocks, audit ledger, over 200 tests</p></div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#17283F;padding:34px;border-radius:16px">
+<h3 style="font-size:36px;font-weight:700;color:#E9A94B">Not yet</h3>
+<div style="display:flex;align-items:center;gap:14px"><x-icon name="Warning" style="width:36px;height:36px;color:#A9B6C6"></x-icon><p style="font-size:26px;line-height:1.3;width:420px">All crash data is synthetic</p></div>
+<div style="display:flex;align-items:center;gap:14px"><x-icon name="Warning" style="width:36px;height:36px;color:#A9B6C6"></x-icon><p style="font-size:26px;line-height:1.3;width:420px">No United States legal or cost model yet</p></div>
+<div style="display:flex;align-items:center;gap:14px"><x-icon name="Warning" style="width:36px;height:36px;color:#A9B6C6"></x-icon><p style="font-size:26px;line-height:1.3;width:420px">No real insurer data and no price test</p></div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#E9A94B;color:#0F1B2D;padding:34px;border-radius:16px">
+<x-icon name="PaperPlane" style="width:56px;height:56px;color:#0F1B2D"></x-icon>
+<h3 style="font-size:36px;font-weight:700">The ask</h3>
+<p style="font-size:30px;line-height:1.35">A £2M seed</p>
+<p style="font-size:30px;line-height:1.35">One insurer or operator for a United States pilot on settled claims</p>
+<p style="font-size:30px;line-height:1.35">One United States counsel to shape the cost model</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#A9B6C6;width:1664px">Live: accel-claims-dashboard.vercel.app · Jayen, Antonio, Vakhtang · Triage evidence, not legal advice. Synthetic data.</p>
+<aside>Close with where we are and the ask. Working now: 22 example crashes all reproduced by the simulator, two agent systems, a live dashboard and one-command run, deadline clocks, an audit ledger and over 200 automated tests. Not yet: all crash data is synthetic, there is no United States legal or cost model, and no real insurer data or price test. The ask: a 2 million pound seed, one insurer or operator for a United States pilot on settled claims, and one United States counsel to shape the cost model. Leave the dashboard link on screen for questions. Likely questions: is this legal today (the United Kingdom regime is not live; we start in the US and flag the proxy); why trust the number (published reference models, quoted as a range with A and B together, a human signs off); what if the manufacturer will not share logs (preservation letter and court disclosure request); where does the money come from (see the charging slide). Scoring cues: business viability, pitch.</aside>
+</section>
+
+</div>
+<script>
+const ICONS = {"Activity": "<polyline points=\"22 12 18 12 15 21 9 3 6 12 2 12\"/>", "Lock": "<rect x=\"3\" y=\"11\" width=\"18\" height=\"11\" rx=\"2\"/><path d=\"M7 11V7a5 5 0 0 1 10 0v4\"/>", "Chart": "<path d=\"M3 3v18h18\"/><path d=\"M8 17v-5\"/><path d=\"M13 17V8\"/><path d=\"M18 17v-9\"/>", "Warning": "<path d=\"M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z\"/><path d=\"M12 9v4\"/><path d=\"M12 17h.01\"/>", "Users": "<path d=\"M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><path d=\"M23 21v-2a4 4 0 0 0-3-3.9\"/><path d=\"M16 3.1a4 4 0 0 1 0 7.8\"/>", "Search": "<circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.4-4.4\"/>", "Globe": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M2 12h20\"/><path d=\"M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z\"/>", "Database": "<ellipse cx=\"12\" cy=\"5\" rx=\"9\" ry=\"3\"/><path d=\"M21 12c0 1.7-4 3-9 3s-9-1.3-9-3\"/><path d=\"M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5\"/>", "Verified": "<path d=\"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\"/><path d=\"m9 12 2 2 4-4\"/>", "CheckCircle": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m9 12 2 2 4-4\"/>", "Clock": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 6v6l4 2\"/>", "Tool": "<path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9l-3.8 3.8z\"/>", "Check": "<path d=\"M20 6 9 17l-5-5\"/>", "PaperPlane": "<path d=\"M22 2 11 13\"/><path d=\"M22 2 15 22 11 13 2 9z\"/>", "Lightbulb": "<path d=\"M9 18h6\"/><path d=\"M10 22h4\"/><path d=\"M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z\"/>"};
+document.querySelectorAll('x-icon').forEach(el => {
+  const p = ICONS[el.getAttribute('name')] || '';
+  el.innerHTML = '<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + p + '</svg>';
+});
+document.querySelectorAll('section').forEach(sec => {
+  const cons = [...sec.querySelectorAll('x-connector')];
+  if (cons.length) {
+    let s = '<svg style="position:absolute;left:0;top:0;width:1920px;height:1080px;pointer-events:none" viewBox="0 0 1920 1080">';
+    cons.forEach(c => {
+      const [x1,y1,x2,y2] = ['x1','y1','x2','y2'].map(a => +c.getAttribute(a));
+      const col = c.style.color || '#000', w = parseFloat(c.style.borderWidth) || 2, my = (y1 + y2) / 2;
+      s += `<polyline points="${x1},${y1} ${x1},${my} ${x2},${my} ${x2},${y2 - 12}" fill="none" stroke="${col}" stroke-width="${w}"/>`;
+      s += `<polygon points="${x2-10},${y2-14} ${x2+10},${y2-14} ${x2},${y2}" fill="${col}"/>`;
+      c.remove();
+    });
+    sec.insertAdjacentHTML('afterbegin', s + '</svg>');
+  }
+  const frame = document.createElement('div'); frame.className = 'frame';
+  sec.parentNode.insertBefore(frame, sec); frame.appendChild(sec);
+});
+const solo = new URLSearchParams(location.search).get('slide');
+const frames = [...document.querySelectorAll('.frame')];
+if (solo) { document.documentElement.classList.add('solo'); frames.forEach((f, i) => { if (i + 1 != +solo) f.remove(); }); }
+function fit() { document.querySelectorAll('.frame').forEach(f => { f.firstElementChild.style.transform = 'scale(' + (f.clientWidth / 1920) + ')'; }); }
+window.addEventListener('resize', fit); window.addEventListener('beforeprint', () => frames.forEach(f => f.firstElementChild.style.transform = 'none')); fit();
+let cur = 0;
+document.addEventListener('keydown', e => {
+  if (!['ArrowRight','ArrowDown','PageDown','ArrowLeft','ArrowUp','PageUp'].includes(e.key)) return;
+  cur = Math.max(0, Math.min(frames.length - 1, cur + (['ArrowRight','ArrowDown','PageDown'].includes(e.key) ? 1 : -1)));
+  frames[cur].scrollIntoView({behavior: 'smooth', block: 'center'}); e.preventDefault();
+});
+</script></body></html>
