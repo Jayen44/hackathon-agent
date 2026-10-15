@@ -413,6 +413,25 @@ async function loadAssets() {
       hdriTex.mapping = THREE.EquirectangularReflectionMapping;
     }
   } catch (e) { showErr("A local asset failed to load, using procedural fallback: " + e.message); }
+  // photo asphalt: road UVs are 1 unit per 10 m, so repeat = 10 / tile size in metres
+  const a = man.asphalt;
+  if (a && a.diffuse) {
+    try {
+      const TL = new THREE.TextureLoader(), rep = 10 / (a.tile_m || 3);
+      const load = async (f, srgb) => {
+        const t = await TL.loadAsync("assets/" + f);
+        t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rep, rep);
+        t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+        if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+        return t;
+      };
+      const [map, nor, rough] = await Promise.all([load(a.diffuse, true), a.normal ? load(a.normal) : null, a.roughness ? load(a.roughness) : null]);
+      M.road.map = map;
+      if (nor) { M.road.normalMap = nor; M.road.normalScale.set(0.8, 0.8); }
+      if (rough) { M.road.roughnessMap = rough; M.road.roughness = 1; }
+      M.road.needsUpdate = true;
+    } catch (e) { showErr("Asphalt texture failed to load, using procedural road: " + (e.message || e)); }
+  }
 }
 
 // ---------------- environment (sky, light, props) ----------------
@@ -428,7 +447,7 @@ function applyEnvironment() {
     u.sunPosition.value.copy(sunDir);
   }
   if (envRT) { envRT.dispose(); envRT = null; }
-  if (hdriTex) { scene.environment = hdriTex; scene.background = hdriTex; sky.visible = false; }
+  if (hdriTex && !dark) { scene.environment = hdriTex; scene.background = hdriTex; sky.visible = false; } // daylight HDRI; dusk keeps the analytic sky
   else { envRT = pmrem.fromScene(skyScene); scene.environment = envRT.texture; scene.background = null; sky.visible = true; }
   renderer.toneMappingExposure = dark ? 0.62 : 0.55;
   sun.color.setHex(dark ? 0xffa060 : 0xfff3e2); sun.intensity = dark ? 1.4 : 3.2;

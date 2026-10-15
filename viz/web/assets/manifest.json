@@ -1,5 +1,18 @@
 {
-  "_comment": "Optional local assets for viz/web/index.html. Leave entries null/empty to use the built-in procedural cars and sky. Paths are relative to this folder. yaw_deg rotates a model so its nose points along +x; models are auto-scaled to 4.5 m length. Every file listed here must also be listed in LICENSES.md.",
-  "cars": { "ego": null, "others": [] },
-  "hdri": null
+  "_comment": "Optional local assets for viz/web/index.html. Set any entry to null/empty to use the built-in procedural cars, sky and road. Paths are relative to this folder. yaw_deg rotates a model so its nose points along +x; models are auto-scaled to 4.5 m length. asphalt.tile_m is the real-world size of one texture tile. Every file listed here must also be listed in LICENSES.md.",
+  "cars": {
+    "ego": { "file": "kenney/taxi.glb", "yaw_deg": 90 },
+    "others": [
+      { "file": "kenney/sedan.glb", "yaw_deg": 90 },
+      { "file": "kenney/suv.glb", "yaw_deg": 90 },
+      { "file": "kenney/van.glb", "yaw_deg": 90 }
+    ]
+  },
+  "hdri": { "file": "hdri/kloofendal_48d_partly_cloudy_puresky_2k.hdr" },
+  "asphalt": {
+    "diffuse": "asphalt/asphalt_02_diff_1k.jpg",
+    "normal": "asphalt/asphalt_02_nor_gl_1k.jpg",
+    "roughness": "asphalt/asphalt_02_rough_1k.jpg",
+    "tile_m": 3
+  }
 }
