@@ -1,7 +1,8 @@
 """Usage: python -m insurance <bundle.json> [more.json ...] [--json] [--price [--legal-cost LOW,HIGH]]
 
---price also runs finance/ to price the recovery (GBP). Legal cost is TODO in finance/tables.py,
-so pass --legal-cost (e.g. 2000,5000) to get a figure; otherwise the result is 'cannot_price'.
+--price also runs finance/ to price the recovery (GBP). Legal cost comes from finance/tables.py
+(CPR PD 45, claims up to GBP 100k); pass --legal-cost (e.g. 2000,5000) to override it, or for
+larger claims where the table is still TODO (otherwise the result is 'cannot_price').
 """
 import dataclasses
 import json

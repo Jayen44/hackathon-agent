@@ -10,8 +10,9 @@ Honest limits (also written into `notes` on every result):
     uncertainty in the human-driver model or the reconstruction.
   * finance/ wants two careful-driver models (R157 A and B) as bounds. With one estimator
     its "only one careful-driver model" gate stays open. Pass two to close it.
-  * The legal-cost table in finance/tables.py is still TODO, so unless the caller passes
-    `legal_cost_gbp` the result is `cannot_price`. Nothing is guessed here.
+  * Legal costs in finance/tables.py come from CPR PD 45 up to GBP 100k; above that (multi-track)
+    they are still TODO, so unless the caller passes `legal_cost_gbp` the result is `cannot_price`.
+    Nothing is guessed here.
 """
 from __future__ import annotations
 
