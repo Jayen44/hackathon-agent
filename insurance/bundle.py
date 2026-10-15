@@ -119,12 +119,16 @@ class Conflict:
     gap_m: float
     hazard_speed_mps: float = 0.0
     friction_mu: float = 0.7
+    crash_type: str = "other"  # "cut_in" | "cut_out" | "lead_vehicle_decel" | "other" (finance/ uses this)
 
 
 @dataclass(frozen=True)
 class Outcome:
     collided: bool
     impact_speed_mps: float | None = None  # ego speed at impact (m/s)
+    # Exact NHTSA SGO "Highest Injury Severity Alleged" drop-down value (finance/tables.py keys).
+    injury_severity: str = "Unknown"
+    paid_claim_gbp: float | None = None    # what the insurer actually paid, if known (beats the tables)
 
 
 @dataclass(frozen=True)
@@ -216,11 +220,16 @@ def load_bundle(d: dict) -> CrashBundle:
         gap_m=_num(_req(c, "gap_m", "conflict"), "conflict.gap_m"),
         hazard_speed_mps=_num(c.get("hazard_speed_mps", 0.0), "conflict.hazard_speed_mps"),
         friction_mu=_num(c.get("friction_mu", 0.7), "conflict.friction_mu"),
+        crash_type=c.get("crash_type", "other"),
     )
     if conflict and (conflict.gap_m < 0 or conflict.ego_speed_mps < 0 or not 0 < conflict.friction_mu <= 1.2):
         raise BundleError("conflict: gap_m/ego_speed_mps must be >= 0 and friction_mu in (0, 1.2]")
     o = _req(d, "outcome", "bundle")
-    outcome = Outcome(bool(_req(o, "collided", "outcome")), o.get("impact_speed_mps"))
+    paid = o.get("paid_claim_gbp")
+    if paid is not None:
+        paid = _num(paid, "outcome.paid_claim_gbp")
+    outcome = Outcome(bool(_req(o, "collided", "outcome")), o.get("impact_speed_mps"),
+                      o.get("injury_severity", "Unknown"), paid)
     return CrashBundle(
         case_id=_req(d, "case_id", "bundle"),
         synthetic=bool(d.get("synthetic", True)),

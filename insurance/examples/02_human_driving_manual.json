@@ -89,6 +89,7 @@
   },
   "outcome": {
     "collided": true,
-    "impact_speed_mps": 9.0
+    "impact_speed_mps": 9.0,
+    "injury_severity": "Minor Without Hospitalization"
   }
 }

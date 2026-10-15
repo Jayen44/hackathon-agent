@@ -98,10 +98,12 @@
     "ego_speed_mps": 13.4,
     "gap_m": 10.0,
     "hazard_speed_mps": 0.0,
-    "friction_mu": 0.7
+    "friction_mu": 0.7,
+    "crash_type": "cut_in"
   },
   "outcome": {
     "collided": true,
-    "impact_speed_mps": 12.0
+    "impact_speed_mps": 12.0,
+    "injury_severity": "Minor Without Hospitalization"
   }
 }

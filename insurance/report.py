@@ -11,6 +11,26 @@ LABEL = {
 }
 
 
+def render_recovery(r) -> str:
+    """Recovery block for a bridge.BridgedAssessment (finance/ numbers, rendered only)."""
+    from finance.recovery import fmt_gbp
+    out = ["RECOVERY (finance engine)", "-" * 25]
+    rec = r.recovery
+    if rec is None:
+        out.append("Not priced.")
+    else:
+        iv = lambda i: f"{i.low:.0%} / {i.mid:.0%} / {i.high:.0%}"  # noqa: E731
+        out += [f"Decision      : {rec.decision}",
+                f"P(avoid)      : {iv(rec.p_avoid)}  (low / mid / high)",
+                f"AV share      : {iv(rec.av_share)}"]
+        if rec.expected_recovery:
+            e = rec.expected_recovery
+            out.append(f"Expected recovery: {fmt_gbp(e.low)} / {fmt_gbp(e.mid)} / {fmt_gbp(e.high)}")
+        out += [f"  - {x}" for x in rec.reasons]
+    out += [f"note: {n}" for n in r.notes]
+    return "\n".join(out)
+
+
 def render(v: Verdict) -> str:
     out = [f"CASE {v.case_id}", "=" * (5 + len(v.case_id)),
            f"Liable party : {LABEL[v.liable]}",

@@ -168,6 +168,7 @@ How it relates to the `sim` branch: the engine never imports `sim`. It only need
 Thresholds (`engine.Policy`) are illustrative, not from law: 10 s minimum handover warning, 2 s override window, P(human avoids) >= 0.8 means the system fell short, <= 0.2 means unavoidable.
 
 ## 5. Working rules
+- **Staying in sync with Antonio (finance):** read `coord/PROTOCOL.md`. At the start of every session run `scripts/sync.ps1` (or `.sh`), then read the open GitHub issues labelled `for:<you>`. `insurance/bridge.py` is the seam between `insurance/` and `finance/`: both owners review it, and `tests/test_bridge.py` contract tests fail if either side drifts. Never edit the other owner's folder; open an issue instead. To split new work, use the `work-splitter` agent (`.claude/agents/work-splitter.md`).
 - Work **only on the `insurance` branch**. Commit small, `git pull --rebase origin insurance` before pushing.
 - Never commit secrets or real personal data. Keep keys in `.env` (ignored).
 - Mark every claim as Verified / Knowledge / Design. Don't present Knowledge as fact.
