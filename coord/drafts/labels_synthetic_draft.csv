@@ -1,0 +1,21 @@
+crash_id,source,crash_type,avoidable_by_careful_driver,pursue_recovery,who_pays,reason
+01_av_late_detection,synthetic:insurance/examples,constant_hazard,yes,yes,tech,design intent: AV in control and detected the hazard late
+02_human_driving_manual,synthetic:insurance/examples,unknown,unsure,no,human,design intent: car driven manually
+03_handover_ignored_by_human,synthetic:insurance/examples,unknown,yes,no,human,design intent: handover warning ignored by human
+04_handover_too_short,synthetic:insurance/examples,unknown,unsure,yes,tech,design intent: handover warning too short for a human to respond
+05_unavoidable_close_cutin,synthetic:insurance/examples,cut_in,no,no,no_fault,design intent: close cut-in not avoidable by a careful driver
+06_borderline_needs_review,synthetic:insurance/examples,unknown,unsure,pull_logs,review,design intent: borderline case for a human handler
+07_outside_odd,synthetic:insurance/examples,unknown,unsure,no,review,design intent: outside ODD; legal consequence not confirmed so left as review
+08_integrity_failure,synthetic:insurance/examples,unknown,unsure,pull_logs,review,design intent: log integrity failure so no reliable verdict
+09_human_override,synthetic:insurance/examples,unknown,unsure,no,human,design intent: human overrode the system
+10_critical_fault,synthetic:insurance/examples,unknown,unsure,yes,tech,design intent: critical system fault before the crash
+11_no_collision,synthetic:insurance/examples,none,unsure,no,no_fault,design intent: no collision occurred
+12_missing_conflict,synthetic:insurance/examples,unknown,unsure,pull_logs,review,design intent: conflict data missing so counterfactual impossible
+13_unapproved_software,synthetic:insurance/examples,unknown,unsure,pull_logs,review,design intent: unapproved software version; legal effect not confirmed
+14_human_took_control_in_time,synthetic:insurance/examples,unknown,unsure,no,human,design intent: human took control in time
+15_lead_braking_avoidable,synthetic:insurance/examples,lead_braking,yes,yes,tech,design intent: lead vehicle braking avoidable by careful driver while AV engaged
+16_lead_braking_unavoidable,synthetic:insurance/examples,lead_braking,no,no,no_fault,design intent: lead braking not avoidable
+17_cut_in_avoidable,synthetic:insurance/examples,cut_in,yes,yes,tech,design intent: cut-in avoidable by careful driver while AV engaged
+18_cut_in_unavoidable,synthetic:insurance/examples,cut_in,no,no,no_fault,design intent: cut-in not avoidable
+19_s4_unauthorised_software_change,synthetic:insurance/examples,unknown,unsure,no,human,design intent: unauthorised software alteration (AEVA s.4); not confirmed
+20_s3_2_engaged_when_inappropriate,synthetic:insurance/examples,unknown,unsure,no,human,design intent: automation engaged when inappropriate (AEVA s.3(2)); not confirmed
