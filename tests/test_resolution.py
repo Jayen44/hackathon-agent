@@ -42,3 +42,15 @@ def test_new_codes_become_steps():
     f = ClaimFacts("x", "cut_in", "Slight", "engaged_verified", "inside", True, (0, 0), None, None, "compliant")
     a = assess(f, [AvoidanceResult("a", .9, (.85, .95)), AvoidanceResult("b", .3, (.25, .35))])
     assert "MODELS_DISAGREE" in a.codes and any("50%" in s.action for s in _gate_steps(a.codes))
+
+
+def test_cheap_pursue_is_headlined_pre_action_only_and_asks_for_p_liable():
+    from pathlib import Path
+    from insurance.bundle import load_bundle_file
+    ex = Path(__file__).resolve().parent.parent / "insurance" / "examples"
+    b = load_bundle_file(ex / "01_av_late_detection.json")
+    r = assess_bundle(b, estimators=default_estimators(), reproduced=True)
+    x = resolve(r, b)
+    if x.outcome == "PURSUE" and "LITIGATION_DOWNSIDE" in r.recovery.codes:
+        assert "pre-action only" in x.headline and "lost trial" in x.headline
+    assert any("legal.p_liable_to_victim" in s.action for s in x.next_steps)

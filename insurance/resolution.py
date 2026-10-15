@@ -17,6 +17,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from finance.recovery import fmt_gbp
 from insurance.bridge import BridgedAssessment
 from insurance.bundle import CrashBundle
 
@@ -87,6 +88,10 @@ def _with_legal_steps(x: Resolution, r: BridgedAssessment, b: CrashBundle) -> Re
             ". URGENT: issue or agree a standstill now" if d.urgent else ""), "PURSUE"))
     if b.legal.regime in ("conventional", "unspecified"):
         extra.append(Step("counsel", "Confirm the recovery route (no vehicle is AEVA-listed today: contribution under the 1978 Act or CPA 1987?)", "PURSUE"))
+    if b.legal.p_liable_to_victim is None and x.outcome in ("PURSUE", "PULL_LOGS"):
+        extra.append(Step("counsel", "Assess the chance the manufacturer/operator is liable to the victim (AEVA s.5 recovery is "
+                          "derivative); set legal.p_liable_to_victim, otherwise avoidance is treated as the whole liability case",
+                          "PURSUE (with a tighter range)"))
     x.next_steps = extra[:1] + x.next_steps + extra[1:]
     return x
 
@@ -118,7 +123,10 @@ def _resolve(r: BridgedAssessment, b: CrashBundle) -> Resolution:
     d = a.decision
     gate = _gate_steps(a.codes)
     if d == "pursue":
-        return done("PURSUE", "Pursue the tech company.",
+        ev = a.expected_recovery
+        head = ("Pursue the tech company." if "LITIGATION_DOWNSIDE" not in a.codes else
+                f"Pursue pre-action only: central case {fmt_gbp(ev.mid)}, but a lost trial costs {fmt_gbp(ev.low)}.")
+        return done("PURSUE", head,
                     Step("counsel", "Send a letter before action citing AEVA s.5", "PURSUE"),
                     Step("engineer", "Send a preservation letter for the vehicle logs and keep the reconstruction under chain of custody", "PURSUE"),
                     Step("insurer finance", "Reserve the legal-cost high end from the assessment", "PURSUE"),
