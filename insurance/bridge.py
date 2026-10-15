@@ -76,7 +76,8 @@ def software_status(b: CrashBundle) -> str:
 
 
 def claim_facts(b: CrashBundle, reproduced: bool, third_party_share: tuple[float, float] | None = None,
-                legal_cost_gbp: tuple[float, float] | None = None, policy: Policy = Policy()) -> ClaimFacts:
+                legal_cost_gbp: tuple[float, float] | None = None, policy: Policy = Policy(),
+                cost_shift_risk: bool = False) -> ClaimFacts:
     """`third_party_share=None` means the injured party's contributory negligence has NOT been assessed (finance then
     gates 'pursue'); the bundle's own value is used when the caller passes none."""
     share = third_party_share if third_party_share is not None else b.outcome.third_party_share
@@ -91,6 +92,7 @@ def claim_facts(b: CrashBundle, reproduced: bool, third_party_share: tuple[float
         paid_claim_gbp=b.outcome.paid_claim_gbp,
         legal_cost_gbp=legal_cost_gbp,
         software_status=software_status(b),
+        cost_shift_risk=cost_shift_risk,
     )
 
 
@@ -104,7 +106,8 @@ class BridgedAssessment:
 def assess_bundle(b: CrashBundle, *, estimators: dict[str, Estimator] | None = None, reproduced: bool = False,
                   third_party_share: tuple[float, float] | None = None,
                   legal_cost_gbp: tuple[float, float] | None = None, policy: Policy = Policy(),
-                  min_net_gbp: float = 0.0) -> BridgedAssessment:
+                  min_net_gbp: float = 0.0,
+                  cost_shift_risk: bool = False) -> BridgedAssessment:
     """Decide liability, then price the recovery when that makes sense.
 
     `reproduced` is False unless the caller has checked (e.g. sim.reproduce.check) that the
@@ -132,7 +135,7 @@ def assess_bundle(b: CrashBundle, *, estimators: dict[str, Estimator] | None = N
     if not reproduced:
         notes.append("Simulation not confirmed to reproduce the reported crash (reproduced=False).")
     try:
-        facts = claim_facts(b, reproduced, third_party_share, legal_cost_gbp, policy)
+        facts = claim_facts(b, reproduced, third_party_share, legal_cost_gbp, policy, cost_shift_risk)
         return BridgedAssessment(verdict, assess(facts, avoidance, min_net_gbp), notes)
     except ValueError as e:   # bad claim inputs must not take down a portfolio run
         return unpriced(f"Invalid claim inputs, not priced: {e}")

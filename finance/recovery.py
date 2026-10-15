@@ -105,6 +105,10 @@ class ClaimFacts:
     paid_claim_gbp: float | None = None   # amount the insurer actually paid (net of contributory negligence)
     legal_cost_gbp: tuple[float, float] | None = None    # override for the legal cost table
     software_status: str = "unknown"      # SOFTWARE code (AEVA s.4)
+    # Caller-set ASSUMPTION, default off. CPR 44.2(2): the unsuccessful party normally pays the winner's costs.
+    # True widens the worst case by the other side's costs, assumed equal to our own high legal cost (no sourced
+    # figure for the defendant's spend). Mid and best cases are unchanged: no win probability is modelled.
+    cost_shift_risk: bool = False
 
 
 @dataclass
@@ -181,6 +185,14 @@ def validate_facts(f: ClaimFacts) -> None:
             raise ValueError(f"third_party_share must be 0 <= low <= high <= 1, got {f.third_party_share!r}")
 
 
+def _special_damages_note(f: ClaimFacts) -> list[str]:
+    """Table values for Serious/Fatal are general damages only; flag that real claims run higher."""
+    if f.paid_claim_gbp is None and f.injury_severity in ("Serious", "Fatal"):
+        return [f"{f.injury_severity} claim value is general damages only (care, lost earnings, dependency excluded): "
+                "the real claim is likely higher; use the insurer's paid amount if known"]
+    return []
+
+
 def _near_track_limit(v: Interval) -> str | None:
     """Legal cost is a step function of claim value (CPR 26.9 tracks), so a value close to a limit can flip the decision."""
     for limit in (tables.FAST_TRACK_LIMIT, tables.INTERMEDIATE_TRACK_LIMIT):
@@ -250,11 +262,14 @@ def assess(f: ClaimFacts, avoidance: list[AvoidanceResult], min_net_gbp: float =
     if value is None or cost is None:
         missing = value_src if value is None else cost_src
         return RecoveryAssessment(**base, decision="cannot_price", reasons=[f"no sourced figure: {missing}",
-                                           "supply paid_claim_gbp and/or legal_cost_gbp (a counsel budget) to price this claim"],
+                                           "supply paid_claim_gbp and/or legal_cost_gbp (a counsel budget) to price this claim",
+                                           *_special_damages_note(f)],
                                   claim_value=value, legal_cost=cost, expected_recovery=None,
                                   sources=[s for s in (value_src, cost_src) if s])
 
     ev = expected_recovery(share, value, cost)
+    if f.cost_shift_risk:
+        ev = Interval(ev.low - cost.high, ev.mid, ev.high)
     gates = _gates(f) + ([cn_gate] if cn_gate else [])
     if len(avoidance) < 2:
         gates.append("only one careful-driver model: bracket incomplete")
@@ -274,6 +289,10 @@ def assess(f: ClaimFacts, avoidance: list[AvoidanceResult], min_net_gbp: float =
                        "before issuing proceedings")
     if cn_note:
         reasons.append(cn_note)
+    if f.cost_shift_risk:
+        reasons.append("worst case includes adverse costs if the claim fails (CPR 44.2(2)); the defendant's costs are "
+                       "ASSUMED equal to our own high legal cost, not sourced")
+    reasons += _special_damages_note(f)
     near = _near_track_limit(value)
     if near and decision != "dont_pursue":
         reasons.append(near)

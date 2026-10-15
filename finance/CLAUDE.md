@@ -52,3 +52,5 @@ With PD 45 costs, a minor-injury claim (about £4-5k) never clears its own trial
 - Legal cost is a step function at the £25k/£100k track limits (real CPR behaviour, not a bug). Claims within 10% of a limit get a reason saying the decision may flip.
 - Still open: multi-track (> £100k) cost, so every table-priced Serious claim is `cannot_price` unless `paid_claim_gbp` or `legal_cost_gbp` is supplied. Needs a sourced budget estimate.
 - Still modelled out: cost-shifting if the insurer loses, delay, settlement discount, cost of pulling logs.
+- `ClaimFacts.cost_shift_risk` (default False, also `assess_bundle(cost_shift_risk=)`): CPR 44.2(2) loser-pays. Widens the worst case by the other side's costs, ASSUMED equal to our high legal cost (unsourced). Mid/best unchanged.
+- Table-priced Serious/Fatal claims carry a "general damages only" reason (special damages and dependency excluded).
