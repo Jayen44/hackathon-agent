@@ -10,6 +10,8 @@
 
 ## Quick start
 ```bash
+git clone https://github.com/Jayen44/hackathon-agent.git
+cd hackathon-agent
 python -m venv .venv
 # Windows: .venv\Scripts\activate    macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
@@ -33,7 +35,11 @@ streamlit run dashboard/app.py
 ## Team
 | Name | Role | GitHub |
 |---|---|---|
-| | | |
+| Jayen | Owner | [@Jayen44](https://github.com/Jayen44) |
+| Antonio | Finance | [@antoniohede-ai](https://github.com/antoniohede-ai) |
+| Termvato | Robotics | [@termvato](https://github.com/termvato) |
+
+Private repo: access is limited to the three people above.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow.
 
