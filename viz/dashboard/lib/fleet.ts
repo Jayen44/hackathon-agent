@@ -41,7 +41,15 @@ export function humanSummary(type: string, summary: string): string {
   const t = summary.trim();
   if (!(t.startsWith("{") || t.startsWith("["))) return clip(t);
   let v: unknown;
-  try { v = JSON.parse(t); } catch { return clip(t.replace(/[{}"\[\]]/g, " ").replace(/\s+/g, " ").trim()); }
+  try { v = JSON.parse(t); } catch {
+    // The API truncates long summaries, so the JSON may not parse: pull the readable field out with a regex.
+    const get = (k: string) => t.match(new RegExp(`"${k}"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)`))?.[1]?.replace(/\\u00a3/g, "£").replace(/\\"/g, '"');
+    const tool = type.startsWith("debate.tool:") ? type.slice("debate.tool:".length) : null;
+    if (tool) { const d = get("decision"); return `${tool}${d ? `: decision ${d.replaceAll("_", " ")}` : ""}`; }
+    const r = get("recommendation") ?? (get("verdict") && `${get("verdict")!.replaceAll("_", " ")}: ${get("reasoning") ?? ""}`)
+      ?? (get("argument") && `${get("assumption") ?? "Challenge"}: ${get("argument")}`) ?? (get("decision") && `Final decision: ${get("decision")!.replaceAll("_", " ")}`);
+    return clip(r ?? "Debate step (details in the claim page)");
+  }
   const o = (Array.isArray(v) ? { items: v } : v) as Record<string, unknown>;
   const out = (o.output && typeof o.output === "object" ? o.output : {}) as Record<string, unknown>;
   const tool = type.startsWith("debate.tool:") ? type.slice("debate.tool:".length) : null;

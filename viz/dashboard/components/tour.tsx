@@ -37,7 +37,7 @@ const STEPS: Step[] = [
   },
   {
     path: claimPath, target: "info-requests",
-    text: (c) => `What to obtain next, ranked by how much it narrows the answer. AV logs = tier 2.${c?.information_requests?.[0] ? ` First: ${c.information_requests[0].title}.` : ""}`,
+    text: (c) => `What to obtain next, ranked by how much it narrows the answer.${c && c.evidence_tier >= 2 ? " Already tier 2 (AV logs)." : " AV logs = tier 2."}${c?.information_requests?.[0] ? ` First: ${c.information_requests[0].title}.` : ""}`,
   },
   { path: claimPath, target: "debate", text: () => "Adjuster vs defence counsel: the system argues against itself. Every GBP figure is re-priced by the finance engine, never by a model." },
   { path: () => `/new?cctv=${DEMO_VIDEO_ID}`, target: "cctv", text: () => "New claim with CCTV: calibrate four road points, pick the AV, Measure. Speeds and gap fill the form with ±σ." },
