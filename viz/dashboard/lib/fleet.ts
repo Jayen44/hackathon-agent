@@ -7,7 +7,7 @@ const RAW = process.env.NEXT_PUBLIC_FLEET_API?.replace(/\/$/, "");
 export const FLEET_MOCK = !RAW;
 const BASE = RAW ?? "/mock-fleet";
 
-export type Run = { id: string; status?: string; started_at?: string; claims_total?: number; claims_processed?: number; label?: string };
+export type Run = { id: string; status?: string; started_at?: string; claims_total?: number; claims_processed?: number; label?: string; dry_run?: boolean };
 export type FleetEvent = {
   id: string;
   ts: number; // ms since epoch
@@ -31,7 +31,7 @@ export type Portfolio = {
 };
 
 type RawEvent = Record<string, unknown>;
-const str = (v: unknown) => (v == null ? null : String(v));
+const str = (v: unknown) => (v == null ? null : typeof v === "object" ? JSON.stringify(v).slice(0, 400) : String(v));
 
 function norm(e: RawEvent, t0: number): FleetEvent {
   const tsRaw = e.timestamp ?? e.ts ?? e.time;
@@ -58,9 +58,24 @@ async function j<T>(path: string): Promise<T> {
   return r.json() as Promise<T>;
 }
 
+/** Runs, live ones first: non-dry before dry, then newest first. The live API names the id `run_id`. */
 export async function listRuns(): Promise<Run[]> {
-  const r = await j<Run[] | { runs: Run[] }>(FLEET_MOCK ? "/runs.json" : "/api/runs");
-  return Array.isArray(r) ? r : r.runs;
+  const r = await j<RawEvent[] | { runs: RawEvent[] }>(FLEET_MOCK ? "/runs.json" : "/api/runs");
+  const raw = Array.isArray(r) ? r : r.runs;
+  const runs: Run[] = raw.map((x) => {
+    const cfg = (x.config ?? {}) as Record<string, unknown>;
+    return {
+      id: String(x.run_id ?? x.id),
+      status: str(x.status) ?? undefined,
+      started_at: str(x.created_at ?? x.started_at) ?? undefined,
+      claims_total: (x.claims_total ?? cfg.claims) as number | undefined,
+      label: str(x.label) ?? undefined,
+      dry_run: Boolean(x.dry_run ?? cfg.dry_run ?? false),
+    };
+  });
+  if (FLEET_MOCK) return runs;
+  const t = (x: Run) => (x.started_at ? Date.parse(x.started_at) : 0);
+  return runs.sort((a, b) => Number(a.dry_run) - Number(b.dry_run) || t(b) - t(a));
 }
 
 // Mock replay clock: events are revealed as the page's own clock passes their offset.
@@ -99,7 +114,16 @@ export async function fetchPortfolio(runId: string, visibleClaims?: Set<string>)
     }
     return { ...p, claims, claims_processed: claims.length, recoverable_by_crash_type: by, decisions: dec };
   }
-  return j<Portfolio>(`/api/runs/${encodeURIComponent(runId)}/portfolio`);
+  const p = await j<Record<string, unknown>>(`/api/runs/${encodeURIComponent(runId)}/portfolio`);
+  type Top = { claim_id: string; crash_type?: string | null; decision: string; expected_recovery_gbp?: Interval | null };
+  const top = (p.top_claims as Top[] | undefined)?.map((c) => ({ ...c, expected_recovery: c.expected_recovery_gbp ?? null, counts_toward_map: true }));
+  return {
+    ...(p as unknown as Portfolio),
+    claims_processed: (p.claims_processed ?? p.claims_done) as number | undefined,
+    recoverable_by_crash_type: (p.recoverable_by_crash_type ?? p.recoverable_gbp_by_crash_type ?? {}) as Record<string, Interval>,
+    decisions: (p.decisions ?? {}) as Record<string, number>,
+    claims: (p.claims as Portfolio["claims"]) ?? top,
+  };
 }
 
 export const LANES: { key: string; label: string; match: string[] }[] = [
