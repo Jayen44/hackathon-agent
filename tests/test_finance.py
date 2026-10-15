@@ -49,10 +49,26 @@ def test_paid_amount_is_already_net_of_contributory_negligence():
     assert any("not applied again" in x for x in a.reasons)
 
 
-def test_unassessed_contributory_negligence_blocks_pursue_on_table_values():
+def test_unassessed_contributory_negligence_is_a_caveat_not_a_gate():
     a = r.assess(facts(injury_severity="Fatal", paid_claim_gbp=None), BOTH_HIGH)
-    assert a.decision == "pull_logs_first" and a.av_share.low == 0
-    assert any("not assessed" in x for x in a.reasons)
+    assert a.decision == "pursue"
+    assert a.av_share.low == 0 and a.av_share.mid == pytest.approx(a.p_avoid.mid)   # central assumes none
+    assert "CN_NOT_ASSESSED" in a.codes and any("must be alleged and proved" in x for x in a.reasons)
+
+
+def test_models_either_side_of_fifty_percent_gate_pursue():
+    a = r.assess(facts(), SPLIT)
+    assert a.decision == "pull_logs_first" and "MODELS_DISAGREE" in a.codes
+
+
+def test_central_negative_without_gates_is_not_pursued():
+    a = r.assess(facts(paid_claim_gbp=5_000, legal_cost_gbp=(1_000, 9_000)), BOTH_HIGH)
+    assert a.expected_recovery.mid < 0 < a.expected_recovery.high and a.decision == "pull_logs_first"
+
+
+def test_cannot_price_reports_break_even_legal_cost():
+    a = r.assess(facts(paid_claim_gbp=250_000, legal_cost_gbp=None), BOTH_HIGH)
+    assert a.decision == "cannot_price" and any("break-even legal cost" in x for x in a.reasons)
 
 
 @pytest.mark.parametrize("status", ["unauthorised_alteration", "safety_update_missing"])
@@ -190,13 +206,12 @@ def test_early_returns_carry_codes():
     (dict(within_odd="outside"), "ODD_OUTSIDE"),
     (dict(within_odd="unknown"), "ODD_UNKNOWN"),
     (dict(reproduced=False), "NOT_REPRODUCED"),
-    (dict(paid_claim_gbp=None, injury_severity="Fatal"), "CN_NOT_ASSESSED"),
 ])
 def test_every_gate_has_a_code(kw, code):
     a = r.assess(facts(**kw), BOTH_HIGH)
     assert a.decision == "pull_logs_first" and code in a.codes
     gate_codes = {"ENGAGEMENT_UNVERIFIED", "ODD_OUTSIDE", "ODD_UNKNOWN", "NOT_REPRODUCED", "CN_NOT_ASSESSED", "ONE_MODEL"}
-    gate_reasons = [x for x in a.reasons if x in r._gates(facts(**kw)) or "not assessed" in x]
+    gate_reasons = [x for x in a.reasons if x in r._gates(facts(**kw))]
     assert len(gate_reasons) == len(gate_codes & set(a.codes))
 
 

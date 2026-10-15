@@ -13,11 +13,15 @@ P(avoid)          = bracket over careful_a and careful_b (lowest CI end, mean, h
 AV share of fault = P(avoid) x (1 - injured party's contrib. negligence)   AV Act 2024; AEVA s.3(1)
                     (applied to table values only: a paid amount is already net of it)
 expected recovery = AV share x claim value - legal cost          AEVA 2018 s.2 pays, s.5 recovers
-pursue            only if the WORST case clears the threshold and no gate is open
-dont_pursue       if even the BEST case does not clear it
-pull_logs_first   otherwise: gates (engagement not verified, ODD not inside, not reproduced,
-                  one model only, contributory negligence not assessed) or a range that straddles
+dont_pursue       if even the BEST case does not clear the threshold
+pull_logs_first   any gate open: engagement not verified, ODD not inside, not reproduced, one model only,
+                  models either side of 50% (balance of probabilities), or a central case that doesn't clear
+pursue            no gate and the CENTRAL case clears the threshold; a negative worst case (trial lost) is
+                  stated (LITIGATION_DOWNSIDE), not a veto: open with a pre-action letter, escalate on evidence
 not_av_recovery   self-driving not engaged, or AEVA s.4 software breach (recover from the insured)
+cannot_price      no sourced value or legal cost (> £100k multi-track): reports the break-even legal cost
+contributory neg. not assessed: central assumes none (must be alleged and proved), worst case up to 100%;
+                  a caveat (CN_NOT_ASSESSED), not a gate
 ```
 No tuned weights: every input is a physical result, a fact from the vehicle data or claim file, or a sourced GBP figure.
 

@@ -124,13 +124,17 @@ def test_tech_liable_case_gets_priced_in_gbp():
     assert rec.p_avoid.mid > 0.9
 
 
-def test_small_claim_is_eaten_by_legal_cost():
-    # Table-priced minor injury (about GBP 4-5k) against GBP 2-5k legal cost: finance/ must not say "pursue".
+def test_small_clean_claim_is_pursued_pre_issue_with_downside_stated():
+    # Table-priced minor injury (about GBP 4-5k), clear liability, no gates: finance decides on the central case
+    # (open with a pre-action letter) and states the trial-and-lose worst case instead of vetoing on it.
     r = assess_bundle(bundle("01_av_late_detection"), legal_cost_gbp=LEGAL, estimators=TWO_MODELS, reproduced=True)
     assert r.verdict.liable == "TECH_COMPANY"
-    assert r.recovery.decision == "pull_logs_first"
-    assert any("straddles" in x for x in r.recovery.reasons)
-    assert any("SI 2025/615" in s for s in r.recovery.sources)
+    rec = r.recovery
+    assert rec.decision == "pursue", rec.reasons
+    assert rec.expected_recovery.mid > 0 >= rec.expected_recovery.low
+    assert "LITIGATION_DOWNSIDE" in rec.codes and any("pre-action letter" in x for x in rec.reasons)
+    assert "CN_NOT_ASSESSED" in rec.codes                       # stated caveat, not a gate
+    assert any("SI 2025/615" in s for s in rec.sources)
 
 
 def test_one_model_or_unreproduced_holds_at_pull_logs():

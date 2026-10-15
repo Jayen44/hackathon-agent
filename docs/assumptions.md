@@ -12,7 +12,8 @@ Marking scheme: [hackathon-marking-rubric.png](hackathon-marking-rubric.png). Ca
 | P(careful driver avoids) read as P(AV fell below that standard) | Modelling assumption | Team |
 | Insurer recovers what the AV company owes the injured party, never more | AEVA s.5(1), s.5(4) | AEVA 2018 (legislation.gov.uk) |
 | Only the INJURED PARTY's own fault reduces recovery (`third_party_share`) | Contributory negligence share, a range | AEVA s.3(1); Law Reform (Contributory Negligence) Act 1945 |
-| Where that share comes from | The insurer's claim file (agreed or ordered in settling the victim's claim). No default band: unassessed means a 0-100% range and a "pull logs" gate | Decision (issue #7) |
+| Where that share comes from | The insurer's claim file (agreed or ordered in settling the victim's claim). Unassessed: central case assumes none (the party alleging contributory negligence must plead and prove it), worst case allows up to 100%; a caveat, not a gate | Decision (issue #7); Knowledge (secondary sources) on the burden |
+| Pursue rule | Decide on the central case; the trial-and-lose worst case is stated, not a veto (recovery opens pre-action and can be dropped). Models either side of 50% gate it (civil standard: balance of probabilities) | Design choice; `docs/validation.md` s.2 point 2 flagged the old worst-case rule as too conservative |
 | Applied once only | A paid amount is already net of it (s.3(1)), so it is applied only to table values | AEVA s.3(1) |
 | Other drivers' fault does not reduce recovery | AV company liable with them for the whole (reduced) loss | Knowledge: joint and several liability, English tort law |
 | Unauthorised software alteration or missed safety-critical update | Not an AV-company recovery: recover from the insured under the policy (`not_av_recovery`); status unknown = flagged before issuing, not a gate | AEVA s.4(1), s.4(4), s.4(6)(b) |

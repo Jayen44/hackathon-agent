@@ -149,22 +149,30 @@ def avoidance_bracket(results: list[AvoidanceResult]) -> Interval:
     )
 
 
-def contributory_negligence(f: ClaimFacts) -> tuple[tuple[float, float], str | None, str | None]:
-    """(share range to apply, gate or None, note or None). Applied once, see module docstring."""
+def contributory_negligence(f: ClaimFacts) -> tuple[tuple[float, float], float, str | None]:
+    """(share range to apply, central share, note or None). Applied once, see module docstring.
+
+    Not assessed: the central case assumes none, because the party alleging contributory negligence has to
+    plead and prove it [Knowledge, secondary sources]; the worst case still allows up to 100%. It is a caveat
+    for the claims handler, not a reason to pull vehicle logs (the logs cannot answer it).
+    """
     if f.paid_claim_gbp is not None:
         note = ("paid amount is already net of the injured party's contributory negligence (AEVA s.3(1)); "
                 "not applied again") if f.third_party_share else None
-        return (0.0, 0.0), None, note
+        return (0.0, 0.0), 0.0, note
     if f.third_party_share is None:
-        return (0.0, 1.0), "injured party's contributory negligence not assessed (AEVA s.3(1)): range 0-100%", None
-    return f.third_party_share, None, None
+        return (0.0, 1.0), 0.0, ("injured party's contributory negligence not assessed (AEVA s.3(1)): central case "
+                                 "assumes none (it must be alleged and proved), worst case allows up to 100%")
+    lo, hi = f.third_party_share
+    return (lo, hi), (lo + hi) / 2, None
 
 
-def av_share(p: Interval, cn: tuple[float, float]) -> Interval:
+def av_share(p: Interval, cn: tuple[float, float], cn_mid: float | None = None) -> Interval:
     lo, hi = cn
-    if not 0 <= lo <= hi <= 1:
-        raise ValueError(f"contributory negligence must be 0 <= low <= high <= 1, got {cn}")
-    return Interval(p.low * (1 - hi), p.mid * (1 - (lo + hi) / 2), p.high * (1 - lo))
+    mid = (lo + hi) / 2 if cn_mid is None else cn_mid
+    if not 0 <= lo <= mid <= hi <= 1:
+        raise ValueError(f"contributory negligence must be 0 <= low <= central <= high <= 1, got {cn}, {mid}")
+    return Interval(p.low * (1 - hi), p.mid * (1 - mid), p.high * (1 - lo))
 
 
 def expected_recovery(share: Interval, value: Interval, cost: Interval) -> Interval:
@@ -208,6 +216,12 @@ def _near_track_limit(v: Interval) -> str | None:
             return (f"claim value {fmt_gbp(v.low)} to {fmt_gbp(v.high)} is within 10% of the {fmt_gbp(limit)} track limit: "
                     "legal cost steps up sharply across it, so a small change in value can flip the decision")
     return None
+
+
+def _models_disagree(avoidance: list[AvoidanceResult]) -> bool:
+    """Civil standard is the balance of probabilities: models either side of 50% leave liability unclear."""
+    ps = [r.p_avoid for r in avoidance]
+    return len(ps) >= 2 and min(ps) < 0.5 < max(ps)
 
 
 def _gates(f: ClaimFacts) -> list[str]:
@@ -276,8 +290,9 @@ def assess(f: ClaimFacts, avoidance: list[AvoidanceResult], min_net_gbp: float =
     if f.software_status not in SOFTWARE:
         raise ValueError(f"software_status must be one of {SOFTWARE}, got {f.software_status!r}")
     p = avoidance_bracket(avoidance)
-    cn, cn_gate, cn_note = contributory_negligence(f)
-    share = av_share(p, cn)
+    cn, cn_mid, cn_note = contributory_negligence(f)
+    cn_unassessed = f.paid_claim_gbp is None and f.third_party_share is None
+    share = av_share(p, cn, cn_mid)
     base = dict(claim_id=f.claim_id, crash_type=f.crash_type, p_avoid=p, av_share=share)
 
     if engagement_code(f.engagement_status) == "not_engaged":
@@ -295,9 +310,12 @@ def assess(f: ClaimFacts, avoidance: list[AvoidanceResult], min_net_gbp: float =
     cost, cost_src = (None, "") if value is None else _legal_cost(f, value)
     if value is None or cost is None:
         missing = value_src if value is None else cost_src
+        breakeven = [] if value is None else [
+            f"break-even legal cost: recovery is worth pursuing only if counsel's budget is below "
+            f"{fmt_gbp(share.mid * value.mid)} (central) or {fmt_gbp(share.low * value.low)} (worst case)"]
         return RecoveryAssessment(**base, decision="cannot_price", reasons=[f"no sourced figure: {missing}",
                                            "supply paid_claim_gbp and/or legal_cost_gbp (a counsel budget) to price this claim",
-                                           *_special_damages_note(f)],
+                                           *breakeven, *_special_damages_note(f)],
                                   claim_value=value, legal_cost=cost, expected_recovery=None,
                                   sources=[s for s in (value_src, cost_src) if s],
                                   codes=["NO_SOURCED_VALUE" if value is None else "NO_SOURCED_LEGAL_COST"])
@@ -307,20 +325,32 @@ def assess(f: ClaimFacts, avoidance: list[AvoidanceResult], min_net_gbp: float =
         # Adverse costs arise only if the claim FAILS, and then nothing is recovered: the worst case is losing
         # outright (our high cost + the defendant's), not a partial recovery minus adverse costs.
         ev = Interval(min(ev.low, -2 * cost.high), ev.mid, ev.high)
-    gates = _gates(f) + ([cn_gate] if cn_gate else [])
+    gates = _gates(f)
     if len(avoidance) < 2:
         gates.append("only one careful-driver model: bracket incomplete")
+    if _models_disagree(avoidance):
+        gates.append("careful-driver models disagree on the balance of probabilities (one below 50%, one above): "
+                     "liability is genuinely unclear")
 
+    # Decision on the central case, not the worst corner: a recovery opens with a pre-action letter and can be
+    # dropped if the response is bad, so the trial-and-lose worst case is a stated downside, not a veto.
     if ev.high <= min_net_gbp:
         decision: Decision = "dont_pursue"
         reasons = [f"best case {fmt_gbp(ev.high)} does not exceed {fmt_gbp(min_net_gbp)}"]
-    elif ev.low > min_net_gbp and not gates:
-        decision = "pursue"
-        reasons = [f"worst case {fmt_gbp(ev.low)} still exceeds {fmt_gbp(min_net_gbp)}"]
-    else:
+    elif gates:
         decision = "pull_logs_first"
         reasons = gates + ([] if ev.low > min_net_gbp else
                            [f"range {fmt_gbp(ev.low)} to {fmt_gbp(ev.high)} straddles {fmt_gbp(min_net_gbp)}"])
+    elif ev.mid > min_net_gbp:
+        decision = "pursue"
+        reasons = [f"central case {fmt_gbp(ev.mid)} exceeds {fmt_gbp(min_net_gbp)}"]
+        if ev.low <= min_net_gbp:
+            reasons.append(f"worst case {fmt_gbp(ev.low)} only if litigated to trial and lost: open with a pre-action "
+                           "letter and escalate only if the response justifies the cost")
+    else:
+        decision = "pull_logs_first"
+        reasons = [f"range {fmt_gbp(ev.low)} to {fmt_gbp(ev.high)} straddles {fmt_gbp(min_net_gbp)} and the central "
+                   f"case {fmt_gbp(ev.mid)} does not clear it: firm up the claim value before deciding"]
     if f.software_status == "unknown" and decision != "dont_pursue":
         reasons.append("confirm no unauthorised software alteration or missed safety-critical update (AEVA s.4) "
                        "before issuing proceedings")
@@ -334,7 +364,11 @@ def assess(f: ClaimFacts, avoidance: list[AvoidanceResult], min_net_gbp: float =
     if near and decision != "dont_pursue":
         reasons.append(near)
 
-    codes = _codes(f, cn_gate, len(avoidance), decision, ev, min_net_gbp, bool(near))
+    codes = _codes(f, "unassessed" if cn_unassessed else None, len(avoidance), decision, ev, min_net_gbp, bool(near))
+    if _models_disagree(avoidance):
+        codes.append("MODELS_DISAGREE")
+    if decision == "pursue" and ev.low <= min_net_gbp:
+        codes.append("LITIGATION_DOWNSIDE")
     return RecoveryAssessment(**base, decision=decision, reasons=reasons, claim_value=value,
                               legal_cost=cost, expected_recovery=ev, sources=[value_src, cost_src], codes=codes)
 
