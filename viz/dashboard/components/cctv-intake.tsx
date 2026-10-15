@@ -84,9 +84,10 @@ export function CctvIntake({ onMeasured }: { onMeasured: (x: CctvFill) => void }
   };
 
   const onFrameClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!info || clicks.length >= 4) return;
+    if (!info) return;
     const r = e.currentTarget.getBoundingClientRect();
-    setClicks([...clicks, [((e.clientX - r.left) / r.width) * info.width, ((e.clientY - r.top) / r.height) * info.height]]);
+    const p: [number, number] = [((e.clientX - r.left) / r.width) * info.width, ((e.clientY - r.top) / r.height) * info.height];
+    setClicks((cur) => (cur.length >= 4 ? cur : [...cur, p]));
   };
   const toggle = (id: number, role: "av" | "oth") => {
     const tog = (a: number[]) => (a.includes(id) ? a.filter((x) => x !== id) : [...a, id]);
@@ -191,7 +192,7 @@ export function CctvIntake({ onMeasured }: { onMeasured: (x: CctvFill) => void }
               <select className={input} value={contact} onChange={(e) => setContact(e.target.value)}><option value="auto">auto</option><option value="yes">yes</option><option value="no">no</option></select>
             </label>
             <div className="flex items-end gap-2">
-              <button type="button" className={btn} onClick={() => setClicks(clicks.slice(0, -1))} disabled={!clicks.length}>Undo click</button>
+              <button type="button" className={btn} onClick={() => setClicks((cur) => cur.slice(0, -1))} disabled={!clicks.length}>Undo click</button>
               <span className="pb-1.5 text-xs text-muted">{clicks.length}/4</span>
             </div>
           </div>
