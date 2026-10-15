@@ -21,7 +21,7 @@ Evidence (tier 0 report / tier 1 video / tier 2 telemetry) → reconstructed sce
 - `sim/world.py`: `run(scenario, policy) -> SimResult` (collision, impact type, speeds, trace).
 - `sim/policies/`: `careful_base.py` (no values), `careful_a.py`, `careful_b.py`, `av_replay.py`.
 - `sim/reproduce.py`: reconstruction check vs reported outcome.
-- `sim/data/`: CitySim loader + event finder (tier 1/2 source and B2/B3 ground truth).
+- `sim/data/`: TGSIM loader (FHWA, US public domain, on Modal volume `accel-data`) = real trajectory ground truth for B2; CitySim loader kept but CitySim is non-commercial + request-form only, so unused.
 - `montecarlo/`: ranges with source tags → samples, P(avoid) + Wilson CI90, paired A/B sampling, sensitivity, Modal fan-out.
 - `viz/web/`: three.js side-by-side replay (AV vs A vs B), open-licence car/road assets, `assets/LICENSES.md`.
 - `viz/isaac/`: Isaac Sim 5.1 render on Modal (backup visual). Starting Isaac requires the human to accept the NVIDIA EULA via `--accept-eula`; Claude never passes it.
