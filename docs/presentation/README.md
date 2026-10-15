@@ -1,6 +1,6 @@
 # Pitch deck: Automated Vehicle Recovery Desk
 
-10 slides, about 5 minutes, United States first (decision #32).
+11 slides, about 5 minutes, United States first (decision #32).
 
 - **Present it live (with speaker notes):** [Claude Slides artifact](https://claude.ai/artifact/Q96PgYWxN8CTCcgpCuNbcP)
 - **Download:** [PDF](Automated-Vehicle-Recovery-Desk.pdf)
@@ -47,6 +47,11 @@ The slides are shown below as images so they display on GitHub.
 ### 10. Ready for real claims (the ask)
 
 ![Slide 10: Ready for real claims (the ask)](images/slide-10.png)
+
+
+### 11. Any questions?
+
+![Slide 11: Any questions?](images/slide-11.png)
 
 ---
 

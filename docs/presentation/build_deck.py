@@ -30,6 +30,7 @@ ICONS = {
     "Check": '<path d="M20 6 9 17l-5-5"/>',
     "PaperPlane": '<path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9z"/>',
     "Play": '<circle cx="12" cy="12" r="10"/><path d="m10 8 6 4-6 4z"/>',
+    "Chat": '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
     "Lightbulb": '<path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/>',
 }
 
