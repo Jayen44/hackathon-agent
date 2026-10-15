@@ -1,0 +1,3282 @@
+[
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_9_1155",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i294_l1 run 9",
+   "t_key": 3.0,
+   "min_ttc_s": 1.4568836295490533,
+   "min_gap_m": 17.16898751318125,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i294_l1 run 9. Ego 33.2 m/s, other vehicle 35.2 m/s, gap 28.8 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 33.21,
+   "gap_m": 28.8,
+   "hazard_speed_mps": 35.19,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_3_789",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i294_l1 run 3",
+   "t_key": 3.0,
+   "min_ttc_s": 1.9887408985817356,
+   "min_gap_m": 13.548203635109985,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i294_l1 run 3. Ego 31.0 m/s, other vehicle 31.5 m/s, gap 19.5 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 30.96,
+   "gap_m": 19.5,
+   "hazard_speed_mps": 31.53,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_3_883",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i294_l1 run 3",
+   "t_key": 3.0,
+   "min_ttc_s": 2.3178035086433346,
+   "min_gap_m": 13.055872267975019,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i294_l1 run 3. Ego 36.9 m/s, other vehicle 31.2 m/s, gap 13.1 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 36.88,
+   "gap_m": 13.1,
+   "hazard_speed_mps": 31.25,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_5_2727",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 5",
+   "t_key": 3.0,
+   "min_ttc_s": 0.7180846163025294,
+   "min_gap_m": 0.3555367765893447,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 5. Ego 5.0 m/s, other vehicle 4.1 m/s, gap 0.6 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 4.96,
+   "gap_m": 0.6,
+   "hazard_speed_mps": 4.14,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_3_490",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 3",
+   "t_key": 3.0,
+   "min_ttc_s": 0.8321498063230919,
+   "min_gap_m": 1.505608135691725,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 3. Ego 10.2 m/s, other vehicle 5.8 m/s, gap 3.6 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 10.17,
+   "gap_m": 3.6,
+   "hazard_speed_mps": 5.84,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_4_1052",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 4",
+   "t_key": 3.0,
+   "min_ttc_s": 0.9761221635782785,
+   "min_gap_m": 1.3492006052521877,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 4. Ego 5.0 m/s, other vehicle 5.3 m/s, gap 4.2 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 4.99,
+   "gap_m": 4.2,
+   "hazard_speed_mps": 5.27,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_5_4598",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 5",
+   "t_key": 3.0,
+   "min_ttc_s": 1.2359727288294207,
+   "min_gap_m": 2.0014178459624254,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 5. Ego 11.4 m/s, other vehicle 7.2 m/s, gap 6.5 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 11.44,
+   "gap_m": 6.5,
+   "hazard_speed_mps": 7.24,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_4_314",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 4",
+   "t_key": 2.6000000000000014,
+   "min_ttc_s": 1.2543119264495561,
+   "min_gap_m": 2.488057923051003,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 4. Ego 15.0 m/s, other vehicle 9.3 m/s, gap 11.4 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 15.01,
+   "gap_m": 11.4,
+   "hazard_speed_mps": 9.3,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_1_7009",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 1",
+   "t_key": 3.0,
+   "min_ttc_s": 1.3501541428047341,
+   "min_gap_m": 1.359789456927606,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 1. Ego 3.4 m/s, other vehicle 4.2 m/s, gap 1.7 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 3.39,
+   "gap_m": 1.7,
+   "hazard_speed_mps": 4.23,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_2_4903",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 2",
+   "t_key": 3.0,
+   "min_ttc_s": 1.384606519762087,
+   "min_gap_m": 4.726350982698081,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 2. Ego 7.6 m/s, other vehicle 4.5 m/s, gap 17.7 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 7.57,
+   "gap_m": 17.7,
+   "hazard_speed_mps": 4.46,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_4_4171",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 4",
+   "t_key": 3.0,
+   "min_ttc_s": 1.3897904014520635,
+   "min_gap_m": 1.2191085309212735,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 4. Ego 8.2 m/s, other vehicle 8.8 m/s, gap 5.5 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 8.24,
+   "gap_m": 5.5,
+   "hazard_speed_mps": 8.85,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_4_5237",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 4",
+   "t_key": 3.0,
+   "min_ttc_s": 1.577796424785241,
+   "min_gap_m": 1.7732968642226385,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 4. Ego 7.7 m/s, other vehicle 5.0 m/s, gap 5.3 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 7.68,
+   "gap_m": 5.3,
+   "hazard_speed_mps": 5.01,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_2_3274",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 2",
+   "t_key": 3.0,
+   "min_ttc_s": 1.589448311308142,
+   "min_gap_m": 1.1643570769865157,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 2. Ego 5.0 m/s, other vehicle 2.9 m/s, gap 3.2 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 4.97,
+   "gap_m": 3.2,
+   "hazard_speed_mps": 2.95,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_4_7750",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 4",
+   "t_key": 3.0,
+   "min_ttc_s": 1.780374042750552,
+   "min_gap_m": 0.6092968216911823,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 4. Ego 1.3 m/s, other vehicle 0.6 m/s, gap 1.4 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 1.28,
+   "gap_m": 1.4,
+   "hazard_speed_mps": 0.58,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_6_2533",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 6",
+   "t_key": 3.0,
+   "min_ttc_s": 1.8207033805404749,
+   "min_gap_m": 1.6463850734774947,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 6. Ego 4.4 m/s, other vehicle 2.5 m/s, gap 3.4 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 4.37,
+   "gap_m": 3.4,
+   "hazard_speed_mps": 2.53,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_2_3250",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 2",
+   "t_key": 3.0,
+   "min_ttc_s": 1.8220888233143222,
+   "min_gap_m": 1.8407041211236264,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 2. Ego 6.0 m/s, other vehicle 4.1 m/s, gap 3.4 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 6.0,
+   "gap_m": 3.4,
+   "hazard_speed_mps": 4.13,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_3_5800",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 3",
+   "t_key": 3.0,
+   "min_ttc_s": 1.920227056968417,
+   "min_gap_m": 2.192466994901565,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 3. Ego 4.6 m/s, other vehicle 4.0 m/s, gap 7.0 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 4.63,
+   "gap_m": 7.0,
+   "hazard_speed_mps": 4.0,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_1_2560",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 1",
+   "t_key": 3.0,
+   "min_ttc_s": 1.9745085682712464,
+   "min_gap_m": 2.1866159413734865,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 1. Ego 2.5 m/s, other vehicle 0.3 m/s, gap 4.4 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 2.47,
+   "gap_m": 4.4,
+   "hazard_speed_mps": 0.31,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_2_7484",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 2",
+   "t_key": 3.0,
+   "min_ttc_s": 1.9903396463708243,
+   "min_gap_m": 2.1871906827479597,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 2. Ego 9.3 m/s, other vehicle 7.7 m/s, gap 6.7 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 9.3,
+   "gap_m": 6.7,
+   "hazard_speed_mps": 7.65,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_5_436",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 5",
+   "t_key": 0.19999999999999574,
+   "min_ttc_s": 2.0502877405182764,
+   "min_gap_m": 1.882885914779112,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 5. Ego 3.4 m/s, other vehicle 4.1 m/s, gap 1.9 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 3.43,
+   "gap_m": 1.9,
+   "hazard_speed_mps": 4.08,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_6_7321",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 6",
+   "t_key": 3.0,
+   "min_ttc_s": 2.0542280234381347,
+   "min_gap_m": 5.5271538064415875,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 6. Ego 9.6 m/s, other vehicle 4.5 m/s, gap 10.4 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 9.59,
+   "gap_m": 10.4,
+   "hazard_speed_mps": 4.55,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_4_4826",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 4",
+   "t_key": 3.0,
+   "min_ttc_s": 2.057444772650564,
+   "min_gap_m": 3.0058752096450263,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 4. Ego 6.6 m/s, other vehicle 4.4 m/s, gap 4.6 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 6.63,
+   "gap_m": 4.6,
+   "hazard_speed_mps": 4.37,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_5_3275",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 5",
+   "t_key": 3.0,
+   "min_ttc_s": 2.096293805009158,
+   "min_gap_m": 1.361503444939892,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 5. Ego 3.2 m/s, other vehicle 3.1 m/s, gap 2.0 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 3.19,
+   "gap_m": 2.0,
+   "hazard_speed_mps": 3.05,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_6_4909",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 6",
+   "t_key": 3.0,
+   "min_ttc_s": 2.1243582178663827,
+   "min_gap_m": 4.3771479326674765,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 6. Ego 14.1 m/s, other vehicle 9.4 m/s, gap 10.2 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 14.1,
+   "gap_m": 10.2,
+   "hazard_speed_mps": 9.38,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_4_596",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 4",
+   "t_key": 3.0,
+   "min_ttc_s": 2.1300277101508467,
+   "min_gap_m": 3.210447347013467,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 4. Ego 6.2 m/s, other vehicle 5.8 m/s, gap 4.0 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 6.18,
+   "gap_m": 4.0,
+   "hazard_speed_mps": 5.81,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_3_5487",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 3",
+   "t_key": 3.0,
+   "min_ttc_s": 2.284364179420901,
+   "min_gap_m": 0.8487024402516496,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 3. Ego 1.1 m/s, other vehicle 1.0 m/s, gap 1.1 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 1.14,
+   "gap_m": 1.1,
+   "hazard_speed_mps": 0.97,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_5_5405",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 5",
+   "t_key": 3.0,
+   "min_ttc_s": 2.3485694398543915,
+   "min_gap_m": 0.9262918954867541,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 5. Ego 2.8 m/s, other vehicle 2.4 m/s, gap 1.4 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 2.79,
+   "gap_m": 1.4,
+   "hazard_speed_mps": 2.43,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_6_2807",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 6",
+   "t_key": 3.0,
+   "min_ttc_s": 2.3539208824038544,
+   "min_gap_m": 3.66073830999997,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 6. Ego 5.2 m/s, other vehicle 3.8 m/s, gap 6.9 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 5.22,
+   "gap_m": 6.9,
+   "hazard_speed_mps": 3.84,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_2_7560",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 2",
+   "t_key": 3.0,
+   "min_ttc_s": 2.3619602196865523,
+   "min_gap_m": 2.045633240118587,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 2. Ego 7.7 m/s, other vehicle 6.3 m/s, gap 3.3 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 7.74,
+   "gap_m": 3.3,
+   "hazard_speed_mps": 6.34,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_2_4250",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 2",
+   "t_key": 3.0,
+   "min_ttc_s": 2.3860578589107444,
+   "min_gap_m": 3.354819674852788,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 2. Ego 20.1 m/s, other vehicle 18.8 m/s, gap 5.4 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 20.11,
+   "gap_m": 5.4,
+   "hazard_speed_mps": 18.76,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_6_3886",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 6",
+   "t_key": 3.0,
+   "min_ttc_s": 2.3984113813191015,
+   "min_gap_m": 7.015852865696984,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 6. Ego 11.7 m/s, other vehicle 6.8 m/s, gap 11.6 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 11.7,
+   "gap_m": 11.6,
+   "hazard_speed_mps": 6.84,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_2_1647",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 2",
+   "t_key": 3.0,
+   "min_ttc_s": 2.4902473144704818,
+   "min_gap_m": 3.32456473090906,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 2. Ego 5.7 m/s, other vehicle 3.8 m/s, gap 5.4 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 5.67,
+   "gap_m": 5.4,
+   "hazard_speed_mps": 3.79,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_4_7232",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 4",
+   "t_key": 3.0,
+   "min_ttc_s": 2.500477426403461,
+   "min_gap_m": 4.977958246335676,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 4. Ego 4.7 m/s, other vehicle 2.5 m/s, gap 11.2 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 4.69,
+   "gap_m": 11.2,
+   "hazard_speed_mps": 2.5,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_1_4808",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 1",
+   "t_key": 3.0,
+   "min_ttc_s": 2.521524786562076,
+   "min_gap_m": 0.6096378226458796,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 1. Ego 2.5 m/s, other vehicle 3.1 m/s, gap 0.6 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 2.5,
+   "gap_m": 0.6,
+   "hazard_speed_mps": 3.14,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_2_3530",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 2",
+   "t_key": 3.0,
+   "min_ttc_s": 2.534723896373403,
+   "min_gap_m": 6.183609012453871,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 2. Ego 10.7 m/s, other vehicle 6.1 m/s, gap 16.9 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 10.72,
+   "gap_m": 16.9,
+   "hazard_speed_mps": 6.14,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_2_2475",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 2",
+   "t_key": 3.0,
+   "min_ttc_s": 2.5584373282413884,
+   "min_gap_m": 4.359953645735454,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 2. Ego 7.3 m/s, other vehicle 7.1 m/s, gap 11.2 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 7.31,
+   "gap_m": 11.2,
+   "hazard_speed_mps": 7.07,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_6_967",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 6",
+   "t_key": 3.0,
+   "min_ttc_s": 2.5971320584848914,
+   "min_gap_m": 3.310604221619026,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 6. Ego 6.8 m/s, other vehicle 4.9 m/s, gap 5.0 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 6.81,
+   "gap_m": 5.0,
+   "hazard_speed_mps": 4.93,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_6_2582",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 6",
+   "t_key": 3.0,
+   "min_ttc_s": 2.598300668191749,
+   "min_gap_m": 3.501093769190261,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 6. Ego 6.9 m/s, other vehicle 3.6 m/s, gap 8.8 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 6.88,
+   "gap_m": 8.8,
+   "hazard_speed_mps": 3.6,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_4_5652",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 4",
+   "t_key": 3.0,
+   "min_ttc_s": 2.66525712749696,
+   "min_gap_m": 4.737610595283698,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 4. Ego 6.2 m/s, other vehicle 3.5 m/s, gap 7.1 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 6.18,
+   "gap_m": 7.1,
+   "hazard_speed_mps": 3.5,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "case_id": "tgsim_cut_in_4_6993",
+  "synthetic": true,
+  "t_crash": 1000.0,
+  "jurisdiction": "UK",
+  "_fleet_source": "tgsim_near_miss",
+  "_fleet_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+  "_tgsim": {
+   "location": "TGSIM i90_94_stationary run 4",
+   "t_key": 3.0,
+   "min_ttc_s": 2.673869065172671,
+   "min_gap_m": 7.381056806425159,
+   "real_outcome": "near miss, no collision recorded"
+  },
+  "narrative": "Synthetic claim built on a real cut in near miss recorded by FHWA TGSIM at TGSIM i90_94_stationary run 4. Ego 7.3 m/s, other vehicle 2.7 m/s, gap 12.7 m. Collision, injury and AV logs are hypothetical.",
+  "vehicle": {
+   "software_version": "synthetic-1.0",
+   "approved_software": [
+    "synthetic-1.0"
+   ],
+   "occupant": "none",
+   "software_verified": true,
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "automated"
+    }
+   ],
+   "odd_inside": true,
+   "control_inputs": []
+  },
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": false,
+   "objects": [
+    {
+     "id": "h1",
+     "cls": "vehicle",
+     "first_detected_t": 997.0,
+     "confidence": 0.9
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "TGSIM overhead video (FHWA)"
+   ],
+   "witnesses": 0,
+   "police_report": false,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "conflict": {
+   "hazard_id": "h1",
+   "t_start": 997.0,
+   "ego_speed_mps": 7.27,
+   "gap_m": 12.7,
+   "hazard_speed_mps": 2.68,
+   "friction_mu": 0.7,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "t_in_path_s": 0.5
+  },
+  "outcome": {
+   "collided": true,
+   "injury_severity": "Slight"
+  }
+ }
+]
