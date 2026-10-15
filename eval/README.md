@@ -2,7 +2,11 @@
 
 `labels.csv` has 20 UK crash cases, each labelled for: was it avoidable by a careful and competent driver, who pays, and would we pursue recovery from the tech company. Load and validate it with `eval.labels.load_labels()`.
 
-**Status: draft.** The labels were written by Claude (Antonio's session) from each case's facts, without running our engine (`labeller = claude-draft`). They become ground truth only after Antonio reviews them and changes `labeller` to `antonio`. Treat any accuracy number from them as provisional.
+**Status: reviewed by Antonio (15 Oct 2026).** Claude drafted the labels from each case's facts, without running our engine. Antonio then reviewed them:
+- **Confirmed:** pursuing small, clean, tech-liable claims; the outside-ODD call.
+- **Not confirmed:** the AEVA s.3(2) case (20) and the marginal miss (SYN-11-176). Both are now `review` / `pull_logs`.
+
+`labeller = antonio` on every row.
 
 ## The cases
 There are no public UK self-driving crash reports, and the team decided on UK data only, so every case is synthetic:
