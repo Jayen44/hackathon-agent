@@ -302,9 +302,10 @@ def _runs(lanes: np.ndarray) -> list[tuple[int, int, int]]:
     return out
 
 
-def _pair_window(df: pd.DataFrame, ego: int, other: int, f0: int, f1: int) -> pd.DataFrame:
-    a = df[(df["id"] == ego) & df["frame"].between(f0, f1)]
-    b = df[(df["id"] == other) & df["frame"].between(f0, f1)]
+def _pair_window(by_id: dict[int, pd.DataFrame], ego: int, other: int, f0: int, f1: int) -> pd.DataFrame:
+    a, b = by_id[ego], by_id[other]
+    a = a[a["frame"].between(f0, f1)]
+    b = b[b["frame"].between(f0, f1)]
     return a.merge(b, on="frame", suffixes=("_e", "_o"))
 
 
@@ -362,13 +363,23 @@ def find_events(rec: Recording, kind: EventKind, thresholds: EventThresholds | N
       did not enter the lane within lane_change_exclusion_s (that is a cut-in).
     """
     th = thresholds or EventThresholds()
-    df = prepare(rec, th, road_angle)
+    return find_events_in_frame(rec, prepare(rec, th, road_angle), kind, th)
+
+
+def find_events_in_frame(rec: Recording, df: pd.DataFrame, kind: EventKind,
+                         th: EventThresholds) -> list[Event]:
+    """find_events on an already prepared road-frame table (columns as prepare()
+    returns: frame, t, id, x, y, heading, v, length, width, direction, lane_key).
+    rec supplies location, frame_rate and source only; other loaders (tgsim.py)
+    build their own road frame and call this."""
     lead = leader_table(df)
     fps = rec.frame_rate
     hold = int(round(th.min_lane_hold_s * fps))
     pre, post = int(round(th.pre_s * fps)), int(round(th.post_s * fps))
     events: list[Event] = []
     lane_by_id = {vid: g[["frame", "lane_key"]].to_numpy() for vid, g in df.groupby("id")}
+    by_id = {vid: g for vid, g in df.groupby("id")}
+    lead_by_frame = {f: g for f, g in lead.groupby("frame")}
 
     def lane_kept(vid: int, f0: int, f1: int) -> bool:
         a = lane_by_id[vid]
@@ -382,13 +393,16 @@ def find_events(rec: Recording, kind: EventKind, thresholds: EventThresholds | N
                 if l0 < 0 or l1 < 0 or e0 - s0 < hold or e1 - s1 < hold:
                     continue
                 fc = int(a[s1, 0])
-                behind = lead[(lead["frame"] == fc) & (lead["lead_id"] == vid) & (lead["lane_key"] == l1)]
+                lf = lead_by_frame.get(fc)
+                if lf is None:
+                    continue
+                behind = lf[(lf["lead_id"] == vid) & (lf["lane_key"] == l1)]
                 if behind.empty or float(behind["gap"].iloc[0]) > th.max_gap_at_cut_in_m:
                     continue
                 ego = int(behind["id"].iloc[0])
                 if th.require_ego_lane_keep and not lane_kept(ego, fc - pre, fc + post):
                     continue
-                w = _pair_window(df, ego, vid, fc - pre, fc + post)
+                w = _pair_window(by_id, ego, vid, fc - pre, fc + post)
                 if w.empty:
                     continue
                 ev = _make_event("cut_in", rec, w, ego, vid, fc, fc,
@@ -423,7 +437,7 @@ def find_events(rec: Recording, kind: EventKind, thresholds: EventThresholds | N
             f0, f1 = max(fs, fk - pre), min(fe, fk + post)
             if th.require_ego_lane_keep and not lane_kept(ego, f0, f1):
                 continue
-            w = _pair_window(df, ego, lid, f0, f1)
+            w = _pair_window(by_id, ego, lid, f0, f1)
             if w.empty:
                 continue
             ev = _make_event("lead_brake", rec, w, ego, lid, fk, f0,
