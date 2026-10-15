@@ -77,6 +77,9 @@ class Vehicle:
     unauthorised_software_change: bool = False   # s.4: prohibited software alteration
     safety_update_missed: bool = False           # s.4: safety-critical update the person knew/ought to have known about
     engaged_when_inappropriate: bool = False     # s.3(2): person in charge let the car drive itself when inappropriate
+    # True only when someone has POSITIVELY confirmed: no alteration and all safety-critical updates installed.
+    # (An approved version alone does not show that. finance/ gets 'compliant' only if this is set.)
+    software_verified: bool = False
 
 
 @dataclass(frozen=True)
@@ -137,9 +140,12 @@ class Conflict:
 class Outcome:
     collided: bool
     impact_speed_mps: float | None = None  # ego speed at impact (m/s)
-    # Exact NHTSA SGO "Highest Injury Severity Alleged" drop-down value (finance/tables.py keys).
+    # UK DfT STATS19 severity as finance/tables.py expects: Fatal | Serious | Slight | Damage only | Unknown
     injury_severity: str = "Unknown"
     paid_claim_gbp: float | None = None    # what the insurer actually paid, if known (beats the tables)
+    # Injured party's contributory negligence (AEVA s.3(1)) as a (low, high) share 0..1. None = NOT assessed:
+    # finance/ then gates 'pursue'. Do not put 0 here unless someone has actually assessed it as zero.
+    third_party_share: tuple[float, float] | None = None
 
 
 @dataclass(frozen=True)
@@ -203,6 +209,7 @@ def load_bundle(d: dict) -> CrashBundle:
         unauthorised_software_change=bool(v.get("unauthorised_software_change", False)),
         safety_update_missed=bool(v.get("safety_update_missed", False)),
         engaged_when_inappropriate=bool(v.get("engaged_when_inappropriate", False)),
+        software_verified=bool(v.get("software_verified", False)),
     )
     for c in vehicle.control_inputs:
         if c.source not in ("system", "human"):
@@ -252,8 +259,14 @@ def load_bundle(d: dict) -> CrashBundle:
     paid = o.get("paid_claim_gbp")
     if paid is not None:
         paid = _num(paid, "outcome.paid_claim_gbp")
+    share = o.get("third_party_share")
+    if share is not None:
+        if (not isinstance(share, (list, tuple)) or len(share) != 2
+                or not 0 <= _num(share[0], "outcome.third_party_share") <= _num(share[1], "outcome.third_party_share") <= 1):
+            raise BundleError("outcome.third_party_share must be [low, high] with 0 <= low <= high <= 1")
+        share = (float(share[0]), float(share[1]))
     outcome = Outcome(bool(_req(o, "collided", "outcome")), o.get("impact_speed_mps"),
-                      o.get("injury_severity", "Unknown"), paid)
+                      o.get("injury_severity", "Unknown"), paid, share)
     return CrashBundle(
         case_id=_req(d, "case_id", "bundle"),
         synthetic=bool(d.get("synthetic", True)),

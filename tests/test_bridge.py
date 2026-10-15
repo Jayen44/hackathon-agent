@@ -1,4 +1,4 @@
-"""Bridge tests, including CONTRACT tests that fail if finance/ changes under us.
+﻿"""Bridge tests, including CONTRACT tests that fail if finance/ changes under us.
 
 If a contract test fails after pulling Antonio's work, the bridge (insurance/bridge.py) needs
 updating to match: tell him, don't edit finance/ to make the test pass.
@@ -12,7 +12,7 @@ from pathlib import Path
 import pytest
 
 from finance import recovery, tables
-from insurance.bridge import (assess_bundle, claim_facts, engagement_status, to_avoidance_result,
+from insurance.bridge import (assess_bundle, claim_facts, engagement_status, software_status, to_avoidance_result,
                               wilson_ci90, within_odd_status)
 from insurance.bundle import load_bundle, load_bundle_file
 from insurance.counterfactual import KinematicEstimator
@@ -49,49 +49,46 @@ def test_contract_assess_signature():
     assert params[:2] == ["f", "avoidance"]
 
 
-def test_contract_example_severities_are_valid_sgo_values():
+def test_contract_example_severities_are_valid_uk_values():
     for p in EX.glob("*.json"):
         sev = load_bundle_file(p).outcome.injury_severity
-        assert sev in tables.CLAIM_VALUE_BY_SGO_SEVERITY, f"{p.name}: {sev!r} not a finance/ severity key"
+        assert sev in tables.CLAIM_VALUE_BY_UK_SEVERITY, f"{p.name}: {sev!r} not a finance/ UK severity key"
 
 
-def test_contract_engagement_and_odd_strings_match_finance_gates():
-    # finance/_gates() compares against these exact strings.
-    assert engagement_status(bundle("01_av_late_detection")) == "Verified Engaged"
-    assert engagement_status(bundle("02_human_driving_manual")) == "Verified Not Engaged"
-    assert within_odd_status(bundle("01_av_late_detection")) == "Yes"
-    assert within_odd_status(bundle("07_outside_odd")) == "No, see Narrative"
-    # finance/ normalises these legacy SGO strings to its UK codes; check the mapping, not source text.
-    assert recovery.engagement_code("Verified Engaged") == "engaged_verified"
-    assert recovery.engagement_code("Verified Not Engaged") == "not_engaged"
-    assert recovery.odd_code("Yes") == "inside" and recovery.odd_code("No, see Narrative") == "outside"
-
-
-# Verbatim from the official NHTSA "SGO-2021-01 Data Element Definitions" (dictionary dated 17 Aug 2026):
-# field 22 (engagement status), field 73 (Highest Injury Severity Alleged), field 113 (Within ODD?).
-SGO_ENGAGEMENT = {"Verified Engaged", "Alleged Engaged", "Verified Not Engaged", "Unknown, see Narrative"}
-SGO_ODD = {"Yes", "No, see Narrative", "Unknown, see Narrative", "Exiting ODD"}
-SGO_SEVERITY = {"Fatality", "Serious With Hospitalization", "Serious Without Hospitalization",
-                "Moderate With Hospitalization", "Moderate Without Hospitalization",
-                "Minor With Hospitalization", "Minor Without Hospitalization",
-                "No Injuries Reported", "Property Damage, No Injury", "Unknown"}
-
-
-def test_finance_severity_keys_are_exactly_the_official_sgo_values():
-    assert set(tables.CLAIM_VALUE_BY_SGO_SEVERITY) == SGO_SEVERITY
-
-
-def test_bridge_only_emits_official_sgo_strings():
-    seen_eng, seen_odd = set(), set()
+def test_contract_bridge_sends_finance_uk_codes():
+    # The bridge sends finance's own codes (recovery.ENGAGEMENT / ODD / SOFTWARE), no legacy strings.
+    assert engagement_status(bundle("01_av_late_detection")) == "engaged_verified"
+    assert engagement_status(bundle("02_human_driving_manual")) == "not_engaged"
+    assert within_odd_status(bundle("01_av_late_detection")) == "inside"
+    assert within_odd_status(bundle("07_outside_odd")) == "outside"
+    assert software_status(bundle("01_av_late_detection")) == "compliant"
+    assert software_status(bundle("19_s4_unauthorised_software_change")) == "unauthorised_alteration"
     for p in EX.glob("*.json"):
         b = load_bundle_file(p)
-        seen_eng.add(engagement_status(b))
-        seen_odd.add(within_odd_status(b))
-    assert seen_eng <= SGO_ENGAGEMENT and seen_odd <= SGO_ODD
+        assert engagement_status(b) in recovery.ENGAGEMENT
+        assert within_odd_status(b) in recovery.ODD
+        assert software_status(b) in recovery.SOFTWARE
+
+
+def test_contract_uk_severity_keys_are_the_stats19_values():
+    assert set(tables.CLAIM_VALUE_BY_UK_SEVERITY) == {"Fatal", "Serious", "Slight", "Damage only", "Unknown"}
+
+
+def test_contract_software_needs_positive_confirmation():
     d = raw("01_av_late_detection")
-    d["vehicle"]["odd_inside"] = None
-    assert within_odd_status(load_bundle(d)) in SGO_ODD
-    assert load_bundle(d).outcome.injury_severity in SGO_SEVERITY
+    d["vehicle"]["software_verified"] = False
+    assert software_status(load_bundle(d)) == "unknown"          # an approved version alone is not enough
+    d["vehicle"]["safety_update_missed"] = True
+    assert software_status(load_bundle(d)) == "safety_update_missing"
+
+
+def test_contract_third_party_share_none_means_not_assessed():
+    f = claim_facts(bundle("01_av_late_detection"), reproduced=True)
+    assert f.third_party_share is None                           # finance then gates 'pursue' (AEVA s.3(1))
+    d = raw("01_av_late_detection")
+    d["outcome"]["third_party_share"] = [0.0, 0.2]
+    assert claim_facts(load_bundle(d), reproduced=True).third_party_share == (0.0, 0.2)
+    assert claim_facts(load_bundle(d), True, third_party_share=(0.1, 0.1)).third_party_share == (0.1, 0.1)
 
 
 # ------------------------------------------------------------- bridge behaviour
@@ -205,4 +202,4 @@ def test_unknown_severity_cannot_be_priced():
 def test_claim_facts_roundtrip():
     f = claim_facts(bundle("05_unavoidable_close_cutin"), reproduced=True)
     assert (f.claim_id, f.crash_type, f.injury_severity) == (
-        "05_unavoidable_close_cutin", "cut_in", "Minor Without Hospitalization")
+        "05_unavoidable_close_cutin", "cut_in", "Slight")

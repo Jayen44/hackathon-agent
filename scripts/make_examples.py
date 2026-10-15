@@ -1,4 +1,4 @@
-"""Regenerate insurance/examples/*.json (synthetic crash bundles, one per decision path).
+﻿"""Regenerate insurance/examples/*.json (synthetic crash bundles, one per decision path).
 
     python scripts/make_examples.py            # writes into insurance/examples
 Edit the cases here, never the JSON by hand. `python -m insurance.gaps` lists decision paths with no example.
@@ -29,6 +29,7 @@ base = {
                            {"t": 99.5, "source": "system", "brake": 0.9, "throttle": 0.0, "steer": 0.0}],
         "faults": [],
         "odd_inside": True,
+        "software_verified": True,   # someone confirmed: no alteration, safety-critical updates current
     },
     "perception": {
         "sensors": ["camera", "lidar", "radar"],
@@ -43,7 +44,7 @@ base = {
     # Hazard visible to a human ~ 40 m ahead at ~30 mph. The system only detected it at t=97 (3 s later).
     "conflict": {"hazard_id": "obstacle1", "t_start": 94.0, "ego_speed_mps": 13.4, "gap_m": 40.0,
                  "hazard_speed_mps": 0.0, "friction_mu": 0.7},
-    "outcome": {"collided": True, "impact_speed_mps": 9.0, "injury_severity": "Minor Without Hospitalization"},
+    "outcome": {"collided": True, "impact_speed_mps": 9.0, "injury_severity": "Slight"},
 }
 
 CASES = {}

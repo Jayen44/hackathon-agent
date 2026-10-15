@@ -47,23 +47,39 @@ def to_avoidance_result(model: str, cf: CounterfactualResult) -> AvoidanceResult
 
 
 def engagement_status(b: CrashBundle, policy: Policy = Policy()) -> str:
-    """SGO 'engagement status' string finance/ expects."""
+    """finance/ UK engagement code: engaged_verified | not_engaged | unknown (see recovery.ENGAGEMENT)."""
     state, _ = control_state(b, policy)
     if state == "automated":
-        return "Verified Engaged"
+        return "engaged_verified"
     if state in ("manual", "assisted"):
-        return "Verified Not Engaged"
+        return "not_engaged"
     # human_override: engagement at the moment of the crash is ambiguous
-    return "Unknown, see Narrative"
+    return "unknown"
 
 
 def within_odd_status(b: CrashBundle) -> str:
-    """SGO field 113 values: Yes | No, see Narrative | Unknown, see Narrative | Exiting ODD."""
-    return {True: "Yes", False: "No, see Narrative", None: "Unknown, see Narrative"}[b.vehicle.odd_inside]
+    """finance/ UK ODD code: inside | outside | unknown (see recovery.ODD)."""
+    return {True: "inside", False: "outside", None: "unknown"}[b.vehicle.odd_inside]
 
 
-def claim_facts(b: CrashBundle, reproduced: bool, third_party_share: tuple[float, float] = (0.0, 0.0),
+def software_status(b: CrashBundle) -> str:
+    """finance/ AEVA s.4 code (recovery.SOFTWARE). 'compliant' needs POSITIVE confirmation: an approved version alone
+    does not show that no safety-critical update was missed, so without `software_verified` the answer is 'unknown'."""
+    v = b.vehicle
+    if v.unauthorised_software_change:
+        return "unauthorised_alteration"
+    if v.safety_update_missed:
+        return "safety_update_missing"
+    if v.software_verified and (not v.approved_software or v.software_version in v.approved_software):
+        return "compliant"
+    return "unknown"
+
+
+def claim_facts(b: CrashBundle, reproduced: bool, third_party_share: tuple[float, float] | None = None,
                 legal_cost_gbp: tuple[float, float] | None = None, policy: Policy = Policy()) -> ClaimFacts:
+    """`third_party_share=None` means the injured party's contributory negligence has NOT been assessed (finance then
+    gates 'pursue'); the bundle's own value is used when the caller passes none."""
+    share = third_party_share if third_party_share is not None else b.outcome.third_party_share
     return ClaimFacts(
         claim_id=b.case_id,
         crash_type=b.conflict.crash_type if b.conflict else "other",
@@ -71,9 +87,10 @@ def claim_facts(b: CrashBundle, reproduced: bool, third_party_share: tuple[float
         engagement_status=engagement_status(b, policy),
         within_odd=within_odd_status(b),
         reproduced=reproduced,
-        third_party_share=third_party_share,
+        third_party_share=share,
         paid_claim_gbp=b.outcome.paid_claim_gbp,
         legal_cost_gbp=legal_cost_gbp,
+        software_status=software_status(b),
     )
 
 
@@ -85,7 +102,7 @@ class BridgedAssessment:
 
 
 def assess_bundle(b: CrashBundle, *, estimators: dict[str, Estimator] | None = None, reproduced: bool = False,
-                  third_party_share: tuple[float, float] = (0.0, 0.0),
+                  third_party_share: tuple[float, float] | None = None,
                   legal_cost_gbp: tuple[float, float] | None = None, policy: Policy = Policy(),
                   min_net_gbp: float = 0.0) -> BridgedAssessment:
     """Decide liability, then price the recovery when that makes sense.

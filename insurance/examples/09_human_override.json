@@ -60,7 +60,8 @@
       }
     ],
     "faults": [],
-    "odd_inside": true
+    "odd_inside": true,
+    "software_verified": true
   },
   "perception": {
     "sensors": [
@@ -110,6 +111,6 @@
   "outcome": {
     "collided": true,
     "impact_speed_mps": 9.0,
-    "injury_severity": "Minor Without Hospitalization"
+    "injury_severity": "Slight"
   }
 }

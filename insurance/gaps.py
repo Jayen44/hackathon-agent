@@ -1,4 +1,4 @@
-"""Deterministic gap audit: what is still missing or unproven. No LLM, no network; costs ~nothing to run.
+﻿"""Deterministic gap audit: what is still missing or unproven. No LLM, no network; costs ~nothing to run.
 
     python -m insurance.gaps            # compact table, highest priority first
     python -m insurance.gaps --json     # machine-readable (used by the gap-closer agent)
@@ -75,11 +75,11 @@ def _pricing_cells() -> list[Gap]:
     except Exception:  # finance missing: nothing to audit
         return []
     out: list[Gap] = []
-    unpriced = [k for k, v in tables.CLAIM_VALUE_BY_SGO_SEVERITY.items() if not v.priced]
+    unpriced = [k for k, v in tables.CLAIM_VALUE_BY_UK_SEVERITY.items() if not v.priced]
     if unpriced:
         out.append(Gap("pricing:claim_value", "finance", 1,
-                       f"{len(unpriced)} SGO severities cannot be priced: {', '.join(unpriced[:4])}...",
-                       "source JCG 18th ed. brackets (issue #4)"))
+                       f"{len(unpriced)} UK severities cannot be priced: {', '.join(unpriced[:4])}...",
+                       "finance to source the missing value (issue #4)"))
     return out
 
 

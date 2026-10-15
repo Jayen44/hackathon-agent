@@ -53,7 +53,8 @@
       }
     ],
     "faults": [],
-    "odd_inside": true
+    "odd_inside": true,
+    "software_verified": true
   },
   "perception": {
     "sensors": [

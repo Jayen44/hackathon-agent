@@ -53,6 +53,7 @@ def to_bundle_dict(sc: SyntheticCrash, rng: random.Random) -> dict:
         "schema_version": "0.1", "case_id": f.claim_id, "synthetic": True, "t_crash": T_CRASH, "jurisdiction": "UK",
         "vehicle": {
             "software_version": "synthetic-1.0", "approved_software": ["synthetic-1.0"], "occupant": "none",
+            "software_verified": rng.random() < 0.8,   # made up: 80% of claims have the software state confirmed
             "mode_events": [{"t": 0.0, "mode": "automated"}],
             "odd_inside": True if odd_code(f.within_odd) == "inside" else None,
             "control_inputs": [{"t": T_CRASH - 1.0, "source": "system", "brake": 0.9}],
