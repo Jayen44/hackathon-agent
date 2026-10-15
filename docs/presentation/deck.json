@@ -3,13 +3,13 @@
   "createdOnFiles": {"v": 1, "at": "2026-10-15T15:00:00Z"},
   "lists": "css",
   "title": "Automated Vehicle Recovery Desk",
-  "order": ["cover", "problem", "customer", "whynow", "flow", "demo", "claim", "agents", "debate", "responsible", "bc-cost", "bc-unit", "bc-model", "bc-fin", "bc-market", "bc-risk", "real", "roadmap", "close"],
+  "order": ["cover", "problem", "customer", "whynow", "flow", "agents", "claim", "bc-model", "bc-risk", "roadmap"],
   "sections": {
-    "s1": {"description": "Driverless crashes leave few, contested claims with the proof on the other side, and we start in the United States.", "start": "cover"},
-    "s2": {"description": "One crash flows from evidence to a decision, shown live.", "start": "flow"},
-    "s3": {"description": "An agent team works the queue and argues with itself, inside clear safeguards.", "start": "agents"},
-    "s4": {"description": "The business case: the value, unit economics, revenue model, three-year plan, market size and risks.", "start": "bc-cost"},
-    "s5": {"description": "What is real today, the roadmap and the ask.", "start": "real"}
+    "s1": {"description": "Why it is needed and who it is for.", "start": "cover"},
+    "s2": {"description": "Why we start in the United States.", "start": "whynow"},
+    "s3": {"description": "How a claim runs, how the agents work, and the live demo.", "start": "flow"},
+    "s4": {"description": "How we charge, and the risks with how we address them.", "start": "bc-model"},
+    "s5": {"description": "Where we are and the ask.", "start": "roadmap"}
   },
   "faces": {
     "public-sans": {"family": "Public Sans", "href": "https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&display=swap"},

@@ -1,4 +1,4 @@
-> **Note (decision #32):** the deck is now United States first. Slide-by-slide content below predates that change for the timing, customer and business-case slides; the current deck has 19 slides (a three-year plan slide was added) and uses the sourced figures in `market/MARKET.md`.
+> **Note:** the current deck is 10 slides and United States first (decision #32): cover, why it is needed, target market, why the United States first, claim workflow, agent team for long runs, live demo, ways to charge, risks and mitigations, ask. The slide table below is the earlier longer outline.
 
 # Pitch outline: 5 minutes, live demo
 

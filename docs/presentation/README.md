@@ -1,6 +1,6 @@
 # Pitch deck: Automated Vehicle Recovery Desk
 
-Source for the 19-slide, 5-minute pitch deck (with the business case). One HTML file per slide in `slides/`, the slide order and
+Source for the 10-slide, 5-minute pitch deck (need, target market, why the United States first, claim workflow, agents, live demo, ways to charge, risks, ask). One HTML file per slide in `slides/`, the slide order and
 sections in `deck.json`, and the speaker plan with the marking-scheme mapping in `pitch-outline.md`.
 
 - **Viewing:** the deck was built as a Claude "Slides" artifact (private link held by the author). These files are its source: each
