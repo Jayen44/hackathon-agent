@@ -20,7 +20,6 @@ scripts/sync.ps1 | scripts/sync.sh             python scripts/sensitivity.py
 | 4 | Antonio | finish claim-value gaps (JCG) |
 | 5 | Antonio | `eval/labels.csv`, 20 labelled crashes |
 | 6 / 8 | Antonio / Jayen | seam: two estimators + real `reproduced` flag (needs OK in #6) |
-| 11 | **Jayen decides** | widen human reaction range to 0.7/1.2/2.0 s? (evidence in issue) |
 | 14 | Vakhtang | R157 Annex 3 parameters (blocks real driver models) |
 | 15 | Antonio | drop legacy SGO tables now that the bridge sends UK codes |
 

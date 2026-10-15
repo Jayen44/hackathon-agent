@@ -52,7 +52,19 @@ Gap needed for the engine to say "tech company liable" (P(human avoids) >= 0.8):
 
 - Moving to the wider range raises the required gap by about **4 to 7 m (roughly 15%)**. Crashes with a 29-34 m gap at 30 mph would move from "tech company" to "review".
 - **Road surface matters more:** wet vs dry shifts the threshold by about 10 m at 30 mph. Evidence about the road surface (weather, CCTV, skid marks) is therefore worth more than refining the reaction-time range.
-- Recommendation: adopt (0.7 / 1.2 / 2.0 s) as the default (issue #11) and say that results are sensitive to it. Not applied yet because it is your call.
+- **Decision (issue #11, 15 Oct 2026): keep 0.7 / 1.0 / 1.5 s.** Literature check (sources below) supports it as expected braking / lead-car cue / surprise hazard. The wider 0.7 / 1.2 / 2.0 s has no source for its 2.0 s top. Results stay sensitive to this range; the unaware-driver 85th percentile (1.8-1.9 s, section 3) means the upper tail is still light, so treat "tech company liable" near the threshold as "review".
+
+### Reaction-time evidence (issue #11)
+| Situation | Reaction time | Source |
+|---|---|---|
+| Driver expects to brake | about 0.7-0.9 s | Green (2000); Johansson & Rumar (1965), median 0.9 s, 25% slower than 1.2 s ([SWOV](https://swov.nl/en/publicatie/drivers-brake-reaction-times-0)) |
+| Unexpected but common cue (lead car brakes) | about 1.25 s | Green (2000), as summarised in secondary sources |
+| Surprise hazard | about 1.5 s | Green (2000). A critique reports 1.0-1.3 s in urgent on-road cases at about 4 s time-to-collision ([TRID](https://trid.trb.org/View/294991)) |
+| UK Highway Code thinking distance | 0.67 s | Highway Code; Brake/TRL argue the real average is 1.5 s ([Brake](https://www.brake.org.uk/how-we-help/raising-awareness/our-current-projects/news-and-blogs/new-figures-show-highway-code-falls-short-on-stopping-distances)) |
+| UN R157 Annex 3 "competent and careful" model | 0.35 s, then 6 m/s^2 | [Chalmers](https://research.chalmers.se/en/publication/543008); not validated against real behaviour |
+| AASHTO design value | 2.5 s | Conservative design figure; not for reconstruction |
+
+Weak/unverified: a "1.5 s standard in reconstruction" claim comes only from a law-firm blog and a calculator site. No Euro NCAP or Thatcham reaction-time figure was found. The 0.35 s R157 value is a benchmark for a careful driver, to be used once #14 lands, not a human median.
 
 ## 4. Not validated / still open
 - The real **UN R157 Annex 3** driver models (issue #14); until then every P(avoid) uses placeholder humans.
