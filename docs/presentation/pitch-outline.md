@@ -1,3 +1,5 @@
+> **Note (decision #32):** the deck is now United States first. Slide-by-slide content below predates that change for the timing, customer and business-case slides; the current deck has 19 slides (a three-year plan slide was added) and uses the sourced figures in `market/MARKET.md`.
+
 # Pitch outline: 5 minutes, live demo
 
 **One line:** when a self-driving car crashes, the UK insurer pays the victim first and may recover from the tech company later. We give the claims team a fast, auditable first read on every crash: who is at fault, how much is recoverable (a GBP range), what to do next, and which deadline is running.

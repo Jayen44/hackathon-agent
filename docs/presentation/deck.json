@@ -3,12 +3,12 @@
   "createdOnFiles": {"v": 1, "at": "2026-10-15T15:00:00Z"},
   "lists": "css",
   "title": "Automated Vehicle Recovery Desk",
-  "order": ["cover", "problem", "customer", "whynow", "flow", "demo", "claim", "agents", "debate", "responsible", "bc-cost", "bc-unit", "bc-model", "bc-market", "bc-risk", "real", "roadmap", "close"],
+  "order": ["cover", "problem", "customer", "whynow", "flow", "demo", "claim", "agents", "debate", "responsible", "bc-cost", "bc-unit", "bc-model", "bc-fin", "bc-market", "bc-risk", "real", "roadmap", "close"],
   "sections": {
-    "s1": {"description": "A driverless crash leaves the insurer paying first and recovering later, and the claims team needs a fast first read.", "start": "cover"},
+    "s1": {"description": "Driverless crashes leave few, contested claims with the proof on the other side, and we start in the United States.", "start": "cover"},
     "s2": {"description": "One crash flows from evidence to a decision, shown live.", "start": "flow"},
     "s3": {"description": "An agent team works the queue and argues with itself, inside clear safeguards.", "start": "agents"},
-    "s4": {"description": "The business case: where the money is, how we earn it, the market and the risks.", "start": "bc-cost"},
+    "s4": {"description": "The business case: the value, unit economics, revenue model, three-year plan, market size and risks.", "start": "bc-cost"},
     "s5": {"description": "What is real today, the roadmap and the ask.", "start": "real"}
   },
   "faces": {
