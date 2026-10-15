@@ -4,6 +4,7 @@
 
 - **Present it live (with speaker notes):** [Claude Slides artifact](https://claude.ai/artifact/Q96PgYWxN8CTCcgpCuNbcP)
 - **Download:** [PDF](Automated-Vehicle-Recovery-Desk.pdf)
+- **Finance speaker's notes and Q&A:** [speaker-notes-finance.md](speaker-notes-finance.md)
 - **Open offline:** download [`deck.html`](deck.html) and open it in a browser (arrow keys move between slides; print for one slide per page)
 
 The slides are shown below as images so they display on GitHub.
