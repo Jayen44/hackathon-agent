@@ -83,7 +83,7 @@ Formulas (3.4.2.1-3.4.2.3.1, read from the rendered pages):
 
 ## Amendment check: GRVA-13-43 (13th GRVA, 23-27 May 2022)
 
-Checked by Vakhtang and Claude on 15 Oct 2026 from the human's local copy `GRVA-13-43e.pdf` (base version; Rev.2 not yet checked). It amends ECE/TRANS/WP.29/2022/59 and **does not change any Annex 3 Performance model 1 or 2 value**. It only updates cross-references from "Annex 4 Appendix 3" to "Annex 3". Relevant content:
+Checked by Vakhtang and Claude on 15 Oct 2026 from the human's local copies `GRVA-13-43e.pdf` and `GRVA-13-43r2e.pdf` (Rev.2, 20 pages; text search found no edits to 0.375 / 0.774 / 0.75 / 12.65 / Table 1 / Table 3, and the same PM2 difficulty classes). It amends ECE/TRANS/WP.29/2022/59 and **does not change any Annex 3 Performance model 1 or 2 value**. It only updates cross-references from "Annex 4 Appendix 3" to "Annex 3". Relevant content:
 - 5.1.1.1 (new): ALKS "shall respond whilst active to any collision which requires a response according to national traffic rules ... and which could be expected to be recognised by a competent and careful human driver."
 - Annex 5 Appendix 1 (moved from Annex 6), PM2 difficulty classes. Cut-in: Easy PFS <= 0.85; Medium PFS > 0.85 and CFS < 0.9; Difficult CFS >= 0.9. Cut-out and deceleration: Easy PFS = 0; Medium PFS > 0 and CFS < 0.5; Difficult CFS >= 0.5. (Candidate feature: label each claim's scenario with its R157 difficulty class.)
 - 8.2.1 / Justification 28: DSSAD data elements on lane changes and lane crossings are recorded "to determine liability of the system and assess its performance". This is the regulatory basis for the tier-2 "obtain AV logs" information request.
