@@ -38,9 +38,9 @@ async function jget<T>(url: string): Promise<T> {
   return r.json() as Promise<T>;
 }
 
-export function CctvIntake({ onMeasured }: { onMeasured: (x: CctvFill) => void }) {
-  const [vid, setVid] = useState<string | null>(null);
-  const [debugId, setDebugId] = useState("");
+export function CctvIntake({ onMeasured, initialVideoId }: { onMeasured: (x: CctvFill) => void; initialVideoId?: string }) {
+  const [vid, setVid] = useState<string | null>(initialVideoId ?? null);
+  const [debugId, setDebugId] = useState(initialVideoId ?? "");
   const [status, setStatus] = useState("");
   const [info, setInfo] = useState<Tracks | null>(null);
   const [clicks, setClicks] = useState<[number, number][]>([]);
@@ -140,7 +140,7 @@ export function CctvIntake({ onMeasured }: { onMeasured: (x: CctvFill) => void }
           paths: { av: pathOf(a.ego_ids), other: pathOf(a.other_ids) } } },
       });
       setDone(a.run_id);
-      setStatus(`Measured (run ${a.run_id}). Values filled into the form below; you can still edit them.`);
+      setStatus(`Measured (run ${a.run_id}). Values filled into the Kinematics fields; you can still edit them.`);
     } catch (e) { setStatus(`Measure failed: ${(e as Error).message}`); }
     finally { setBusy(false); }
   };

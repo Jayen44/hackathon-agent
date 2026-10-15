@@ -168,6 +168,7 @@ export default function AgentRun() {
         ))}
       </div>
 
+      <div data-tour="lanes">
       <Panel title="Agents and hand-offs" aside={<span className="text-[11px] text-muted">click a step for detail</span>}>
         <Swimlanes events={events} t0={t0} now={now} selected={selected} onSelect={setSelected} />
         {sel && (
@@ -184,6 +185,7 @@ export default function AgentRun() {
           </div>
         )}
       </Panel>
+      </div>
 
       <div className="grid gap-5 lg:grid-cols-[1fr_420px]">
         <Panel title="Live trace">

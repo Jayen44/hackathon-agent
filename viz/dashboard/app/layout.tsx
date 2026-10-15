@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { DemoButton, Tour } from "@/components/tour";
 import "./globals.css";
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
@@ -36,11 +37,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </nav>
             <div className="ml-auto flex items-center gap-3">
               <span className="hidden text-xs text-muted sm:inline">Triage, not a ruling</span>
+              <DemoButton />
               <ThemeToggle />
             </div>
           </div>
         </header>
         <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">{children}</main>
+        <Tour />
         <footer className="mx-auto max-w-7xl px-4 pb-10 pt-4 text-xs text-muted sm:px-6">
           Decision support for a human claims handler under AEVA 2018 s.2 and s.5. Not a liability ruling and not legal
           advice. Example claims are synthetic. Public data only; no personal data is stored.

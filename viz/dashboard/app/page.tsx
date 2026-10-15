@@ -70,7 +70,7 @@ export default function Inbox() {
       {!rows && !err && <p className="text-sm text-muted">Loading claims…</p>}
 
       {rows && (
-        <div className="overflow-x-auto rounded-lg border border-line bg-panel">
+        <div data-tour="inbox-table" className="overflow-x-auto rounded-lg border border-line bg-panel">
           <table className="w-full min-w-[860px] text-sm">
             <thead className="border-b border-line text-left text-xs uppercase tracking-wide text-muted">
               <tr>

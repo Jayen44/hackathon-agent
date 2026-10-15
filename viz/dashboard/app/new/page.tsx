@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AgentTraceList, type TraceEntry } from "@/components/agent-trace";
 import { CctvIntake, type CctvFill } from "@/components/cctv-intake";
 import { Panel } from "@/components/ui";
@@ -52,6 +52,15 @@ export default function NewClaim() {
   const router = useRouter();
   const [cctv, setCctv] = useState<CctvFill["cctv"] | null>(null);
   const [hints, setHints] = useState<Record<string, string>>({});
+  // ?cctv=<video id> (demo tour): tick CCTV and load that already-uploaded video.
+  const [presetVideo, setPresetVideo] = useState<string | undefined>(undefined);
+  useEffect(() => {
+    const v = new URLSearchParams(window.location.search).get("cctv");
+    if (v && /^[0-9a-f]{32}$/.test(v)) {
+      setPresetVideo(v);
+      setF((cur) => ({ ...cur, evidence: { ...cur.evidence, cctv: true } }));
+    }
+  }, []);
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setF((x) => ({ ...x, [k]: v }));
   const onMeasured = (x: CctvFill) => {
     setF((cur) => ({ ...cur, ...x.fields }));
@@ -199,6 +208,7 @@ export default function NewClaim() {
               {tri("software_verified", "Software confirmed compliant (AEVA s.4)?")}
               {tri("evidence_secured", "Evidence tamper-evident (hashed, custody)?")}
             </div>
+            <div data-tour="cctv">
             <fieldset className="mt-4">
               <legend className="mb-2 text-xs font-medium text-muted">Evidence available</legend>
               <div className="flex flex-wrap gap-2">
@@ -210,7 +220,8 @@ export default function NewClaim() {
                 ))}
               </div>
             </fieldset>
-            {f.evidence.cctv && <CctvIntake onMeasured={onMeasured} />}
+            {f.evidence.cctv && <CctvIntake onMeasured={onMeasured} initialVideoId={presetVideo} />}
+            </div>
           </Panel>
 
           {err && <p className="rounded border border-bad/30 bg-bad-soft p-3 text-sm text-bad">{err}</p>}

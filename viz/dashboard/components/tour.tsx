@@ -1,0 +1,170 @@
+"use client";
+
+// Guided demo tour for the stage. Start: header "Demo" button or any URL with ?demo=1. State lives in
+// sessionStorage while touring. The page stays fully interactive: the highlight ignores pointer events.
+// Step texts read their numbers from the claims API; nothing is hard-coded.
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { getClaim, type Claim } from "@/lib/api";
+import { gbp, pct } from "@/lib/format";
+
+const KEY = "accel-tour-step", CLAIM_KEY = "accel-tour-claim";
+const PREFERRED = "22_pursue_lead_braking", FALLBACK = "DEMO-1_queue_late_brake";
+export const DEMO_VIDEO_ID = "ce5730a6facc4e34885a1a4f5c405fbc";
+
+type Step = { path: (cid: string) => string; target: string; text: (c: Claim | null) => string };
+
+const claimPath = (cid: string) => `/claims/${encodeURIComponent(cid)}`;
+const STEPS: Step[] = [
+  { path: () => "/", target: "inbox-table", text: () => "Robotaxi claims the insurer has paid. Which can it recover from the AV company?" },
+  {
+    path: claimPath, target: "claim-decision",
+    text: (c) => !c ? "Each claim ends in a decision and a GBP range. Triage, not a ruling."
+      : c.expected_recovery_gbp
+        ? `${c.decision_label}: expected recovery ${gbp(c.expected_recovery_gbp.low)} to ${gbp(c.expected_recovery_gbp.high)}, net of legal cost. Triage, not a ruling.`
+        : `${c.decision_label}. Not priced: ${c.gbp.reason ?? "see the engine notes"}. Triage, not a ruling.`,
+  },
+  { path: claimPath, target: "replay", text: () => "3D reconstruction: the AV as reported vs careful drivers A and B (UN R157 Annex 3). Click it, press C to change camera." },
+  {
+    path: claimPath, target: "pavoid",
+    text: (c) => {
+      const d = c?.sim?.drivers, rep = c?.sim?.reproduction;
+      if (!d?.careful_a || !d?.careful_b) return "Would a careful human have avoided it? P(avoid) with 90% CI, plus reproduction and timeline checks.";
+      const a = d.careful_a, b = d.careful_b;
+      return `Careful driver A avoids it in ${pct(a.p_avoid)} (CI ${pct(a.ci90[0])}–${pct(a.ci90[1])}), B in ${pct(b.p_avoid)}. ` +
+        (rep ? `Sim reproduces the reported crash in ${pct(rep.rate)} of runs.` : "");
+    },
+  },
+  {
+    path: claimPath, target: "info-requests",
+    text: (c) => `What to obtain next, ranked by how much it narrows the answer. AV logs = tier 2.${c?.information_requests?.[0] ? ` First: ${c.information_requests[0].title}.` : ""}`,
+  },
+  { path: claimPath, target: "debate", text: () => "Adjuster vs defence counsel: the system argues against itself. Every GBP figure is re-priced by the finance engine, never by a model." },
+  { path: () => `/new?cctv=${DEMO_VIDEO_ID}`, target: "cctv", text: () => "New claim with CCTV: calibrate four road points, pick the AV, Measure. Speeds and gap fill the form with ±σ." },
+  { path: () => "/run", target: "lanes", text: () => "The long-running Managed Agents team, live: one lane per agent, hand-offs between them, recoverable GBP by crash type." },
+];
+
+function store(k: string, v: string | null) {
+  try { if (v == null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch { /* private mode */ }
+}
+function load(k: string) { try { return sessionStorage.getItem(k); } catch { return null; } }
+
+export function startTour() {
+  store(KEY, "0");
+  window.dispatchEvent(new Event("accel-tour"));
+}
+
+export function DemoButton() {
+  return <button type="button" onClick={startTour} className="rounded border border-line px-2 py-0.5 text-xs text-muted hover:text-fg">Demo</button>;
+}
+
+async function pickClaim(): Promise<string> {
+  try {
+    const r = await getClaim(PREFERRED);
+    if (r.status === "done" && r.claim.decision === "pursue") return PREFERRED;
+  } catch { /* fall through */ }
+  return FALLBACK;
+}
+
+export function Tour() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [step, setStep] = useState<number | null>(null);
+  const [cid, setCid] = useState<string | null>(null);
+  const [claim, setClaim] = useState<Claim | null>(null);
+  const [rect, setRect] = useState<DOMRect | null>(null);
+
+  // Activation: ?demo=1, the Demo button, or a tour already in progress (sessionStorage).
+  useEffect(() => {
+    const sync = () => { const s = load(KEY); setStep(s == null ? null : Math.max(0, Math.min(STEPS.length - 1, Number(s) || 0))); };
+    if (new URLSearchParams(window.location.search).get("demo") === "1" && load(KEY) == null) store(KEY, "0");
+    sync();
+    window.addEventListener("accel-tour", sync);
+    return () => window.removeEventListener("accel-tour", sync);
+  }, []);
+
+  useEffect(() => {
+    if (step == null || cid) return;
+    const saved = load(CLAIM_KEY);
+    if (saved) { setCid(saved); return; }
+    pickClaim().then((c) => { store(CLAIM_KEY, c); setCid(c); });
+  }, [step, cid]);
+
+  useEffect(() => {
+    if (!cid || step == null || step < 1 || step > 5) return;
+    let alive = true;
+    const poll = () => getClaim(cid).then((r) => { if (!alive) return; if (r.status === "done") setClaim(r.claim); else setTimeout(poll, 3000); }).catch(() => {});
+    poll();
+    return () => { alive = false; };
+  }, [cid, step]);
+
+  const go = useCallback((n: number | null) => {
+    if (n == null || n < 0 || n >= STEPS.length) { store(KEY, null); store(CLAIM_KEY, null); setStep(null); setCid(null); setRect(null); return; }
+    store(KEY, String(n)); setStep(n); setRect(null);
+  }, []);
+
+  // Navigate to the step's page.
+  useEffect(() => {
+    if (step == null || !cid) return;
+    const want = STEPS[step].path(cid);
+    const wantPath = want.split("?")[0];
+    if (decodeURIComponent(pathname) !== decodeURIComponent(wantPath)) router.push(want);
+  }, [step, cid, pathname, router]);
+
+  // Track the target element (it may appear late: claims load asynchronously).
+  useEffect(() => {
+    if (step == null) return;
+    let scrolled = false, alive = true;
+    const tick = () => {
+      if (!alive) return;
+      const el = document.querySelector(`[data-tour="${STEPS[step].target}"]`);
+      if (el) {
+        if (!scrolled) { el.scrollIntoView({ block: "center", behavior: "smooth" }); scrolled = true; }
+        setRect(el.getBoundingClientRect());
+      } else setRect(null);
+    };
+    tick();
+    const t = setInterval(tick, 250);
+    return () => { alive = false; clearInterval(t); };
+  }, [step, pathname]);
+
+  useEffect(() => {
+    if (step == null) return;
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      if (e.key === "ArrowRight") go(step + 1 < STEPS.length ? step + 1 : null);
+      else if (e.key === "ArrowLeft") go(Math.max(0, step - 1));
+      else if (e.key === "Escape") go(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [step, go]);
+
+  if (step == null) return null;
+  const s = STEPS[step];
+  const pad = 6;
+  return (
+    <>
+      {rect && (
+        <div aria-hidden className="pointer-events-none fixed z-40 rounded-lg transition-all duration-200"
+          style={{ left: rect.left - pad, top: rect.top - pad, width: rect.width + 2 * pad, height: rect.height + 2 * pad,
+            boxShadow: "0 0 0 2px var(--accent), 0 0 0 9999px rgba(0,0,0,0.45)" }} />
+      )}
+      <div role="dialog" aria-label="Demo tour" className="fixed bottom-4 right-4 z-50 w-[320px] rounded-lg border border-line bg-panel p-4 text-sm shadow-lg">
+        <div className="flex items-center justify-between text-xs text-muted">
+          <span>Step {step + 1}/{STEPS.length}</span>
+          <button type="button" onClick={() => go(null)} className="hover:text-fg">Exit</button>
+        </div>
+        <p className="mt-2">{s.text(step >= 1 && step <= 5 ? claim : null)}</p>
+        <div className="mt-3 flex justify-between">
+          <button type="button" disabled={step === 0} onClick={() => go(step - 1)} className="rounded border border-line px-3 py-1 disabled:opacity-40">Back</button>
+          <button type="button" onClick={() => go(step + 1 < STEPS.length ? step + 1 : null)} className="rounded bg-accent px-3 py-1 font-medium text-on-accent">
+            {step + 1 < STEPS.length ? "Next" : "Finish"}
+          </button>
+        </div>
+        <p className="mt-2 text-[11px] text-muted">← → to move, Esc to exit</p>
+      </div>
+    </>
+  );
+}

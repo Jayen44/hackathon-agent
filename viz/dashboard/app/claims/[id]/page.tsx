@@ -99,7 +99,7 @@ export default function ClaimPage() {
       <Link href="/" className="text-sm text-muted hover:text-fg">← Claims</Link>
 
       {/* Top: decision and money */}
-      <section className="rounded-lg border border-line bg-panel p-5">
+      <section data-tour="claim-decision" className="rounded-lg border border-line bg-panel p-5">
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
@@ -134,6 +134,7 @@ export default function ClaimPage() {
       {/* Middle: replay + evidence */}
       <div className="space-y-5">
         {cctv && <CctvEvidencePanel c={cctv} />}
+        <div data-tour="replay">
         <Panel title="Replay: reported AV vs careful drivers A and B" className="overflow-hidden" aside={cctv ? (
           <div className="flex gap-1 text-[11px]" role="tablist" aria-label="Replay source">
             {([["cctv", "CCTV"], ["sim", "Sim median"]] as const).map(([k, l]) => (
@@ -154,8 +155,9 @@ export default function ClaimPage() {
             <p className="text-sm text-muted">No replay: {claim.sim_error ?? "no reconstructed conflict in this claim."}</p>
           )}
         </Panel>
+        </div>
 
-        <div className="grid gap-5 lg:grid-cols-2">
+        <div data-tour="pavoid" className="grid gap-5 lg:grid-cols-2">
           <Panel title="Would a careful driver have avoided it?">
             {s ? (
               <div className="space-y-4">
@@ -232,6 +234,7 @@ export default function ClaimPage() {
 
       {/* Bottom: information requests + agents */}
       <div className="grid gap-5 lg:grid-cols-[1fr_420px]">
+        <div data-tour="info-requests">
         <Panel title="Information requests" aside={<span className="text-[11px] text-muted">ranked: pricing blockers, then expected effect</span>}>
           {claim.information_requests.length ? (
             <ol className="space-y-2">
@@ -252,7 +255,8 @@ export default function ClaimPage() {
             </ol>
           ) : <p className="text-sm text-muted">Nothing outstanding.</p>}
         </Panel>
-        <DebatePanel claimId={claim.claim_id} initial={claim.debate} />
+        </div>
+        <div data-tour="debate"><DebatePanel claimId={claim.claim_id} initial={claim.debate} /></div>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">
