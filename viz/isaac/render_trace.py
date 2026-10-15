@@ -1,14 +1,16 @@
 """Render a sim/ trace JSON to PNG frames with Isaac Sim (headless, RTX).
 
 Runs INSIDE Isaac Sim's interpreter:
-    /isaac-sim/python.sh render_trace.py trace.json out_dir [--fps 25] [--camera chase|overhead]
+    /isaac-sim/python.sh render_trace.py trace.json out_dir [--fps 25] [--camera chase|overhead|cctv]
         [--renderer RayTracedLighting|PathTracing] [--assets isaac|procedural] [--sky kloofendal]
 
 Starting Isaac Sim requires the NVIDIA Isaac Sim EULA to have been accepted
 by a human (modal_app.py sets ACCEPT_EULA only when --accept-eula is passed).
 
 Drawing tool only. Every position comes from the 2D kinematic trace produced
-by sim/world.py; nothing here simulates physics. Frame: x along road, y lateral
+by sim/world.py; nothing here simulates physics. --camera cctv is a FIXED pole camera
+(assets.CctvCamera, pose taken from the trace's "cctv_camera" if present) so the
+ground truth in samples/*_truth.json is an exact projection of what is rendered. Frame: x along road, y lateral
 (left +), metres; ego lane centred on y = 0. Stage is Z-up, metres.
 
 Assets (see ASSETS.md): DRIVE Sim-ready cars, NVIDIA MDL asphalt/grass and an
@@ -35,7 +37,7 @@ ap.add_argument("out_dir")
 ap.add_argument("--fps", type=int, default=25)
 ap.add_argument("--width", type=int, default=1920)
 ap.add_argument("--height", type=int, default=1080)
-ap.add_argument("--camera", choices=["chase", "overhead"], default="chase")
+ap.add_argument("--camera", choices=["chase", "overhead", "cctv"], default="chase")
 ap.add_argument("--renderer", choices=["RayTracedLighting", "PathTracing"], default="RayTracedLighting")
 ap.add_argument("--subframes", type=int, default=0, help="RTX subframes per frame (0 = auto: 8 RT / 32 PT)")
 ap.add_argument("--assets", choices=["isaac", "procedural"], default="isaac")
@@ -90,6 +92,8 @@ t = TR["t"]
 n = len(t)
 LANE_W = float(TR.get("lane_width", 3.5))
 LANES = sorted(TR.get("lane_centres", [0.0, LANE_W]))
+DASH = TR.get("dash") or {"period_m": 12.0, "length_m": 3.0, "phase_m": 0.0}
+CCTV_MODE = args.camera == "cctv"
 META = TR.get("meta") or {}
 HIT = META.get("other_actor") if META.get("collided") else None
 
@@ -221,11 +225,27 @@ for i, y in enumerate((y_lo - 1.15, y_hi + 1.15)):  # kerbs
     box(f"/World/Kerb_{i}", ((x_min + x_max) / 2, y, 0.06), (x_max - x_min, 0.3, 0.15), m_kerb)
 for i, y in enumerate((y_lo, y_hi)):  # solid edge lines
     box(f"/World/Lines/edge_{i}", ((x_min + x_max) / 2, y, 0.004), (x_max - x_min, 0.15, 0.006), m_line)
-for j, y in enumerate((a + b) / 2 for a, b in zip(LANES, LANES[1:])):  # dashed lane lines
-    x, k = x_min, 0
+# dashed lane lines: dash k spans [phase + k*period, + length], so dash ends sit at known road x
+# (the CCTV calibration clicks in samples/*_truth.json are these corners)
+P_D, L_D, PH_D = float(DASH["period_m"]), float(DASH["length_m"]), float(DASH["phase_m"])
+for j, y in enumerate((a + b) / 2 for a, b in zip(LANES, LANES[1:])):
+    x, k = PH_D + math.floor((x_min - PH_D) / P_D) * P_D, 0
     while x < x_max:
-        box(f"/World/Lines/div_{j}_{k}", (x + 1.5, y, 0.004), (3.0, 0.12, 0.006), m_line)
-        x, k = x + 12.0, k + 1
+        box(f"/World/Lines/div_{j}_{k}", (x + L_D / 2, y, 0.004), (L_D, 0.12, 0.006), m_line)
+        x, k = x + P_D, k + 1
+
+if CCTV_MODE:
+    # Urban dressing: footways behind the kerbs, lamp columns. Static props only.
+    m_foot = preview_material("/World/Looks/Footway", (0.42, 0.42, 0.41), rough=0.9)
+    m_pole = preview_material("/World/Looks/Pole", (0.32, 0.33, 0.34), rough=0.5, metal=0.6)
+    for i, (a0, a1) in enumerate(((y_lo - 4.5, y_lo - 1.3), (y_hi + 1.3, y_hi + 4.5))):
+        bind(quad(f"/World/Footway_{i}", x_min, x_max, a0, a1, 0.13, 2.0).GetPrim(), m_foot)
+    for i, y in enumerate((y_lo - 2.0, y_hi + 2.0)):
+        xp, k = math.floor(x_min / 30.0) * 30.0 + 15.0 * i, 0
+        while xp < x_max:
+            box(f"/World/Lamps/col_{i}_{k}", (xp, y, 4.0), (0.16, 0.16, 8.0), m_pole)
+            box(f"/World/Lamps/arm_{i}_{k}", (xp, y + (1.0 if i == 0 else -1.0), 7.95), (0.12, 2.0, 0.12), m_pole)
+            xp, k = xp + 30.0, k + 1
 
 # lighting: HDRI dome (Isaac-served, Poly Haven fallback) + sun
 dome = UsdLux.DomeLight.Define(stage, "/World/Sky")
@@ -323,7 +343,7 @@ for idx, (name, a) in enumerate(actors.items()):
     halo.CreateAxisAttr("Z")
     UsdGeom.Xformable(halo).AddTranslateOp().Set(Gf.Vec3d(0, 0, 0.012))
     UsdGeom.Xformable(halo).AddScaleOp().Set(Gf.Vec3f(1.0, W / L * 1.4, 1.0))
-    if name == "ego":
+    if name == "ego" and not CCTV_MODE:
         bind(halo.GetPrim(), EGO_HALO)
     else:
         UsdGeom.Imageable(halo).MakeInvisible()
@@ -332,9 +352,18 @@ for idx, (name, a) in enumerate(actors.items()):
                      brakes=A.brake_flags(a["states"], t), lit=None)
 
 cam = UsdGeom.Camera.Define(stage, "/World/Camera")
-cam.CreateFocalLengthAttr(28.0)
-cam.CreateHorizontalApertureAttr(36.0)
-cam.CreateVerticalApertureAttr(36.0 * args.height / args.width)
+if CCTV_MODE:
+    _cc = dict(TR.get("cctv_camera") or {})
+    _cc.update(width=args.width, height=args.height)  # fx scales with width; same pose + lens
+    CCTV_CAM = A.CctvCamera(**_cc)
+    log("cctv camera:", CCTV_CAM, "fx_px:", CCTV_CAM.fx)
+    cam.CreateFocalLengthAttr(CCTV_CAM.focal_mm)
+    cam.CreateHorizontalApertureAttr(CCTV_CAM.h_aperture_mm)
+    cam.CreateVerticalApertureAttr(CCTV_CAM.v_aperture_mm)
+else:
+    cam.CreateFocalLengthAttr(28.0)
+    cam.CreateHorizontalApertureAttr(36.0)
+    cam.CreateVerticalApertureAttr(36.0 * args.height / args.width)
 cam.CreateClippingRangeAttr(Gf.Vec2f(0.1, 5000.0))
 cam_op = UsdGeom.Xformable(cam).AddTransformOp()
 
@@ -381,11 +410,14 @@ def place(i: int, f_i: int):
             for lamp in v["lamps"]:
                 bind(lamp.GetPrim(), BRAKE_ON if lit else BRAKE_OFF)
             v["lit"] = lit
-        if HIT and f_i == first_hold and name in (HIT, "ego"):
+        if HIT and not CCTV_MODE and f_i == first_hold and name in (HIT, "ego"):
             UsdGeom.Imageable(v["halo"]).MakeVisible()
             bind(v["halo"].GetPrim(), HIT_HALO)
     ex, ey, eh, _ = actors["ego"]["states"][i]
-    if args.camera == "chase":
+    if CCTV_MODE:
+        if f_i == 0:  # fixed camera: set once, never moves
+            cam_op.Set(Gf.Matrix4d(*[v for row in CCTV_CAM.usd_matrix() for v in row]))
+    elif args.camera == "chase":
         eye, look = chase.update(ex, ey, eh, frame_dt)
         look_at(eye, look)
     else:
