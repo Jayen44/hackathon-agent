@@ -43,7 +43,7 @@ def render(v: Verdict) -> str:
         c = v.counterfactual
         out += ["", f"Competent-driver test ({c.model}):",
                 f"  P(human avoids) = {c.p_avoid:.0%} over {c.n_samples} sampled reaction times",
-                f"  fast / median / slow reaction avoids: {c.avoids_at_p5} / {c.avoids_at_p50} / {c.avoids_at_p95}",
+                f"  fast / median / slow reaction avoids: {_tf(c.avoids_at_p5)} / {c.avoids_at_p50} / {_tf(c.avoids_at_p95)}",
                 f"  median human impact speed if not avoided: {c.median_impact_speed_mps:.1f} m/s"]
         out += [f"  note: {n}" for n in c.notes]
     for title, items in (("Findings", v.findings), ("Exclusions that may apply", v.exclusions),
@@ -53,3 +53,7 @@ def render(v: Verdict) -> str:
             out += ["", f"{title}:"] + [f"  - {x}" for x in items]
     out += ["", v.disclaimer]
     return "\n".join(out)
+
+
+def _tf(x):
+    return 'n/a' if x is None else x

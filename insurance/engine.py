@@ -215,10 +215,10 @@ def decide(b: CrashBundle, policy: Policy = Policy(), estimator: Estimator | Non
     pct = (f"avoids at fast/median/slow reaction: {cf.avoids_at_p5}/{cf.avoids_at_p50}/{cf.avoids_at_p95}; "
            f"P(avoid)={cf.p_avoid:.0%} via {cf.model}")
     if cf.p_avoid >= policy.p_system_fell_short:
-        conf = "HIGH" if cf.avoids_at_p95 else "MEDIUM"
+        conf = "HIGH" if cf.avoids_at_p95 is True else "MEDIUM"
         return done("TECH_COMPANY", conf, "A competent human would very likely have avoided this crash.", pct, "counterfactual", "cf.system_fell_short")
     if cf.p_avoid <= policy.p_unavoidable:
-        conf = "HIGH" if not cf.avoids_at_p5 else "MEDIUM"
+        conf = "HIGH" if cf.avoids_at_p5 is False else "MEDIUM"
         return done("NO_FAULT_DRIVING", conf,
                     "A competent human would very likely not have avoided this crash either; no driving fault.",
                     pct, "counterfactual", "cf.unavoidable")

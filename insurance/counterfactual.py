@@ -32,9 +32,10 @@ class HumanParams:
 class CounterfactualResult:
     p_avoid: float                      # fraction of sampled human drivers who avoid the crash
     # Outcome for fast / median / slow reaction (5th / 50th / 95th percentile of the reaction distribution)
-    avoids_at_p5: bool
+    # None = not reported (sim's estimate() gives a CI instead of a single fast/slow driver)
+    avoids_at_p5: bool | None
     avoids_at_p50: bool
-    avoids_at_p95: bool
+    avoids_at_p95: bool | None
     median_impact_speed_mps: float      # median over samples (0.0 if most avoid)
     n_samples: int
     model: str

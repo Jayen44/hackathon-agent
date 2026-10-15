@@ -159,3 +159,19 @@ def test_rejects_malformed_bundles(mutate):
     mutate(d)
     with pytest.raises(BundleError):
         load_bundle(d)
+
+
+def test_none_extremes_from_sim_give_medium_not_high():
+    """sim's estimate() reports a CI, not fast/slow driver outcomes (avoids_at_p5/p95 = None)."""
+    class NoExtremes:
+        def estimate(self, c):
+            r = KinematicEstimator().estimate(c)
+            return type(r)(**{**r.__dict__, "p_avoid": 1.0, "avoids_at_p5": None, "avoids_at_p95": None})
+    v = verdict("01_av_late_detection", estimator=NoExtremes())
+    assert v.liable == "TECH_COMPANY" and v.confidence == "MEDIUM"
+    class NoExtremesLow(NoExtremes):
+        def estimate(self, c):
+            r = super().estimate(c)
+            return type(r)(**{**r.__dict__, "p_avoid": 0.0})
+    v = verdict("05_unavoidable_close_cutin", estimator=NoExtremesLow())
+    assert v.liable == "NO_FAULT_DRIVING" and v.confidence == "MEDIUM"
