@@ -22,6 +22,7 @@ Marking scheme: [hackathon-marking-rubric.png](hackathon-marking-rubric.png). Ca
 | Serious injury value | GBP 5,750 to 533,720 general damages only (minor back injury to tetraplegia); care and lost earnings excluded | JCG 18th ed. 7(B)(c)(ii), 2A via Keoghs / Exchange Chambers (verify vs book) |
 | Fatal claim value | GBP 15,120 to 46,580: bereavement award + estate PSLA if aware; dependency and funeral excluded | Fatal Accidents Act 1976 s.1A(3) (SI 2020/316); JCG 18th ed. death with full awareness |
 | Legal cost of the recovery action (<= £100k) | Fixed recoverable costs, band 2 settled pre-issue to band 4 one-day trial | CPR PD 45 Tables 12 and 14; CPR 26.9 and 26.15 |
+| Central legal cost | Band 2, proceedings issued and settled before trial (Table 12 B(2) / Table 14 S4) at the mid claim value, not the average of the two extremes | Design choice: most defended claims settle; no settlement-rate statistic used |
 | Legal cost above £100k | TODO | Multi-track has no fixed costs |
 | Legal cost is spent whether or not recovery succeeds; no cost-shifting modelled | Simplification | Team |
 

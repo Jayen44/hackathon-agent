@@ -26,6 +26,7 @@ class GBPRange:
     high: float | None
     source: str
     status: Status
+    mid: float | None = None   # central case when it is not simply the midpoint (legal cost)
 
     @property
     def priced(self) -> bool:
@@ -165,19 +166,37 @@ def _intermediate_band4_trial(d: float) -> float:
     return 29_938 + 0.22 * d + 1_445 + 5_988
 
 
+def _fast_band2_issued_settled(d: float) -> float:
+    """PD 45 Table 12, row B(2), band 2: proceedings issued, settled after allocation, before listing for trial."""
+    return 2_374 + 0.20 * d
+
+
+def _intermediate_band2_issued_settled(d: float) -> float:
+    """PD 45 Table 14, stage S4, band 2: issued, defended, settled by inspection of documents."""
+    return 9_704 + 0.14 * d
+
+
 def legal_cost_for_claim(value_low: float, value_high: float) -> GBPRange:
     """Legal cost range for a recovery claim worth value_low..value_high GBP.
 
     Low: band 2, settled pre-issue, at value_low. High: band 4, one-day trial, at value_high.
+    Central (our choice, not a statistic): band 2, proceedings issued and settled before trial, at the
+    mid value. Most defended claims settle; taking the average of 'settle at once' and 'full trial' as the
+    centre overstated cost.
     """
+    d_mid = (value_low + value_high) / 2
     if value_high <= FAST_TRACK_LIMIT:
-        return GBPRange(_fast_band2_pre_issue(value_low), _fast_band4_trial(value_high),
-                        f"{_PD45} Table 12 (fast track): band 2 pre-issue to band 4 trial", "statutory")
+        low, high = _fast_band2_pre_issue(value_low), _fast_band4_trial(value_high)
+        return GBPRange(low, high, f"{_PD45} Table 12 (fast track): band 2 pre-issue to band 4 trial; "
+                        "central = band 2 issued, settled before listing (B(2))", "statutory",
+                        mid=min(high, max(low, _fast_band2_issued_settled(d_mid))))
     if value_high <= INTERMEDIATE_TRACK_LIMIT:
         low = (_fast_band2_pre_issue if value_low <= FAST_TRACK_LIMIT else _intermediate_band2_pre_issue)(value_low)
-        return GBPRange(low, _intermediate_band4_trial(value_high),
-                        f"{_PD45} Tables 12/14 (fast/intermediate track): band 2 pre-issue to band 4 trial",
-                        "statutory")
+        high = _intermediate_band4_trial(value_high)
+        centre = (_fast_band2_issued_settled if d_mid <= FAST_TRACK_LIMIT else _intermediate_band2_issued_settled)(d_mid)
+        return GBPRange(low, high, f"{_PD45} Tables 12/14 (fast/intermediate track): band 2 pre-issue to band 4 "
+                        "trial; central = band 2 issued, settled before trial (B(2) / S4)", "statutory",
+                        mid=min(high, max(low, centre)))
     # Multi-track: no fixed costs; costs are budgeted case by case (CPR Part 3, Section II).
     return GBPRange(None, None, "TODO: multi-track (> GBP 100,000) has no fixed costs; needs a budget estimate",
                     "TODO")

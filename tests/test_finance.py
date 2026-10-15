@@ -158,3 +158,13 @@ def test_serious_range_above_100k_needs_multi_track_costs():
     a = r.assess(facts(injury_severity="Serious", paid_claim_gbp=None,
                        legal_cost_gbp=None), BOTH_HIGH)
     assert a.decision == "cannot_price" and "multi-track" in a.reasons[0]
+
+
+def test_legal_cost_centre_is_issued_and_settled_not_the_average():
+    c = tables.legal_cost_for_claim(5_000, 5_000)
+    assert c.mid == pytest.approx(2_374 + 0.20 * 5_000)          # PD 45 Table 12 B(2), band 2
+    assert c.low < c.mid < (c.low + c.high) / 2
+    i = tables.legal_cost_for_claim(50_000, 80_000)
+    assert i.mid == pytest.approx(9_704 + 0.14 * 65_000)          # PD 45 Table 14 S4, band 2
+    a = r.assess(facts(legal_cost_gbp=None, paid_claim_gbp=5_000), BOTH_HIGH)
+    assert a.legal_cost.mid == pytest.approx(3_374)

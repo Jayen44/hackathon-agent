@@ -221,7 +221,8 @@ def _legal_cost(f: ClaimFacts, value: Interval) -> tuple[Interval | None, str]:
     row = tables.legal_cost_for_claim(value.low, value.high)
     if not row.priced:
         return None, row.source
-    return Interval.span(row.low, row.high), f"{row.source} [{row.status}]"
+    mid = row.mid if row.mid is not None else (row.low + row.high) / 2
+    return Interval(row.low, mid, row.high), f"{row.source} [{row.status}]"
 
 
 def assess(f: ClaimFacts, avoidance: list[AvoidanceResult], min_net_gbp: float = 0.0) -> RecoveryAssessment:
