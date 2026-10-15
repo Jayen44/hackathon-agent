@@ -1,5 +1,7 @@
 """Usage: python -m insurance <bundle.json> [more.json ...] [--json] [--price [--legal-cost LOW,HIGH]]
 
+--recon-error F assumes +-F on gap/speed/friction (widens the interval); --min-net GBP sets the pursue threshold;
+--ledger FILE logs the run and prints what changed since the last one.
 --price also runs finance/ to price the recovery (GBP). Legal cost comes from finance/tables.py
 (CPR PD 45, claims up to GBP 100k); pass --legal-cost (e.g. 2000,5000) to override it, or for
 larger claims where the table is still TODO (otherwise the result is 'cannot_price').
@@ -24,6 +26,21 @@ def main(argv: list[str]) -> int:
         lo, hi = argv[i + 1].split(",")
         legal = (float(lo), float(hi))
         del argv[i:i + 2]
+    recon = None
+    if "--recon-error" in argv:
+        i = argv.index("--recon-error")
+        recon = float(argv[i + 1])
+        del argv[i:i + 2]
+    min_net = 0.0
+    if "--min-net" in argv:
+        i = argv.index("--min-net")
+        min_net = float(argv[i + 1])
+        del argv[i:i + 2]
+    ledger = None
+    if "--ledger" in argv:
+        i = argv.index("--ledger")
+        ledger = argv[i + 1]
+        del argv[i:i + 2]
     paths = [a for a in argv if not a.startswith("--")]
     if not paths:
         print(__doc__)
@@ -37,10 +54,18 @@ def main(argv: list[str]) -> int:
             rc = 1
             continue
         if price:
-            r = assess_bundle(bundle, legal_cost_gbp=legal)
+            from insurance.portfolio import default_estimators
+            r = assess_bundle(bundle, legal_cost_gbp=legal, min_net_gbp=min_net,
+                              estimators=default_estimators(single=True, recon_error=recon) if recon else None)
+            x = resolve(r, bundle)
             print(json.dumps(dataclasses.asdict(r), indent=2, default=str) if as_json
                   else render(r.verdict) + "\n\n" + render_recovery(r)
-                  + "\n\n" + render_resolution(resolve(r, bundle)))
+                  + "\n\n" + render_resolution(x))
+            if ledger and not as_json:
+                from insurance import ledger as L
+                for c in L.changes(ledger, r, x):
+                    print("changed since last run: " + c)
+                L.record(ledger, r, x)
         else:
             verdict = decide(bundle)
             print(json.dumps(dataclasses.asdict(verdict), indent=2) if as_json else render(verdict))

@@ -215,6 +215,14 @@ def decide(b: CrashBundle, policy: Policy = Policy(), estimator: Estimator | Non
     elif b.perception.objects or b.perception.decision_log_present:
         v.findings.append("The hazard does not appear in the system's object list.")
 
+    if cf.p_range is not None:
+        lo_r, hi_r = cf.p_range
+        if cf.p_avoid >= policy.p_system_fell_short > lo_r:
+            v.findings.append(f"Verdict is sensitive to reconstruction error: P(avoid) falls to {lo_r:.0%}, below the "
+                              f"{policy.p_system_fell_short:.0%} threshold, within the assumed error.")
+        elif cf.p_avoid <= policy.p_unavoidable < hi_r:
+            v.findings.append(f"Verdict is sensitive to reconstruction error: P(avoid) rises to {hi_r:.0%}, above the "
+                              f"{policy.p_unavoidable:.0%} threshold, within the assumed error.")
     pct = (f"avoids at fast/median/slow reaction: {cf.avoids_at_p5}/{cf.avoids_at_p50}/{cf.avoids_at_p95}; "
            f"P(avoid)={cf.p_avoid:.0%} via {cf.model}")
     if cf.p_avoid >= policy.p_system_fell_short:

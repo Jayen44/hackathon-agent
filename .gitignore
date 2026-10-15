@@ -9,3 +9,5 @@ __pycache__/
 .vscode/
 .pytest_cache/
 data/
+queue.html
+*.jsonl

@@ -40,6 +40,8 @@ class CounterfactualResult:
     n_samples: int
     model: str
     notes: list[str] = field(default_factory=list)
+    # (low, high) P(avoid) across the assumed reconstruction error (insurance/uncertainty.py); None = not assessed
+    p_range: tuple[float, float] | None = None
 
 
 class Estimator(Protocol):

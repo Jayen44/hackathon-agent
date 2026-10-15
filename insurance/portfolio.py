@@ -24,20 +24,28 @@ PLACEHOLDER_SLOW = dataclasses.replace(HumanParams(), reaction_mode_s=1.2, react
                                        label="placeholder slow human (not R157)")
 
 
-def default_estimators(single: bool = False) -> dict:
+def default_estimators(single: bool = False, recon_error: float | None = None) -> dict:
     # n=400 keeps a 20-crash run to a few seconds; the CI passed to finance widens accordingly (Wilson on n)
     est = {"placeholder_quick_human": KinematicEstimator(PLACEHOLDER_QUICK, n=400)}
     if not single:
         est["placeholder_slow_human"] = KinematicEstimator(PLACEHOLDER_SLOW, n=400)
+    if recon_error:
+        from insurance.uncertainty import PerturbedEstimator, ReconError
+        est = {k: PerturbedEstimator(v, ReconError.uniform(recon_error)) for k, v in est.items()}
     return est
 
 
-def run(cases: list[tuple], single: bool = False) -> list[BridgedAssessment]:
+def run(cases: list[tuple], single: bool = False, recon_error: float | None = None, min_net_gbp: float = 0.0,
+        ledger: Path | None = None) -> list[BridgedAssessment]:
     """cases: (bundle, reproduced) pairs."""
     out = []
     for b, rep in cases:
-        r = assess_bundle(b, estimators=default_estimators(single), reproduced=rep)
+        r = assess_bundle(b, estimators=default_estimators(single, recon_error), reproduced=rep, min_net_gbp=min_net_gbp)
         r.resolution = resolve(r, b)   # outcome + next steps, see insurance/resolution.py
+        if ledger:
+            from insurance import ledger as L
+            r.changes = L.changes(ledger, r, r.resolution)
+            L.record(ledger, r, r.resolution)
         out.append(r)
     return out
 
@@ -81,13 +89,20 @@ def main(argv: list[str] | None = None) -> None:
     a.add_argument("--seed", type=int, default=7)
     a.add_argument("--dir", type=Path, default=None)
     a.add_argument("--single", action="store_true")
+    a.add_argument("--recon-error", type=float, default=None, help="ASSUMED +- fraction on gap, speed, friction (e.g. 0.1)")
+    a.add_argument("--min-net", type=float, default=0.0, help="policy: minimum net GBP to pursue (default 0)")
+    a.add_argument("--ledger", type=Path, default=None, help="append every run to this JSONL and print what changed")
     args = a.parse_args(argv)
     if args.dir:
         cases = [(load_bundle_file(p), True) for p in sorted(args.dir.glob("*.json"))]
     else:
         from insurance.synth_bundles import generate_cases
         cases = [(c.bundle, c.reproduced) for c in generate_cases(args.n, args.seed)]
-    print(render(run(cases, args.single)))
+    results = run(cases, args.single, args.recon_error, args.min_net, args.ledger)
+    print(render(results))
+    ch = [(r.verdict.case_id, c) for r in results for c in getattr(r, "changes", [])]
+    if ch:
+        print("\nChanged since the last run:\n" + "\n".join(f"  {cid}: {c}" for cid, c in ch))
 
 
 if __name__ == "__main__":

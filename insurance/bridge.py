@@ -43,11 +43,26 @@ def wilson_ci90(p: float, n: int) -> tuple[float, float]:
     return min(p, max(0.0, centre - half)), max(p, min(1.0, centre + half))
 
 
+def provenance(estimators: dict, policy: Policy, min_net_gbp: float, cost_shift_risk: bool, reproduced: bool,
+               today: date) -> dict:
+    """What produced a result, so it can be reproduced and audited. Thresholds are illustrative policy values."""
+    import dataclasses
+    ests = []
+    for name, e in estimators.items():
+        err = getattr(e, "error", None)
+        base = getattr(e, "base", e)
+        ests.append(f"{name}: {type(base).__name__}" + (f" + recon error ({err.label()})" if err and err.active else ""))
+    return {"estimators": ests, "policy": dataclasses.asdict(policy), "min_net_gbp": min_net_gbp,
+            "cost_shift_risk": cost_shift_risk, "reproduced": reproduced, "run_date": today.isoformat()}
+
+
 def to_avoidance_result(model: str, cf: CounterfactualResult,
                         p_liable: tuple[float, float, float] | None = None) -> AvoidanceResult:
     """`p_liable` = (low, mid, high) P(other party liable to the victim | careful driver avoids). AEVA s.5 recovery is
     derivative, so the share is P(avoid) x P(liable); finance/ receives the product as its p_avoid."""
     lo, hi = wilson_ci90(cf.p_avoid, cf.n_samples)
+    if cf.p_range is not None:      # widen to cover the assumed reconstruction error
+        lo, hi = min(lo, cf.p_range[0]), max(hi, cf.p_range[1])
     p = cf.p_avoid
     if p_liable is not None:
         p, lo, hi = p * p_liable[1], lo * p_liable[0], hi * p_liable[2]
@@ -110,6 +125,7 @@ class BridgedAssessment:
     verdict: Verdict
     recovery: RecoveryAssessment | None   # None = not priced, see notes
     notes: list[str] = field(default_factory=list)
+    provenance: dict = field(default_factory=dict)   # what produced this result (estimators, thresholds, date)
     deadline: Deadline | None = None      # limitation clock for the claim's recovery route, when dates allow
 
 
@@ -124,6 +140,7 @@ def assess_bundle(b: CrashBundle, *, estimators: dict[str, Estimator] | None = N
     simulation reproduces the reported crash; finance/ then holds the decision at pull_logs_first.
     """
     estimators = estimators or {"kinematic_placeholder": KinematicEstimator()}
+    prov = provenance(estimators, policy, min_net_gbp, cost_shift_risk, reproduced, today or date.today())
     verdict = decide(b, policy, next(iter(estimators.values())))
     notes = ["ci90 covers Monte Carlo sampling error only, not model or reconstruction uncertainty."]
     notes += regime_notes(b.legal)
@@ -132,7 +149,7 @@ def assess_bundle(b: CrashBundle, *, estimators: dict[str, Estimator] | None = N
         notes.append(f"Limitation: {deadline.route} deadline {deadline.due.isoformat()} ({deadline.days_left} days): {deadline.basis}.")
 
     def unpriced(why: str) -> BridgedAssessment:
-        return BridgedAssessment(verdict, None, [why] + notes, deadline)
+        return BridgedAssessment(verdict, None, [why] + notes, prov, deadline)
 
     if not b.outcome.collided:
         return unpriced("No collision: nothing to recover.")
@@ -150,6 +167,6 @@ def assess_bundle(b: CrashBundle, *, estimators: dict[str, Estimator] | None = N
         notes.append("Simulation not confirmed to reproduce the reported crash (reproduced=False).")
     try:
         facts = claim_facts(b, reproduced, third_party_share, legal_cost_gbp, policy, cost_shift_risk)
-        return BridgedAssessment(verdict, assess(facts, avoidance, min_net_gbp), notes, deadline)
+        return BridgedAssessment(verdict, assess(facts, avoidance, min_net_gbp), notes, prov, deadline)
     except ValueError as e:   # bad claim inputs must not take down a portfolio run
         return unpriced(f"Invalid claim inputs, not priced: {e}")

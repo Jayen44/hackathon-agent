@@ -28,6 +28,10 @@ def render_recovery(r) -> str:
             out.append(f"Expected recovery: {fmt_gbp(e.low)} / {fmt_gbp(e.mid)} / {fmt_gbp(e.high)}")
         out += [f"  - {x}" for x in rec.reasons]
     out += [f"note: {n}" for n in r.notes]
+    if getattr(r, "provenance", None):
+        p = r.provenance
+        out.append(f"provenance: {'; '.join(p['estimators'])}; thresholds P>={p['policy']['p_system_fell_short']:.0%} / "
+                   f"P<={p['policy']['p_unavoidable']:.0%} (illustrative); min_net GBP {p['min_net_gbp']:,.0f}; run {p['run_date']}")
     return "\n".join(out)
 
 

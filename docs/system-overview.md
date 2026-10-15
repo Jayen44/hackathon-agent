@@ -68,6 +68,15 @@ Every crash lands in exactly one outcome, with ordered next steps naming who act
 
 Steps are chosen from finance's codes: preservation letter for the vehicle logs then pre-action disclosure (CPR 31.16; no statutory right to the data), re-run the reconstruction, assess contributory negligence, run a second model, resolve model disagreement, confirm the recovery route. For open claims the limitation deadline is the first step (URGENT under 90 days), and a step asks counsel to assess `p_liable_to_victim` when unset. A test fails if finance adds a code with no step.
 
+## 5b. Workflow tools around the pipeline
+- **Reconstruction uncertainty** (`insurance/uncertainty.py`, opt-in `--recon-error F`): re-runs the estimator at the pessimistic and optimistic corners of an ASSUMED error on gap, speed and friction and widens the interval sent to finance. The verdict also notes when it would flip within that error. The fraction is the caller's assumption, not a sourced number.
+- **Provenance** on every result: estimators, thresholds, `min_net_gbp`, run date. Printed in the report and written to the ledger.
+- **Ledger** (`insurance/ledger.py`, `--ledger FILE`): append-only JSONL of every run; a re-run prints what changed (outcome, decision, gates cleared, deadline, settings).
+- **Deadline watch** (`python -m insurance.watch --dir ...`): claims by days left to limitation, URGENT under 90 days.
+- **Claims queue** (`python -m insurance.queue_html`): one self-contained HTML page for the handler: outcome, liable party, GBP range, deadline, next steps and reasons per claim.
+- **Sign-off roles**: each outcome names suggested approvers (for example claims manager and counsel for `PURSUE`). Labels only; a human decides.
+- **Pursue threshold**: `--min-net GBP` (default 0). It is a policy choice and is recorded in the provenance.
+
 ## 6. Defence-counsel debate (`agents/debate.py`)
 An adjuster prices the claim, defence counsel finds the weakest assumption and files the strongest challenge, and the adjuster rebuts. Every number comes from `finance/`; agents only pick inputs to test, and `apply_change` keeps challenges within what the evidence allows. The final decision is recomputed from the accepted inputs; a rejected challenge that would flip the decision marks the claim `CONTESTED` for a human. Runs on Claude (API key) or offline with scripted stand-ins; results show in `dashboard/pages/1_Agent_debates.py`.
 
@@ -88,7 +97,9 @@ GitHub issues are the inbox, labelled `for:antonio|jayen|vakhtang`. Open an issu
 ## 9. Known issues and status
 | Issue | Status |
 |---|---|
-| Cheap claims now `pursue` on a small central case with a big negative worst case (about GBP 1.4k vs about -12k) | Mitigated: headline says "pursue pre-action only", the downside is stated, and counsel gets a step to reserve adverse costs. The materiality threshold (`min_net_gbp`) is a policy call for Jayen and Antonio; default 0 |
+| Cheap claims now `pursue` on a small central case with a big negative worst case (about GBP 1.4k vs about -12k) | Mitigated: headline says "pursue pre-action only", the downside is stated, counsel gets a step to reserve adverse costs, and `--min-net` makes the threshold an explicit, logged policy choice. The value is still for Jayen and Antonio to set; default 0 |
+| Interval covered sampling noise only | Mitigated: opt-in `--recon-error` widens it for reconstruction error (the fraction is assumed, not sourced); model error (human driver) remains until `sim/` is wired in |
+| No case lifecycle, audit trail or insurer view | Mitigated: ledger, provenance, deadline watch, HTML queue (file based, no server). No live UI or case-management integration |
 | `p_liable_to_victim` has no sourced value | Mitigated: flagged in notes, and a resolution step asks counsel to assess it. A real value needs counsel |
 | No vehicle is AEVA-listed today; s.5 pricing is a proxy for supervised pilots | Documented per claim (regime note, counsel step to confirm the route); needs a lawyer |
 | Legal cost above GBP 100k unsourced | Open (Antonio, #4 / #23); `cannot_price` with a break-even cost shown |

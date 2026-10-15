@@ -3,12 +3,14 @@
 **Branch** `insurance` · tests: `pytest -q` (~207 pass, 1 skipped until `sim/` is merged) · repo is private (Jayen44, antoniohede-ai, termvato).
 
 ## What exists
-- `insurance/`: crash-bundle JSON (`bundle.py`, incl. optional `legal` block), integrity checks, liability engine (`engine.py`, decision paths have `Step.code`), counterfactual estimators (`counterfactual.py`), AEVA s.3(2)/s.4 rules, `bridge.py` -> `finance.recovery.assess` (UK codes), `legal.py` (regime, recovery route, limitation deadlines, `p_liable_to_victim`), `resolution.py` (every crash -> one of 8 outcomes + next steps, reads `assess().codes` not prose), `synth_bundles.py`, `portfolio.py`, `gaps.py`.
+- `insurance/`: crash-bundle JSON (`bundle.py`, incl. optional `legal` block), integrity checks, liability engine (`engine.py`, decision paths have `Step.code`), counterfactual estimators (`counterfactual.py`), AEVA s.3(2)/s.4 rules, `bridge.py` -> `finance.recovery.assess` (UK codes), `legal.py` (regime, recovery route, limitation deadlines, `p_liable_to_victim`), `uncertainty.py` (opt-in reconstruction error), `ledger.py` / `watch.py` / `queue_html.py` (run log, deadline watch, HTML claims queue), `resolution.py` (every crash -> one of 8 outcomes + next steps, reads `assess().codes` not prose), `synth_bundles.py`, `portfolio.py`, `gaps.py`.
 - 22 example bundles in `insurance/examples` (regenerate with `scripts/make_examples.py`; timelines and impact speeds computed by `settle()`; 21 and 22 are clean Pursue demos; legal block is a synthetic post-commencement scenario).
 - Verified/validated: `docs/verification.md`, `docs/validation.md`. Pitch dos/don'ts and legal to-do: `docs/legal-basis.md` (summary of Vakhtang's `sim/LEGAL_BASIS.md`).
 
 ## Commands
 ```
+python -m insurance.queue_html --dir insurance/examples -o queue.html   python -m insurance.watch --dir insurance/examples
+flags on insurance / portfolio: --recon-error 0.1  --min-net GBP  --ledger runs.jsonl
 pytest -q                                      python -m insurance.gaps [--mine]
 python -m insurance <bundle.json> [--price]    python -m insurance.portfolio --n 20 --seed 7   (or --dir insurance/examples)
 scripts/sync.ps1 | scripts/sync.sh             python scripts/sensitivity.py

@@ -22,6 +22,11 @@ from insurance.bridge import BridgedAssessment
 from insurance.bundle import CrashBundle
 
 
+# Suggested approvers per outcome (labels only; the firm decides who actually signs).
+SIGN_OFF = {"PURSUE": ["claims manager", "counsel"], "HUMAN_REVIEW": ["senior claims handler"],
+            "SETTLE_NO_RECOVERY": ["claims handler"], "RECOVER_FROM_INSURED": ["claims handler"]}
+
+
 @dataclass
 class Step:
     who: str          # claims handler | engineer | counsel | insurer finance
@@ -35,6 +40,7 @@ class Resolution:
     outcome: str
     headline: str
     next_steps: list[Step] = field(default_factory=list)
+    sign_off: list[str] = field(default_factory=list)   # suggested roles; a human decides, this only names who
 
 
 # Codes that need no action of their own (decision-context or handled by the outcome itself).
@@ -71,8 +77,11 @@ def _gate_steps(codes: list[str]) -> list[Step]:
 
 
 def resolve(r: BridgedAssessment, b: CrashBundle) -> Resolution:
-    x = _resolve(r, b)
-    return _with_legal_steps(x, r, b)
+    x = _with_legal_steps(_resolve(r, b), r, b)
+    x.sign_off = list(SIGN_OFF.get(x.outcome, []))
+    if r.deadline and r.deadline.urgent and "counsel" not in x.sign_off and x.outcome in ("PURSUE", "PULL_LOGS", "NEEDS_INPUTS"):
+        x.sign_off.append("counsel")
+    return x
 
 
 def _with_legal_steps(x: Resolution, r: BridgedAssessment, b: CrashBundle) -> Resolution:
@@ -159,5 +168,7 @@ def _resolve(r: BridgedAssessment, b: CrashBundle) -> Resolution:
 
 def render_resolution(x: Resolution) -> str:
     lines = [f"OUTCOME: {x.outcome}. {x.headline}"]
+    if x.sign_off:
+        lines.append("  Suggested sign-off: " + ", ".join(x.sign_off))
     lines += [f"  {i}. [{s.who}] {s.action}  -> {s.unblocks}" for i, s in enumerate(x.next_steps, 1)]
     return "\n".join(lines)
