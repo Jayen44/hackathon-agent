@@ -36,6 +36,16 @@ Comment on the issue with: **what you changed, what you need from them, how to t
 Ask the `work-splitter` agent (`.claude/agents/work-splitter.md`). It reads both sides' code and CLAUDE.md files and
 proposes chunks with an owner, an interface and an acceptance test. Review its proposal before it files issues.
 
+## Saving tokens
+- `CLAUDE.md` is loaded into every session: keep it under about 60 lines. Detail lives in `docs/` and is read only when needed.
+- Work from the issue. Each issue names the files, the interface and a test command, so don't explore the whole repo.
+- Run only the tests you need (`pytest -q tests/test_bridge.py -x`), and trim noisy output (`| Select-Object -Last 15`).
+- Don't re-research: findings are in `docs/verification.md`. Add to it instead of searching again.
+- Use the `work-splitter` agent only when work is genuinely unclear. It is not needed to start a chunk that already has an issue.
+- Prefer `standard` web searches; use extended only for hard-to-find facts. Fetch a primary page instead of running many searches.
+- No parallel sub-agents for small edits. One session, one chunk at a time.
+- Put a conclusion in the issue comment, not a transcript.
+
 ## Rules that keep us in sync
 - No guessed numbers. Unknown means TODO and a visible refusal (finance's rule, applies to both sides).
 - Real figures need a source in the code comment or table.

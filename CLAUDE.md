@@ -1,190 +1,35 @@
-# CLAUDE.md: Driverless-car crash liability and insurance
+# CLAUDE.md: driverless-car crash liability and recovery (`insurance` branch)
 
-Context for Claude (and teammates) working on the `insurance` branch. Work only on this branch.
+Given the evidence from a driverless-car crash, decide who pays (human driver vs tech company) and price what the
+victim's insurer can recover. Benchmark: would a careful and competent human driver have avoided it?
+Decision support only; all demo data is synthetic. Keep this file short: it is loaded every session.
 
-## Project in one line
-Given the data from a driverless-car crash, decide **who pays**: the human in the car (and their motor insurer) or the technology company running the self-driving system. The benchmark is whether a **careful and competent human driver** would have avoided or handled the situation.
-
-## Status of claims in this file
-- **[Verified]**: found in a source listed at the bottom.
-- **[Knowledge]**: from general knowledge, not checked this session. Verify before relying on it.
-- **[Design]**: our own proposal for the prototype. Not an industry standard.
-
-All numbers marked "illustrative" are placeholders. This is decision support, not legal or financial advice.
-
----
-
-## 1. Data required after a crash
-
-Evidence must be **time-synchronised** (one clock, e.g. GPS/UTC) and **tamper-evident** (hashes or signatures, chain of custody). Without both, no source can be trusted to decide fault.
-
-### 1.1 Vehicle data store (the "black box")
-| Data | Why it matters |
-|---|---|
-| Automation mode and **every mode change**, with timestamps | Who was in control at the moment of the crash [Verified: DSSAD purpose] |
-| Handover events: transition demand issued, how long until the human responded | Tests whether the human was given a fair chance to take over |
-| Driver/occupant status: hands on wheel, eyes on road, seat belt, driver-monitoring flags | Human conduct, and the user-in-charge exception below |
-| Control inputs: steering, throttle, brake, indicator, both **requested by the system** and **actually applied** | Separates a system decision from a human override |
-| Vehicle state: speed, acceleration, yaw rate, gear, ABS/ESC activation | Reconstruct motion; check braking was achievable |
-| System health and faults: sensor failures, degraded modes, software version, last update | Product defect vs operational failure |
-| Operational design domain (ODD) status: inside or outside the conditions the system is approved for | Was the system used where it was meant to be used? |
-
-Retention: UNECE R157 asks for at least six months for DSSAD data, and the harmonised data elements and access rules are incomplete [Verified]. Treat access and retrieval as a risk, not a given.
-
-### 1.2 Perception and planning data (the car's view of the world)
-| Data | Why it matters |
-|---|---|
-| **Camera** video from all cameras, plus per-frame timestamps | What was visible; what a human would have seen |
-| **LiDAR** point clouds, **radar** returns, ultrasonic | What was detectable, including at night or in bad weather |
-| **Object list**: detected objects, class, position, velocity, confidence, and the **time each object was first detected** | Core of the "would a human have reacted sooner?" test |
-| Prediction output: where the system expected others to go | Was the plan reasonable given its own prediction? |
-| Planned trajectory and the **decision log** (why it chose to brake, swerve or hold) | Shows intent and whether the choice was sensible |
-| Localisation and map data; map version | Wrong map or lost position can be the root cause |
-| Pre-crash window: recommend a rolling buffer of **at least 30 seconds before** and a few seconds after. The NHTSA reporting rule uses 30 seconds [Verified] | Captures the full lead-up |
-
-### 1.3 External evidence
-| Source | Use |
-|---|---|
-| **CCTV** (street, shop, transport, building) | Independent view that doesn't depend on the car's own sensors |
-| Other vehicles' dashcams and **witness** statements and phone footage | Corroboration, and the human driver's account |
-| Police report, scene photos, skid marks, vehicle damage | Physical reconstruction |
-| Road layout, signage, speed limits, lighting, surface | What was reasonable at that spot |
-| Weather, time of day, sun position | Visibility |
-| Traffic signal timing logs | Right of way |
-| **Medical** records (injury severity) | Sizing the payout |
-| **Telematics from other parties** (e.g. a cyclist's phone) | Alternative speed and path evidence |
-
-### 1.4 Integrity checks to run on all evidence
-- Do the clocks agree? Reconcile with a known event.
-- Does the car's account match the CCTV? A mismatch flags tampering or sensor error.
-- Is the log complete, or are gaps present around the crash?
-- Is the software the **approved** version?
-- Who has accessed or exported the data?
-
----
-
-## 2. The "careful and competent human driver" threshold
-
-### 2.1 Where the standard comes from
-- UK Automated Vehicles Act 2024: authorisation relies on safety principles aiming for a level of safety **equivalent to or higher than careful and competent human drivers** [Verified]. The detailed principles were still being developed in the sources I found, so check current status.
-- Waymo's industry benchmark, **NIEON** (Non-Impaired, with Eyes ON the conflict): an always-attentive, unimpaired reference driver with a surprise-based reaction time and a defined braking/evasion model [Verified]. It is Waymo's own model and is used for collision-avoidance evaluation. Treat it as one published reference, not the legal test.
-
-### 2.2 How we use it: the counterfactual test [Design]
-For each crash, replay the scenario with a **reference human driver model** in place of the system and ask: *would a careful and competent human have avoided it, or reduced its severity?*
-
-1. **Reconstruct** the scenario from section 1 data: positions, speeds, visibility, when each hazard became detectable.
-2. **Find the conflict start**: the earliest time a human with normal vision could reasonably have perceived the hazard (use the camera, CCTV and lighting data, not just the car's detection time).
-3. **Apply the human model**: reaction time after the conflict starts, then a brake and/or steer response up to a realistic maximum deceleration and jerk, within road limits. Illustrative inputs: reaction time drawn from a range of roughly 0.7 to 1.5 s depending on surprise and visibility [Knowledge, to calibrate]; limited friction on wet roads.
-4. **Compare outcomes**: crash/no crash and impact speed, for the system versus the reference human.
-5. **Classify**:
-
-| Result | Meaning |
-|---|---|
-| System avoided, or impact reduced, relative to the human model | Meets the standard |
-| Human model avoids the crash, system didn't | **System fell below the competent-driver standard** |
-| Neither could avoid it (unavoidable, e.g. a child running out from behind a parked van at close range) | No fault from the driving performance |
-| Human model also fails, but the system was outside its ODD or in a known degraded state | Operational/ODD failure: tech company or operator responsible |
-
-6. **Report confidence**, not just a verdict: run the human model across a range of reaction times (e.g. 5th, 50th, 95th percentile) and report how often the human would have avoided the crash. A verdict that flips between percentiles should go to human review.
-
-### 2.3 Other conduct checks
-- Did the system break a traffic rule (speed, red light, right of way)?
-- Was the manoeuvre one a careful driver would not have attempted?
-- Did the system fail to give a **timely, adequate** handover warning?
-- Did the human act recklessly (see 3.2)?
-
----
-
-## 3. Who pays: switching liability between human and tech company
-
-### 3.1 The key variable is **who was in control**
-| State at the time of the crash | Primary responsible party | Notes |
+## Map
+| Path | Owner | What |
 |---|---|---|
-| Human driving (manual or driver assistance) | **Human driver** and their motor insurer | Normal motor claim |
-| Self-driving engaged, human a "user-in-charge", system within its ODD | **Tech company / authorised self-driving entity (ASDE)** | Human has immunity for the driving [Verified, UK] |
-| Self-driving engaged, **no human on board** (e.g. robotaxi) | Operator / ASDE | Operator responsible if injury occurs under their operation [Verified, UK] |
-| Handover requested and human **failed to respond** after a fair, adequate warning | Shifts back to **human** | Immunity is conditional: it doesn't cover recklessly refusing a transition demand [Verified, UK] |
-| Human overrode the system and caused the crash | **Human** | The control-input log decides this |
-| System outside its approved ODD, but human insisted on using it | Mixed: depends on warnings given | Needs a documented policy |
-| Defect or software bug (design or programming flaw) | **Manufacturer / developer** | Product-liability basis [Verified, UK] |
+| `insurance/` | Jayen | `bundle.py` crash-bundle JSON format, `integrity.py`, `engine.py` (`decide`), `counterfactual.py`, `sim_adapter.py`, `report.py` |
+| `insurance/bridge.py` | Jayen + Antonio | the seam: bundle -> `finance.recovery.assess` |
+| `finance/` | Antonio | `recovery.py` (GBP + pursue/don't), `tables.py` (sourced claim values); read `finance/CLAUDE.md` |
+| `sim/` | Vakhtang | simulator on the `sim` branch (R157 driver models); read `sim/CLAUDE.md` there |
+| `coord/PROTOCOL.md` | all | how we split and hand over work (GitHub issues are the inbox) |
 
-The user-in-charge immunity does **not** cover non-driving failures such as being uninsured [Verified]. The human still needs insurance for those and for manual driving.
-
-### 3.2 Decision flow [Design]
+## Commands
 ```
-1. Verify evidence integrity (1.4). If it fails -> human review.
-2. Determine control state at T-crash (mode log + driver monitoring).
-   - Manual -> human claim. Stop.
-3. If self-driving engaged:
-   a. Was a handover requested?
-      - Yes, adequate warning, human did not respond -> human liable (check "reckless").
-      - Yes, inadequate/late warning -> tech company liable.
-   b. Was the system inside its ODD and on an approved software version?
-      - No -> tech company/operator liable (unless human knowingly misused it).
-   c. Run the competent-driver counterfactual (section 2).
-      - System fell short -> tech company liable.
-      - Unavoidable for a competent human -> no driving fault; sort cause (third party, road defect).
-   d. Check for system faults/defects -> manufacturer liable (and subrogation, below).
-4. Output: liable party, confidence, evidence list, items needing human review.
+pytest -q                                   # all tests (add -x, or a single file, while iterating)
+python -m insurance insurance/examples/01_av_late_detection.json [--price --legal-cost 2000,5000]
+scripts/sync.ps1   (or scripts/sync.sh)     # fetch, rebase, test, list your issues
 ```
 
-### 3.3 Paying the victim first, then recovering [Verified: see docs/verification.md]
-UK Automated and Electric Vehicles Act 2018: s.2 makes the **insurer** liable when a listed automated vehicle driving itself causes an accident in Great Britain. s.5 lets the insurer recover from any other person liable to the injured party, but only once the insurer's liability is **settled**, and never more than that person's liability to the victim. s.3(1) applies contributory negligence; s.3(2) removes cover for the person in charge if the accident was wholly due to their negligence in letting the car drive itself when inappropriate; s.4 allows policy exclusions for unauthorised software changes or missed safety-critical updates.
+## Read on demand (do NOT preload)
+- Crash data checklist, competent-driver test, liability table and decision flow: `docs/liability-spec.md`
+- What has been fact-checked and what hasn't: `docs/verification.md`
+- Finance assumptions and open TODOs: `docs/assumptions.md`
 
-Note: "careful and competent human driver" is the AV Act 2024 *authorisation* benchmark, not the civil test under s.5 (which asks who is liable to the injured party). Using our counterfactual as a proxy for that is a modelling assumption.
-
-The practical model: pay the victim fast, then run subrogation against the tech company if the counterfactual and evidence show the system fell short. Jurisdictions differ (US states, EU, Germany), so keep the UK as the default assumption for the prototype and label it.
-
-### 3.4 Moral hazard and disputes to design for
-- Tech companies hold the data and have an incentive to present it favourably, so demand **independent access** and integrity checks.
-- Humans over-trust the system, and "hands off" behaviour is common, so driver-monitoring data matters.
-- Software updates change behaviour, so always record the software version.
-- Fleet-wide faults (one bug, many cars) are a **correlated tail risk**, not an isolated claim.
-
----
-
-## 4. Prototype scope (5-hour hackathon) [Design]
-- Synthetic crash cases only. No real personal data.
-- Inputs: a JSON "crash bundle" with the mode log, control inputs, object-detection timeline, and a simplified scene (distances, speeds, visibility).
-- Engine: integrity checks -> control state -> handover check -> ODD check -> counterfactual human model with a reaction-time distribution -> liability verdict plus confidence.
-- Output: a plain-English report and a table of evidence used and missing.
-- Always state the limits: synthetic data, simplified physics, UK assumptions, not legal advice.
-- Keep deterministic code for the decision and numbers. An LLM may only explain results.
-
-## 4b. Code that implements this (built on this branch)
-```
-insurance/
-  bundle.py          crash-bundle format (JSON schema v0.1) + validating loader
-  integrity.py       evidence integrity checks (1.4)
-  counterfactual.py  Estimator interface + KinematicEstimator (PLACEHOLDER human driver)
-  engine.py          decision flow (3.2): decide(bundle, policy, estimator) -> Verdict
-  report.py          plain-English report
-  sim_adapter.py     SimEstimator: runs the sim branch's simulator as the estimator
-  examples/          10 synthetic bundles, one per decision path
-tests/test_insurance.py, tests/test_insurance_sim.py (the latter skips until `sim/` is present)
-```
-Run a case: `python -m insurance insurance/examples/01_av_late_detection.json` (add `--json` for machine output).
-
-How it relates to the `sim` branch: the engine never imports `sim`. It only needs something with `estimate(conflict) -> CounterfactualResult`. The default is a closed-form placeholder. After merging `sim`, pass `SimEstimator()` to `decide()`. Both use PLACEHOLDER driver parameters until Vakhtang fills in the UN R157 Annex 3 values in `sim/policies/careful_a.py` / `careful_b.py`. Never put guessed numbers in those files.
-
-Thresholds (`engine.Policy`) are illustrative, not from law (see docs/verification.md; the 10 s echoes UN R157's earliest-fallback timing but is not a standard for human takeover): 10 s minimum handover warning, 2 s override window, P(human avoids) >= 0.8 means the system fell short, <= 0.2 means unavoidable.
-
-## 5. Working rules
-- **Staying in sync with Antonio (finance):** read `coord/PROTOCOL.md`. At the start of every session run `scripts/sync.ps1` (or `.sh`), then read the open GitHub issues labelled `for:<you>`. `insurance/bridge.py` is the seam between `insurance/` and `finance/`: both owners review it, and `tests/test_bridge.py` contract tests fail if either side drifts. Never edit the other owner's folder; open an issue instead. To split new work, use the `work-splitter` agent (`.claude/agents/work-splitter.md`).
-- Work **only on the `insurance` branch**. Commit small, `git pull --rebase origin insurance` before pushing.
-- Never commit secrets or real personal data. Keep keys in `.env` (ignored).
-- Mark every claim as Verified / Knowledge / Design. Don't present Knowledge as fact.
-- Finance: Antonio (`@antoniohede-ai`). Robotics/simulation: Termvato (`@termvato`). Interface changes need both to agree.
-
-## Sources
-- [UK Automated Vehicles Act: SCL summary](https://www.scl.org/the-uks-automated-vehicles-act-unlocking-opportunities-for-uk-investment-and-innovation-in-the-automotive-sector/)
-- [Ashfords: Automated Vehicles Act 2024](https://www.ashfords.co.uk/insights/articles/automated-vehicles-act-2024-revolutionising-the-future-of-transportation)
-- [Slaughter and May: AV Act 2024](https://thelens.slaughterandmay.com/post/102j8ih/the-automated-vehicles-act-2024-becomes-law-in-the-uk)
-- [Waymo: Benchmarking AV safety](https://waymo.com/blog/2022/09/benchmarking-av-safety/)
-- [Waymo collision avoidance testing paper (arXiv)](https://arxiv.org/pdf/2212.08148)
-- [Survey of driver models for AV safety assessment (arXiv)](https://arxiv.org/pdf/2303.14779)
-- [German Road Safety Council on EDR and DSSAD](https://dvr.de/ueber-uns/resolutions/statement-by-the-german-road-safety-council-dvr-on-edr-and-dssad)
-- [UNECE R157 summary (regulations.ai)](https://regulations.ai/regulations/RAI-IO-UNECE-R157-2021)
-- [TRL: regulatory preparation for ADS approval](https://www.trl.co.uk/Uploads/TRL/Brochures/Regulatory%20preparation%20for%20ADS%20approval_Summary.pdf)
-- [IEEE 3501 / 1616.1 DSSAD standards](https://standards.ieee.org/ieee/3501/10939/)
-- [NHTSA Standing General Order crash reporting](https://www.nhtsa.gov/SGOCrashReporting)
+## Rules
+- Start of session: run the sync script, read ONLY the open issues labelled `for:<you>`. Each issue lists the files, interface and test command, so work from it instead of exploring the repo.
+- Stay on the `insurance` branch (or a short branch off it). Small commits; `git pull --rebase origin insurance` before pushing; `pytest -q` before every push.
+- Never edit the other owner's folder; open an issue labelled `for:<them>`. The seam (`bridge.py`, `tests/test_bridge.py`) needs both owners' OK.
+- Contract tests in `tests/test_bridge.py` fail if finance and insurance drift. Fix the bridge, don't weaken the test.
+- No guessed numbers or legal facts. Unknown = TODO + visible refusal. Every figure needs a source; mark claims Verified / Knowledge / Design.
+- Thresholds in `engine.Policy` and the human model in `counterfactual.HumanParams` are illustrative placeholders, not R157.
+- Token care: see `coord/PROTOCOL.md` section "Saving tokens".
