@@ -78,11 +78,11 @@ def export_comparison(scenario: SimScenario, av_policy: Policy, policy_a: Policy
 
 
 def _write_sample() -> None:
-    # Test fixtures only (tests/test_sim.py). NOT R157 values; R157 PARAMS stay None until
-    # Vakhtang fills them from the regulation text.
+    # Hand-built cut-in (tests/test_sim.py geometry); careful panels use the UN R157 Annex 3
+    # models (sim/policies/R157_ANNEX3.md). AV profile is illustrative, not from a real report.
     from sim.policies import careful_a, careful_b
     from sim.policies.av_replay import AVReplayPolicy
-    from tests.test_sim import TEST_DRIVER, cut_in
+    from tests.test_sim import cut_in
 
     gap = 25.0
     av_profile = [(2.4, -4.0)]  # illustrative late, soft braking; not from a real report
@@ -90,15 +90,15 @@ def _write_sample() -> None:
     export_comparison(
         cut_in(gap_m=gap),
         AVReplayPolicy(av_profile),
-        careful_a.make_policy(TEST_DRIVER),
-        careful_b.make_policy(TEST_DRIVER),
+        careful_a.make_policy(),
+        careful_b.make_policy(),
         out,
         meta={
             "id": "sample-cut-in",
             "title": f"Cut-in, {gap:.0f} m gap, ego 72 km/h, cutter 43 km/h",
-            "label": "sample: test driver params, not R157",
-            "notes": ("Hand-built test scenario (tests/test_sim.py cut_in). Both careful panels use "
-                      "the test-only TEST_DRIVER fixture, so they are identical. AV braking profile "
+            "label": "illustrative scenario · careful drivers: UN R157 Annex 3",
+            "notes": ("Hand-built scenario (tests/test_sim.py cut_in). Careful panels: UN R157 Annex 3 "
+                      "Performance models 1 and 2 (sim/policies/R157_ANNEX3.md). AV braking profile "
                       f"{av_profile} is illustrative, not from an SGO report. No P(avoid) shown: "
                       "no Monte Carlo run behind this sample."),
             "crash_type": "cut_in",
