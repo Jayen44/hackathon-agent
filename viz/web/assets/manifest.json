@@ -1,0 +1,5 @@
+{
+  "_comment": "Optional local assets for viz/web/index.html. Leave entries null/empty to use the built-in procedural cars and sky. Paths are relative to this folder. yaw_deg rotates a model so its nose points along +x; models are auto-scaled to 4.5 m length. Every file listed here must also be listed in LICENSES.md.",
+  "cars": { "ego": null, "others": [] },
+  "hdri": null
+}
