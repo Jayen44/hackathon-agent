@@ -1,9 +1,9 @@
 # Handoff: current state (update this, don't re-explain history)
 
-**Branch** `insurance` · tests: `pytest -q` (158 pass, 1 skipped until `sim/` is merged) · repo is private (Jayen44, antoniohede-ai, termvato).
+**Branch** `insurance` · tests: `pytest -q` (~200 pass, 1 skipped until `sim/` is merged) · repo is private (Jayen44, antoniohede-ai, termvato).
 
 ## What exists
-- `insurance/`: crash-bundle JSON (`bundle.py`), integrity checks, liability engine (`engine.py`, decision paths have `Step.code`), counterfactual estimators (`counterfactual.py`: closed form + numeric for lead-braking/cut-in), AEVA s.3(2)/s.4 rules, `bridge.py` -> `finance.recovery.assess` (sends UK codes), `resolution.py` (every crash -> one of 8 outcomes + next steps; reads `assess().codes`, not prose), `synth_bundles.py`, `portfolio.py`, `gaps.py`.
+- `insurance/`: crash-bundle JSON (`bundle.py`), integrity checks, liability engine (`engine.py`, decision paths have `Step.code`), counterfactual estimators (`counterfactual.py`: closed form + numeric for lead-braking/cut-in), AEVA s.3(2)/s.4 rules, `bridge.py` -> `finance.recovery.assess` (sends UK codes), `legal.py` (regime, recovery route, limitation deadlines, `p_liable_to_victim`; bundle `legal` block), `resolution.py` (every crash -> one of 8 outcomes + next steps; reads `assess().codes`, not prose), `synth_bundles.py`, `portfolio.py`, `gaps.py`.
 - 22 example bundles in `insurance/examples` (timelines self-consistent via `settle()`; 21 and 22 are clean Pursue demos) (regenerate with `scripts/make_examples.py`).
 - Verified/validated: `docs/verification.md`, `docs/validation.md`.
 
@@ -33,7 +33,7 @@ scripts/sync.ps1 | scripts/sync.sh             python scripts/sensitivity.py
 - Waiting on Antonio's approve on #6 (nudged twice). No insurer UI exists yet on any branch (Streamlit scaffold on main; Sim Lab on sim).
 
 ## Known limits
-Legal regime: AEVA s.2/s.5 does not cover today's supervised pilots (no listed vehicles); the engine models the s.5 route. Pitch dos/don'ts and the to-do list (regime field, limitation clocks, disclaimer) are in `docs/legal-basis.md`.
+Legal regime: AEVA s.2/s.5 does not cover today's supervised pilots (no listed vehicles); the engine models the s.5 route. Pitch dos/don'ts and the to-do list are in `docs/legal-basis.md`; regime, limitation clocks, P(liable), disclaimer and disclosure wording are built. Still open: claim-value scope (s.2(3), CPA exclusions: finance), R157 scope tags and typical-driver sensitivity (sim).
 Human-driver model is a placeholder (optimistic reaction times, no swerving); friction values are unsourced physics; all crashes synthetic; recovery maths ignores cost-shifting and delay (see `docs/validation.md`).
 
 ## Token tips

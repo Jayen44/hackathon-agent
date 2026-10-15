@@ -11,6 +11,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal
 
+from insurance.legal import REGIMES, ROUTES, Legal
+
 SCHEMA_VERSION = "0.1"
 Mode = Literal["manual", "assisted", "automated"]
 Occupant = Literal["user_in_charge", "none"]
@@ -161,6 +163,7 @@ class CrashBundle:
     conflict: Conflict | None
     outcome: Outcome
     schema_version: str = SCHEMA_VERSION
+    legal: Legal = Legal()
 
 
 # ---------------------------------------------------------------- loading
@@ -273,8 +276,33 @@ def load_bundle(d: dict) -> CrashBundle:
         t_crash=_num(_req(d, "t_crash", "bundle"), "t_crash"),
         jurisdiction=d.get("jurisdiction", "UK"),
         vehicle=vehicle, perception=perception, external=external,
-        integrity=integrity, conflict=conflict, outcome=outcome,
+        integrity=integrity, conflict=conflict, outcome=outcome, legal=_parse_legal(d.get("legal")),
     )
+
+
+def _parse_legal(g: dict | None) -> Legal:
+    if g is None:
+        return Legal()
+    from datetime import date
+    if g.get("regime", "unspecified") not in REGIMES:
+        raise BundleError(f"legal.regime must be one of {REGIMES}")
+    if g.get("recovery_route", "unspecified") not in ROUTES:
+        raise BundleError(f"legal.recovery_route must be one of {ROUTES}")
+    for k in ("settlement_date", "knowledge_date", "supply_date"):
+        if g.get(k) is not None:
+            try:
+                date.fromisoformat(g[k])
+            except (TypeError, ValueError):
+                raise BundleError(f"legal.{k} must be an ISO date (YYYY-MM-DD)") from None
+    q = g.get("p_liable_to_victim")
+    if q is not None:
+        if (not isinstance(q, (list, tuple)) or len(q) != 3
+                or not 0 <= _num(q[0], "legal.p_liable_to_victim") <= _num(q[1], "legal.p_liable_to_victim")
+                <= _num(q[2], "legal.p_liable_to_victim") <= 1):
+            raise BundleError("legal.p_liable_to_victim must be [low, mid, high] with 0 <= low <= mid <= high <= 1")
+        q = (float(q[0]), float(q[1]), float(q[2]))
+    return Legal(g.get("regime", "unspecified"), g.get("recovery_route", "unspecified"), g.get("settlement_date"),
+                 g.get("knowledge_date"), g.get("supply_date"), q)
 
 
 def load_bundle_file(path: str | Path) -> CrashBundle:

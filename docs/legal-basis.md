@@ -23,17 +23,17 @@ Summary of Vakhtang's research note `sim/LEGAL_BASIS.md` (branch `sim`, status 1
 | # | Change | Status |
 |---|---|---|
 | 1 | Benchmark wording "careful and competent human driver (AVA 2024 s.2(2)(a)); R157 Annex 3 is guidance" | Docs fixed here; check dashboard/agent prompts |
-| 2 | `regime` and `recovery_route` per claim (AEVA_listed / authorised / conventional; s.5 / contribution / CPA / policy s.4) | **Not built.** Every UK claim today is `conventional`; the engine assumes the s.5 route. Needs a bundle field |
-| 3 | P(success) = P(party liable to victim), not only P(avoid) | Not built; modelling assumption noted in `docs/liability-spec.md` |
+| 2 | `regime` and `recovery_route` per claim (AEVA_listed / authorised / conventional; s.5 / contribution / CPA / policy s.4) | **Built** (`insurance/legal.py`, bundle `legal.regime` / `legal.recovery_route`; notes on every result; price still uses the s.5 proxy) |
+| 3 | P(success) = P(party liable to victim), not only P(avoid) | **Built** as an input: `legal.p_liable_to_victim` [low, mid, high] scales P(avoid) in `bridge.py`; unset = flagged as not assessed. Needs a real source for the value |
 | 4 | Claim-value scope (s.2(3), CPA exclusions) | Not built |
 | 5 | Tag `r157_scenario_in_scope` / `r157_road_context_in_scope`, lower confidence when false | Not built (sim side) |
 | 6 | "Typical driver" sensitivity row for PM1 optimism | Not built; placeholder values need a source |
 | 7 | AEVA s.4 checklist (software version, missed safety-critical updates, unauthorised changes) | Built (`software_status`, `not_av_recovery`) |
 | 8 | AEVA s.3(2) check (engaged outside ODD by the person in charge) | Built (flagged in verdict exclusions) |
-| 9 | Limitation clocks ("days to deadline") per claim | **Not built.** Needs settlement date in the bundle |
-| 10 | Data access: preservation letter + CPR 31.16 summary instead of "pull logs" | Resolution steps say "pull the DSSAD log"; wording should become a disclosure request |
-| 11 | Report disclaimer: AVA 2024 mostly not in force, SGO data unverified, R157 used outside scope where flagged | `engine.DISCLAIMER` not yet updated |
-| 12 | Say "ADS-engaged", not "self-driving", for unauthorised vehicles (AVA s.78) | Not audited |
+| 9 | Limitation clocks ("days to deadline") per claim | **Built** (`limitation_deadline`; needs `legal.settlement_date` / `knowledge_date`; shown in notes and as first resolution step, URGENT under 90 days) |
+| 10 | Data access: preservation letter + CPR 31.16 summary instead of "pull logs" | **Built** (preservation letter, then CPR 31.16, no assumed right to data) |
+| 11 | Report disclaimer: AVA 2024 mostly not in force, SGO data unverified, R157 used outside scope where flagged | **Built** (`engine.DISCLAIMER`) |
+| 12 | Say "ADS-engaged", not "self-driving", for unauthorised vehicles (AVA s.78) | Done in `insurance/` (report label, engine text); agent prompts not audited |
 
 ## 4. Open questions for a lawyer (abridged)
 1. Supervised pilots: who is the victim's defendant (driver, PHV operator, Uber, Wayve), and is contribution against the AV developer realistic?

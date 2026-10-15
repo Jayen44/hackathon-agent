@@ -37,7 +37,7 @@ class Resolution:
 
 
 _STEP_FOR_CODE = {
-    "ENGAGEMENT_UNVERIFIED": Step("engineer", "Pull the vehicle data storage (DSSAD) log to verify self-driving was engaged at impact",
+    "ENGAGEMENT_UNVERIFIED": Step("engineer", "Send a preservation letter for the vehicle's DSSAD/ADS logs and request them; if refused, apply for pre-action disclosure (CPR 31.16). No statutory right to the data exists",
                                   "PURSUE or RECOVER_FROM_INSURED"),
     "ODD_OUTSIDE": Step("engineer", "Confirm the operating conditions (ODD) at the crash location/time: the target may be the operator",
                         "PURSUE (against the right party)"),
@@ -62,6 +62,28 @@ def _gate_steps(codes: list[str]) -> list[Step]:
 
 
 def resolve(r: BridgedAssessment, b: CrashBundle) -> Resolution:
+    x = _resolve(r, b)
+    return _with_legal_steps(x, r, b)
+
+
+def _with_legal_steps(x: Resolution, r: BridgedAssessment, b: CrashBundle) -> Resolution:
+    """Limitation clock first (it is the one step that can lose the claim), then the regime caveat. Only for claims
+    that are still open for recovery."""
+    if x.outcome not in ("PURSUE", "PULL_LOGS", "NEEDS_INPUTS"):
+        return x
+    extra = []
+    d = r.deadline
+    if d:
+        when = "OVERDUE" if d.days_left < 0 else f"{d.days_left} days"
+        extra.append(Step("counsel", f"Limitation: {d.route} deadline {d.due.isoformat()} ({when}): {d.basis}" + (
+            ". URGENT: issue or agree a standstill now" if d.urgent else ""), "PURSUE"))
+    if b.legal.regime in ("conventional", "unspecified"):
+        extra.append(Step("counsel", "Confirm the recovery route (no vehicle is AEVA-listed today: contribution under the 1978 Act or CPA 1987?)", "PURSUE"))
+    x.next_steps = extra[:1] + x.next_steps + extra[1:]
+    return x
+
+
+def _resolve(r: BridgedAssessment, b: CrashBundle) -> Resolution:
     cid = r.verdict.case_id
 
     def done(outcome: str, headline: str, *steps: Step) -> Resolution:
@@ -90,7 +112,7 @@ def resolve(r: BridgedAssessment, b: CrashBundle) -> Resolution:
     if d == "pursue":
         return done("PURSUE", "Pursue the tech company.",
                     Step("counsel", "Send a letter before action citing AEVA s.5", "PURSUE"),
-                    Step("engineer", "Preserve the vehicle logs and the reconstruction (chain of custody)", "PURSUE"),
+                    Step("engineer", "Send a preservation letter for the vehicle logs and keep the reconstruction under chain of custody", "PURSUE"),
                     Step("insurer finance", "Reserve the legal-cost high end from the assessment", "PURSUE"),
                     *gate)
     if d == "not_av_recovery":

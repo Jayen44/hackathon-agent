@@ -92,5 +92,10 @@
     "collided": true,
     "impact_speed_mps": 7.31,
     "injury_severity": "Slight"
+  },
+  "legal": {
+    "regime": "AEVA_authorised",
+    "recovery_route": "AEVA_s5",
+    "settlement_date": "2027-03-01"
   }
 }

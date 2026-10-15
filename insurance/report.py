@@ -5,7 +5,7 @@ from insurance.engine import Verdict
 
 LABEL = {
     "HUMAN_DRIVER": "Human driver (and their motor insurer)",
-    "TECH_COMPANY": "Technology company / authorised self-driving entity",
+    "TECH_COMPANY": "Technology company (ADS developer or operator)",
     "NO_FAULT_DRIVING": "No driving fault (unavoidable or no collision)",
     "NEEDS_REVIEW": "Needs human review",
 }

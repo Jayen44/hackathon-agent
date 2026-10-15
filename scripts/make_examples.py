@@ -45,6 +45,9 @@ base = {
     "conflict": {"hazard_id": "obstacle1", "t_start": 94.0, "ego_speed_mps": 13.4, "gap_m": 40.0,
                  "hazard_speed_mps": 0.0, "friction_mu": 0.7},
     "outcome": {"collided": True, "impact_speed_mps": 9.0, "injury_severity": "Slight"},
+    # Synthetic scenario for the regime AFTER AV Act 2024 commencement (no vehicle is AEVA-listed today; see docs/legal-basis.md).
+    # p_liable_to_victim is left unset on purpose: "not assessed" is the honest default.
+    "legal": {"regime": "AEVA_authorised", "recovery_route": "AEVA_s5", "settlement_date": "2027-03-01"},
 }
 
 

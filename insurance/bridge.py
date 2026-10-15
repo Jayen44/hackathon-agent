@@ -18,12 +18,14 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
+from datetime import date
 
 from finance.recovery import AvoidanceResult, ClaimFacts, RecoveryAssessment, assess
 from insurance.bundle import CrashBundle
 from insurance.counterfactual import CounterfactualResult, Estimator, KinematicEstimator
 from insurance.engine import Policy, Verdict, control_state, decide
 from insurance.integrity import check_integrity
+from insurance.legal import Deadline, limitation_deadline, regime_notes
 
 Z90 = 1.6449  # two-sided 90%
 
@@ -41,9 +43,16 @@ def wilson_ci90(p: float, n: int) -> tuple[float, float]:
     return min(p, max(0.0, centre - half)), max(p, min(1.0, centre + half))
 
 
-def to_avoidance_result(model: str, cf: CounterfactualResult) -> AvoidanceResult:
+def to_avoidance_result(model: str, cf: CounterfactualResult,
+                        p_liable: tuple[float, float, float] | None = None) -> AvoidanceResult:
+    """`p_liable` = (low, mid, high) P(other party liable to the victim | careful driver avoids). AEVA s.5 recovery is
+    derivative, so the share is P(avoid) x P(liable); finance/ receives the product as its p_avoid."""
     lo, hi = wilson_ci90(cf.p_avoid, cf.n_samples)
-    return AvoidanceResult(model=model, p_avoid=cf.p_avoid, ci90=(lo, hi))
+    p = cf.p_avoid
+    if p_liable is not None:
+        p, lo, hi = p * p_liable[1], lo * p_liable[0], hi * p_liable[2]
+        lo, hi = min(lo, p), max(hi, p)
+    return AvoidanceResult(model=model, p_avoid=p, ci90=(lo, hi))
 
 
 def engagement_status(b: CrashBundle, policy: Policy = Policy()) -> str:
@@ -101,13 +110,14 @@ class BridgedAssessment:
     verdict: Verdict
     recovery: RecoveryAssessment | None   # None = not priced, see notes
     notes: list[str] = field(default_factory=list)
+    deadline: Deadline | None = None      # limitation clock for the claim's recovery route, when dates allow
 
 
 def assess_bundle(b: CrashBundle, *, estimators: dict[str, Estimator] | None = None, reproduced: bool = False,
                   third_party_share: tuple[float, float] | None = None,
                   legal_cost_gbp: tuple[float, float] | None = None, policy: Policy = Policy(),
                   min_net_gbp: float = 0.0,
-                  cost_shift_risk: bool = False) -> BridgedAssessment:
+                  cost_shift_risk: bool = False, today: date | None = None) -> BridgedAssessment:
     """Decide liability, then price the recovery when that makes sense.
 
     `reproduced` is False unless the caller has checked (e.g. sim.reproduce.check) that the
@@ -116,9 +126,13 @@ def assess_bundle(b: CrashBundle, *, estimators: dict[str, Estimator] | None = N
     estimators = estimators or {"kinematic_placeholder": KinematicEstimator()}
     verdict = decide(b, policy, next(iter(estimators.values())))
     notes = ["ci90 covers Monte Carlo sampling error only, not model or reconstruction uncertainty."]
+    notes += regime_notes(b.legal)
+    deadline = limitation_deadline(b.legal, today or date.today())
+    if deadline:
+        notes.append(f"Limitation: {deadline.route} deadline {deadline.due.isoformat()} ({deadline.days_left} days): {deadline.basis}.")
 
     def unpriced(why: str) -> BridgedAssessment:
-        return BridgedAssessment(verdict, None, [why] + notes)
+        return BridgedAssessment(verdict, None, [why] + notes, deadline)
 
     if not b.outcome.collided:
         return unpriced("No collision: nothing to recover.")
@@ -129,13 +143,13 @@ def assess_bundle(b: CrashBundle, *, estimators: dict[str, Estimator] | None = N
     if b.conflict is None:
         return unpriced("No reconstructed conflict: P(avoid) can't be computed, so nothing can be priced.")
 
-    avoidance = [to_avoidance_result(name, est.estimate(b.conflict)) for name, est in estimators.items()]
+    avoidance = [to_avoidance_result(name, est.estimate(b.conflict), b.legal.p_liable_to_victim) for name, est in estimators.items()]
     if len(avoidance) < 2:
         notes.append("Only one careful-driver model supplied: finance/ will hold 'pursue' at pull_logs_first.")
     if not reproduced:
         notes.append("Simulation not confirmed to reproduce the reported crash (reproduced=False).")
     try:
         facts = claim_facts(b, reproduced, third_party_share, legal_cost_gbp, policy, cost_shift_risk)
-        return BridgedAssessment(verdict, assess(facts, avoidance, min_net_gbp), notes)
+        return BridgedAssessment(verdict, assess(facts, avoidance, min_net_gbp), notes, deadline)
     except ValueError as e:   # bad claim inputs must not take down a portfolio run
         return unpriced(f"Invalid claim inputs, not priced: {e}")

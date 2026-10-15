@@ -16,7 +16,10 @@ Liable = Literal["HUMAN_DRIVER", "TECH_COMPANY", "NO_FAULT_DRIVING", "NEEDS_REVI
 Confidence = Literal["HIGH", "MEDIUM", "LOW"]
 
 DISCLAIMER = ("Decision support only: synthetic/simplified inputs, UK assumptions, placeholder human-driver "
-              "model unless stated. Not legal or financial advice. A human claims handler decides.")
+              "model unless stated. Not legal or financial advice. A human claims handler decides. Triage evidence, not a "
+              "liability finding. UK law as at Oct 2026: most of the Automated Vehicles Act 2024 is not yet in force and "
+              "no vehicle is listed under AEVA 2018, so the s.5 recovery model is a proxy for today's claims. "
+              "Careful-driver models are published UN R157 Annex 3 guidance, used outside their motorway scope where flagged.")
 
 
 @dataclass(frozen=True)
@@ -129,7 +132,7 @@ def decide(b: CrashBundle, policy: Policy = Policy(), estimator: Estimator | Non
     # letting the vehicle drive itself when that was inappropriate. Third-party victims are unaffected.
     if sw.engaged_when_inappropriate:
         v.exclusions.append("Person in charge's own claim excluded if the accident was WHOLLY due to their negligence "
-                            "in engaging self-driving when inappropriate (AEVA 2018 s.3(2)). Third parties unaffected.")
+                            "in engaging the automated driving system when inappropriate (AEVA 2018 s.3(2)). Third parties unaffected.")
         v.review_items.append("Confirm the accident was *wholly* due to that negligence; s.3(2) does not apply to partial causes.")
         v.steps.append(Step("law", "continue", "s.3(2) exclusion flagged for the person in charge", "law.s3_2_person_in_charge_negligence"))
 
