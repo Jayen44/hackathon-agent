@@ -130,3 +130,27 @@ def test_invalid_what_if_is_a_tool_error_not_a_crash():
     deb = d.run_debate(claim(), client)          # completes; both bad changes are logged, not applied
     assert [t["step"] for t in deb.trace].count("invalid_change") == 2
     assert deb.final["decision"] == deb.original["decision"]
+
+
+def test_handler_summary_is_plain_and_uses_engine_numbers():
+    deb = d.run_debate(claim(), None)
+    h = deb.handler_summary
+    assert set(h) >= {"bottom_line", "status", "what_the_challenge_changed", "checks_for_you", "caveats"}
+    assert h["bottom_line"].startswith(d.DECISION_TEXT[deb.final["decision"]])
+    from finance.recovery import fmt_gbp
+    assert fmt_gbp(deb.final["expected_recovery"]["mid"]) in h["bottom_line"]
+    for code in ("pull_logs_first", "dont_pursue", "keep_model", "cn_low"):
+        assert code not in json.dumps(h)
+    assert "not a liability ruling" in h["caveats"][-1]
+
+
+def test_contested_status_tells_the_handler_to_decide():
+    flip = change(keep_model="careful_a", p_avoid_at_low_bound=True, legal_cost_low=60_000, legal_cost_high=60_000)
+    client = FakeClient([answer({"recommendation": "r", "what_happened": "w", "why": [], "key_assumptions": [],
+                                 "what_would_change_this": ["decision log"]}),
+                         answer({"assumption": "a", "argument": "b", "evidence_cited": [], "change": flip}),
+                         answer({"verdict": "reject", "reasoning": "no", "conceded": "nothing", "maintained": "x",
+                                 "handler_checks": ["check the decision log"], "accepted_change": flip})])
+    h = d.run_debate(claim(), client).handler_summary
+    assert h["status"].startswith("CONTESTED") and "You decide" in h["status"]
+    assert h["checks_for_you"] == ["check the decision log", "decision log"]

@@ -454,12 +454,18 @@ def weakest_assumption(f: ClaimFacts, avoidance: list[AvoidanceResult],
     if a.expected_recovery is None:
         return []
     cn, _, _ = contributory_negligence(f)
-    trials = [(f"use {r.model} only (p_avoid {r.p_avoid:.2f})", {"keep_model": r.model}) for r in avoidance]
+    def name(m: str) -> str:
+        return m.replace("_", " ")
+
+    trials = [(f"rely on the {name(r.model)} driver model alone (it avoids the crash {r.p_avoid:.0%} of the time)",
+               {"keep_model": r.model}) for r in avoidance]
     trials += [
-        (f"p_avoid at lower 90% bound ({a.p_avoid.low:.2f})", {"p_avoid_at_low_bound": True}),
-        (f"injured party's contributory negligence at max ({cn[1]:.0%})", {"cn_low": cn[1], "cn_high": cn[1]}),
-        (f"claim value at low end ({fmt_gbp(a.claim_value.low)})", {"claim_value_gbp": a.claim_value.low}),
-        (f"legal cost at high end ({fmt_gbp(a.legal_cost.high)})",
+        (f"take the low end of the careful-driver result ({a.p_avoid.low:.0%} chance of avoiding the crash)",
+         {"p_avoid_at_low_bound": True}),
+        (f"assume the injured person was {cn[1]:.0%} to blame", {"cn_low": cn[1], "cn_high": cn[1]}),
+        (f"value the claim at the low end of its range ({fmt_gbp(a.claim_value.low)})",
+         {"claim_value_gbp": a.claim_value.low}),
+        (f"assume legal costs at the top of the range ({fmt_gbp(a.legal_cost.high)}, a full trial)",
          {"legal_cost_low": a.legal_cost.high, "legal_cost_high": a.legal_cost.high}),
     ]
     out = []

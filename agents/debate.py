@@ -119,41 +119,75 @@ COMMON = (
     "\n- The case_file holds the liability engine's verdict, the evidence that exists and is missing, and "
     "the scene. Use it: arguments that rest on evidence nobody has are weak."
 )
-ADJUSTER = COMMON + (
-    "\n\nYou are the insurer's recovery adjuster. Call assess_claim, then write a recommendation of at most "
-    "60 words quoting the decision and the expected recovery range from the tool, and list the 2-4 "
-    "assumptions the result depends on most (at most 15 words each; name the source, or say it is a "
-    "modelling assumption)."
+READER = (
+    "\n\nWho reads your output: a claims handler deciding what to do with this claim. They are not an engineer or "
+    "a lawyer. Write in plain English, in short sentences. Say what the evidence shows and where it comes from "
+    "(e.g. 'the vehicle's decision log', 'the police report', 'the whiplash tariff'). Explain P(avoid) as 'the "
+    "chance a careful driver would have avoided the crash' and the AV share as 'the share of the loss we can "
+    "claim back from the AV company'. Never use internal codes or field names (pull_logs_first, cn_low, "
+    "keep_model, p_avoid, ODD): say 'get the vehicle logs first', 'the injured person's own share of the "
+    "blame', 'use one driver model only', 'the conditions the system is approved for'."
 )
-DEFENCE = COMMON + (
+ADJUSTER = COMMON + READER + (
+    "\n\nYou are the insurer's recovery adjuster. Call assess_claim, then return:"
+    "\n- recommendation (max 60 words): what to do and what money is at stake, quoting the decision and the "
+    "expected recovery range from the tool, in words a handler can act on."
+    "\n- what_happened (max 40 words): the crash in plain words, from the case file."
+    "\n- why (2-4 items, max 25 words each): why the AV company is, or is not, likely to be liable, each tied to "
+    "a piece of evidence."
+    "\n- key_assumptions (2-4 items, max 20 words each): what the result depends on, each naming its source or "
+    "saying it is a modelling assumption."
+    "\n- what_would_change_this (1-3 items, max 20 words each): the evidence that would most move the decision."
+)
+DEFENCE = COMMON + READER + (
     "\n\nYou are defence counsel for the AV company. Find the single strongest challenge to the adjuster's "
     "result. Call find_weak_assumptions, test candidates with what_if, and pick the challenge that most damages "
     "the recovery case while staying inside what the evidence allows (what_if rejects anything outside it). "
     "The challenge must rest on something in the case file or a tool result (a placeholder model, missing "
-    "evidence, an unassessed input), not on a stated intention such as 'we would fight to trial'. "
-    "Name the assumption in at most 12 words and argue it in at most 80 words, citing the numbers what_if "
-    "returned. Return the change exactly as you tested it."
+    "evidence, an unassessed input), not on a stated intention such as 'we would fight to trial'. Return:"
+    "\n- assumption (max 12 words): the point you attack, in plain words."
+    "\n- argument (max 80 words): 'We say ... because ... . If that is right, ...', citing the numbers what_if "
+    "returned."
+    "\n- evidence_cited (1-3 items, max 20 words each): the facts in the case file your argument rests on."
+    "\n- change: exactly as you tested it."
 )
-REBUTTAL = COMMON + (
+REBUTTAL = COMMON + READER + (
     "\n\nYou are the insurer's adjuster answering defence counsel. Decide on the evidence: 'accept' if the "
     "challenge is credible; 'partially_accept' if a milder version is credible (test it with what_if and "
     "return that milder change); 'reject' only if you can say why the evidence supports the original "
     "assumption (a statutory source, both careful-driver models agreeing, the claim file). Never reject just "
-    "to keep a better number. Give your reasoning in at most 80 words: the verdict, the evidence it rests "
-    "on, and what the claims handler should check. accepted_change is the change you accept: all "
-    "null/false if you reject."
+    "to keep a better number. Return:"
+    "\n- verdict and accepted_change (all null/false if you reject)."
+    "\n- reasoning (max 80 words): your answer in plain English."
+    "\n- conceded (max 40 words): what defence counsel got right ('nothing' if nothing)."
+    "\n- maintained (max 40 words): what still stands, and the evidence it rests on."
+    "\n- handler_checks (1-3 items, max 20 words each): concrete things the claims handler should check or "
+    "request next."
 )
 
-ADJUSTER_OUT = {"type": "object", "additionalProperties": False, "required": ["recommendation", "key_assumptions"],
-                "properties": {"recommendation": {"type": "string"},
-                               "key_assumptions": {"type": "array", "items": {"type": "string"}}}}
-DEFENCE_OUT = {"type": "object", "additionalProperties": False, "required": ["assumption", "argument", "change"],
-               "properties": {"assumption": {"type": "string"}, "argument": {"type": "string"},
-                              "change": CHANGE_SCHEMA}}
+_STR, _LIST = {"type": "string"}, {"type": "array", "items": {"type": "string"}}
+ADJUSTER_OUT = {"type": "object", "additionalProperties": False,
+                "required": ["recommendation", "what_happened", "why", "key_assumptions", "what_would_change_this"],
+                "properties": {"recommendation": _STR, "what_happened": _STR, "why": _LIST,
+                               "key_assumptions": _LIST, "what_would_change_this": _LIST}}
+DEFENCE_OUT = {"type": "object", "additionalProperties": False,
+               "required": ["assumption", "argument", "evidence_cited", "change"],
+               "properties": {"assumption": _STR, "argument": _STR, "evidence_cited": _LIST, "change": CHANGE_SCHEMA}}
 REBUTTAL_OUT = {"type": "object", "additionalProperties": False,
-                "required": ["verdict", "reasoning", "accepted_change"],
+                "required": ["verdict", "reasoning", "conceded", "maintained", "handler_checks", "accepted_change"],
                 "properties": {"verdict": {"type": "string", "enum": ["accept", "partially_accept", "reject"]},
-                               "reasoning": {"type": "string"}, "accepted_change": CHANGE_SCHEMA}}
+                               "reasoning": _STR, "conceded": _STR, "maintained": _STR, "handler_checks": _LIST,
+                               "accepted_change": CHANGE_SCHEMA}}
+
+# Plain-English decisions for the person reading the summary.
+DECISION_TEXT = {
+    "pursue": "Pursue recovery from the AV company (start with a pre-action letter)",
+    "pull_logs_first": "Get the vehicle logs (and missing evidence) before deciding",
+    "dont_pursue": "Don't pursue: recovery is unlikely to cover the legal cost",
+    "not_av_recovery": "Not a claim against the AV company",
+    "cannot_price": "Can't price yet: a figure is missing",
+}
+VERDICT_TEXT = {"accept": "accepted", "partially_accept": "partly accepted", "reject": "rejected"}
 
 
 # ----------------------------------------------------------------------------- the debate
@@ -168,6 +202,7 @@ class Debate:
     rebuttal: dict
     final: dict                    # finance's re-pricing under the change the adjuster accepted
     contested: bool                # adjuster rejected a challenge that flips the decision -> human review
+    handler_summary: dict = field(default_factory=dict)   # plain-English bottom line, built in code from the above
     trace: list[dict] = field(default_factory=list)
 
     def to_dict(self) -> dict:
@@ -176,27 +211,79 @@ class Debate:
 
 def _offline_adjuster(c: Claim, a: RecoveryAssessment) -> dict:
     ev = a.expected_recovery
-    return {"recommendation": f"{a.decision}: expected recovery {fmt_gbp(ev.low)} to {fmt_gbp(ev.high)} "
-                              f"(central {fmt_gbp(ev.mid)}).",
-            "key_assumptions": a.reasons + a.sources}
+    v = c.case_file.get("liability_verdict", {})
+    return {"recommendation": f"{DECISION_TEXT[a.decision]}. Expected recovery {fmt_gbp(ev.low)} to "
+                              f"{fmt_gbp(ev.high)}, most likely {fmt_gbp(ev.mid)}, after our legal costs.",
+            "what_happened": v.get("summary", "See the case file."),
+            "why": v.get("findings", []) or [f"Chance a careful driver would have avoided it: {a.p_avoid.mid:.0%}"],
+            "key_assumptions": a.reasons + a.sources,
+            "what_would_change_this": v.get("evidence_missing", [])[:3]}
 
 
 def _offline_defence(c: Claim, a: RecoveryAssessment) -> dict:
     top = weakest_assumption(c.facts, c.avoidance, c.min_net_gbp)[0]
     return {"assumption": top.assumption,
-            "argument": f"Take {top.assumption}: the central expected recovery falls to "
-                        f"{fmt_gbp(top.expected_recovery_mid)}"
+            "argument": f"We say the recovery rests on {top.assumption}. If that is right, the most likely recovery "
+                        f"falls to {fmt_gbp(top.expected_recovery_mid)}"
                         + (" and the decision changes." if top.flips_decision else "."),
+            "evidence_cited": [c.case_file.get("provenance", {}).get("driver_models", "")] if c.case_file else [],
             "change": top.change}
 
 
 def _offline_rebuttal(c: Claim, a: RecoveryAssessment, ch: dict, b: RecoveryAssessment) -> dict:
     if b.decision != a.decision:
         return {"verdict": "accept", "accepted_change": ch["change"],
-                "reasoning": f"The challenge moves the decision from {a.decision} to {b.decision}; accepted "
-                             "pending evidence that settles the point."}
+                "reasoning": f"The challenge changes the decision to '{DECISION_TEXT[b.decision]}', so it is accepted "
+                             "until evidence settles the point.",
+                "conceded": ch["assumption"], "maintained": "nothing beyond the original evidence",
+                "handler_checks": ["Obtain the evidence that settles: " + ch["assumption"]]}
     return {"verdict": "reject", "accepted_change": blank_change(),
-            "reasoning": f"The decision ({a.decision}) holds even under this challenge."}
+            "reasoning": f"The decision ('{DECISION_TEXT[a.decision]}') holds even under this challenge.",
+            "conceded": "nothing", "maintained": "the original decision",
+            "handler_checks": []}
+
+
+def handler_summary(d_original: dict, adj: dict, ch: dict, d_challenged: dict, reb: dict, d_final: dict,
+                    contested: bool, case_file: dict) -> dict:
+    """The page a claims handler reads first. Built in code; every number comes from finance."""
+    def mid(x):
+        e = x.get("expected_recovery")
+        return fmt_gbp(e["mid"]) if e else "n/a"
+
+    def rng(x):
+        e = x.get("expected_recovery")
+        return f"{fmt_gbp(e['low'])} to {fmt_gbp(e['high'])}" if e else "n/a"
+
+    before, after = d_original["decision"], d_final["decision"]
+    moved = ("The decision stayed the same" if before == after
+             else f"The decision changed from '{DECISION_TEXT[before]}' to '{DECISION_TEXT[after]}'")
+    prov = case_file.get("provenance", {})
+    caveats = []
+    if prov.get("synthetic"):
+        caveats.append("Synthetic demo claim, not a real crash.")
+    if "placeholder" in prov.get("driver_models", ""):
+        caveats.append("Careful-driver models are placeholders, not the UN R157 reference drivers.")
+    checks, seen = [], set()
+    for x in (reb.get("handler_checks") or []) + (adj.get("what_would_change_this") or []):
+        if x and x.lower() not in seen:
+            seen.add(x.lower())
+            checks.append(x)
+    return {
+        "bottom_line": f"{DECISION_TEXT[after]}. Expected recovery {rng(d_final)}, most likely {mid(d_final)}, "
+                       "after our legal costs.",
+        "status": ("CONTESTED: the adjuster rejected a challenge that would change the decision. You decide."
+                   if contested else "Agreed after challenge: the adjuster and defence counsel's points are "
+                   "reflected in the figure."),
+        "what_the_challenge_changed": f"Defence counsel challenged: {ch.get('assumption', '')}. The adjuster "
+                                      f"{VERDICT_TEXT.get(reb.get('verdict'), reb.get('verdict'))} it. Most likely "
+                                      f"recovery moved from {mid(d_original)} to {mid(d_final)}. {moved}.",
+        "what_happened": adj.get("what_happened", ""),
+        "why": adj.get("why", []),
+        "conceded": reb.get("conceded", ""),
+        "maintained": reb.get("maintained", ""),
+        "checks_for_you": checks[:5],
+        "caveats": caveats + ["Triage evidence for a claims handler, not a liability ruling or legal advice."],
+    }
 
 
 def run_debate(c: Claim, client: Any = None, log: Callable[[dict], None] | None = None) -> Debate:
@@ -252,8 +339,10 @@ def run_debate(c: Claim, client: Any = None, log: Callable[[dict], None] | None 
         final.reasons.append("CONTESTED: the adjuster rejected a challenge that would change the decision "
                              f"to {challenged.decision}; a human claims handler must review")
     record("orchestrator", "final", {"decision": final.decision, "contested": contested})
-    return Debate(c.facts.claim_id, "offline" if client is None else "claude", summary(original), adj, ch,
-                  summary(challenged), reb, summary(final), contested, trace)
+    o, chd, fin = summary(original), summary(challenged), summary(final)
+    hs = handler_summary(o, adj, ch, chd, reb, fin, contested, c.case_file)
+    return Debate(c.facts.claim_id, "offline" if client is None else "claude", o, adj, ch, chd, reb, fin,
+                  contested, hs, trace)
 
 
 # ----------------------------------------------------------------------------- CLI
@@ -317,22 +406,19 @@ def claims_from_synthetic(n: int, seed: int) -> list[Claim]:
 
 
 def render(d: Debate) -> str:
-    o, ch, f = d.original, d.challenged, d.final
-
-    def ev(x):
-        e = x["expected_recovery"]
-        return f"{fmt_gbp(e['low'])} / {fmt_gbp(e['mid'])} / {fmt_gbp(e['high'])}" if e else "n/a"
-
-    return "\n".join([
-        f"== {d.claim_id} ({d.mode})",
-        f"  ADJUSTER     {o['decision']:<16} {ev(o)}",
-        f"               {d.adjuster['recommendation']}",
-        f"  DEFENCE      attacks: {d.challenge['assumption']}",
-        f"               {d.challenge['argument']}",
-        f"               -> {ch['decision']:<13} {ev(ch)}",
-        f"  REBUTTAL     {d.rebuttal['verdict']}: {d.rebuttal['reasoning']}",
-        f"  FINAL        {f['decision']:<16} {ev(f)}" + ("   CONTESTED: human review" if d.contested else ""),
-    ])
+    h = d.handler_summary
+    lines = [f"== {d.claim_id} ({d.mode})",
+             f"  BOTTOM LINE  {h['bottom_line']}",
+             f"  STATUS       {h['status']}",
+             f"  WHAT HAPPENED {h['what_happened']}"]
+    lines += [f"  WHY          - {x}" for x in h["why"]]
+    lines += [f"  CHALLENGE    {h['what_the_challenge_changed']}",
+              f"  DEFENCE SAID {d.challenge.get('argument', '')}",
+              f"  CONCEDED     {h['conceded']}",
+              f"  MAINTAINED   {h['maintained']}"]
+    lines += [f"  CHECK        - {x}" for x in h["checks_for_you"]]
+    lines += [f"  NOTE         {x}" for x in h["caveats"]]
+    return "\n".join(lines)
 
 
 def main(argv: list[str] | None = None) -> None:

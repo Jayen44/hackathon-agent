@@ -142,7 +142,7 @@ def test_weakest_assumption_finds_the_flip():
     attacks = r.weakest_assumption(facts(), SPLIT, min_net_gbp=20_000)
     assert attacks[0].flips_decision
     assert attacks == sorted(attacks, key=lambda a: a.expected_recovery_mid)
-    assert any("careful_a only" in a.assumption and a.flips_decision for a in attacks)
+    assert any("careful a driver model alone" in a.assumption and a.flips_decision for a in attacks)
 
 
 def test_rank_and_map():

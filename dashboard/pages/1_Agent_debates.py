@@ -70,6 +70,20 @@ st.subheader("The debates")
 for d in debates:
     flag = "  ·  CONTESTED" if d["contested"] else ""
     with st.expander(f"{d['claim_id']}: {d['original']['decision']} → {d['final']['decision']}{flag}"):
+        h = d.get("handler_summary") or {}
+        if h:
+            st.markdown(f"### {h['bottom_line']}")
+            (st.warning if d["contested"] else st.success)(h["status"])
+            st.markdown(f"**What happened:** {h['what_happened']}")
+            if h["why"]:
+                st.markdown("**Why:**\n" + "\n".join(f"- {x}" for x in h["why"]))
+            st.markdown(f"**What the challenge changed:** {h['what_the_challenge_changed']}")
+            st.markdown(f"**Defence counsel got right:** {h['conceded']}  \n**Still stands:** {h['maintained']}")
+            if h["checks_for_you"]:
+                st.markdown("**Checks for you:**\n" + "\n".join(f"- [ ] {x}" for x in h["checks_for_you"]))
+            st.caption(" ".join(h["caveats"]))
+            st.divider()
+            st.markdown("**The full debate**")
         cf = d.get("case_file", {})
         v = cf.get("liability_verdict", {})
         if v:
