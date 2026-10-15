@@ -47,6 +47,12 @@ Decision = Literal["pursue", "dont_pursue", "pull_logs_first", "not_av_recovery"
 ENGAGEMENT = ("engaged_verified", "engaged_alleged", "not_engaged", "unknown")
 ODD = ("inside", "outside", "exiting", "unknown")
 SOFTWARE = ("compliant", "unauthorised_alteration", "safety_update_missing", "unknown")
+ROUTES = ("AEVA_s5", "contribution_1978", "CPA_1987", "policy_s4", "unspecified")   # = insurance/legal.py
+
+# AEVA 2018 s.2(4): property-damage liability per accident capped at the RTA 1988 s.145(4)(b) amount,
+# GBP 1,200,000 since 31 Dec 2016 (SI 2016/1193). CPA 1987 s.5(4): no property damages of GBP 275 or less.
+PROPERTY_CAP_GBP = 1_200_000
+CPA_PROPERTY_THRESHOLD_GBP = 275
 
 
 
@@ -109,6 +115,12 @@ class ClaimFacts:
     # True widens the worst case by the other side's costs, assumed equal to our own high legal cost (no sourced
     # figure for the defendant's spend). Mid and best cases are unchanged: no win probability is modelled.
     cost_shift_risk: bool = False
+    # Claim-value scope (#23). Parts of the PAID amount, so they apply only when paid_claim_gbp is known.
+    recovery_route: str = "unspecified"           # ROUTES; CPA_1987 adds the s.5 property rules
+    excluded_damage_gbp: float = 0.0              # outside AEVA s.2(3): the AV itself, goods carried for hire or
+                                                  # reward, property in the insured's / person in charge's custody
+    property_damage_gbp: float | None = None      # property-damage part of the in-scope paid amount
+    property_private: bool | None = None          # CPA s.5(3): ordinarily and mainly for private use? None = unknown
 
 
 @dataclass
@@ -194,6 +206,17 @@ def validate_facts(f: ClaimFacts) -> None:
             raise ValueError(f"legal_cost_gbp must be (low, high) with 0 < low <= high, got {f.legal_cost_gbp!r}")
     engagement_code(f.engagement_status)
     odd_code(f.within_odd)
+    if f.recovery_route not in ROUTES:
+        raise ValueError(f"recovery_route must be one of {ROUTES}, got {f.recovery_route!r}")
+    for name in ("excluded_damage_gbp", "property_damage_gbp"):
+        x = getattr(f, name)
+        if x is not None and not (finite(x) and x >= 0):
+            raise ValueError(f"{name} must be a finite amount >= 0, got {x!r}")
+    if f.paid_claim_gbp is not None:
+        if f.excluded_damage_gbp >= f.paid_claim_gbp:
+            raise ValueError("excluded_damage_gbp must be less than paid_claim_gbp")
+        if (f.property_damage_gbp or 0) > f.paid_claim_gbp - f.excluded_damage_gbp:
+            raise ValueError("property_damage_gbp cannot exceed the in-scope paid amount")
     tables.claim_value_for_severity(f.injury_severity)
     if f.third_party_share is not None:
         lo, hi = f.third_party_share
@@ -267,11 +290,50 @@ def _codes(f: ClaimFacts, cn_gate: str | None, n_models: int, decision: str, ev:
 
 def _claim_value(f: ClaimFacts) -> tuple[Interval | None, str]:
     if f.paid_claim_gbp is not None:
-        return Interval.point(f.paid_claim_gbp), "insurer claim file (amount paid)"
+        v = _in_scope(f)[0]
+        return v, "insurer claim file (amount paid)" + (", scoped to recoverable damage" if v.high < f.paid_claim_gbp else "")
     row = tables.claim_value_for_severity(f.injury_severity)
     if not row.priced:
         return None, row.source
     return Interval.span(row.low, row.high), f"{row.source} [{row.status}]"
+
+
+def _in_scope(f: ClaimFacts) -> tuple[Interval, list[str], list[str]]:
+    """Recoverable part of the paid amount (#23): (value, reasons, codes). Only meaningful when paid is known.
+
+    AEVA s.2(3): damage to the AV itself, goods carried for hire or reward and property in the insured's or
+    person in charge's custody are not s.2 damage, so they are not recoverable under s.5.
+    AEVA s.2(4): property damage above GBP 1.2m per accident is outside the insurer's s.2 liability.
+    CPA 1987 route: no property damage unless ordinarily and mainly for private use (s.5(3)), and none at
+    all if it is GBP 275 or less (s.5(4)); damage to the product itself is excluded (s.5(2), same as s.2(3)(a)).
+    """
+    reasons, codes = [], []
+    base = f.paid_claim_gbp - f.excluded_damage_gbp
+    if f.excluded_damage_gbp > 0:
+        reasons.append(f"{fmt_gbp(f.excluded_damage_gbp)} of the paid amount is outside AEVA s.2(3) "
+                       "(AV itself, goods carried for hire or reward, insured's own property): not recoverable")
+        codes.append("SCOPE_EXCLUDED")
+    prop = f.property_damage_gbp or 0.0
+    if prop > PROPERTY_CAP_GBP:
+        reasons.append(f"property damage above the {fmt_gbp(PROPERTY_CAP_GBP)} AEVA s.2(4) cap is not recoverable")
+        codes.append("PROPERTY_CAP")
+        base -= prop - PROPERTY_CAP_GBP
+        prop = PROPERTY_CAP_GBP
+    low = base
+    if f.recovery_route == "CPA_1987" and f.property_damage_gbp is not None and prop > 0:
+        if prop <= CPA_PROPERTY_THRESHOLD_GBP or f.property_private is False:
+            why = (f"£275 or less (CPA s.5(4))" if prop <= CPA_PROPERTY_THRESHOLD_GBP
+                   else "not for private use (CPA s.5(3))")
+            reasons.append(f"CPA route: property damage {fmt_gbp(prop)} is {why}, so it is not recoverable")
+            codes.append("CPA_PROPERTY_EXCLUDED")
+            base -= prop
+            low = base
+        elif f.property_private is None:
+            reasons.append(f"CPA route: property damage {fmt_gbp(prop)} counts only if it was for private use "
+                           "(CPA s.5(3)): unknown, so the low end excludes it")
+            codes.append("CPA_PRIVATE_UNKNOWN")
+            low = base - prop
+    return Interval(low, (low + base) / 2, base), reasons, codes
 
 
 def _legal_cost(f: ClaimFacts, value: Interval) -> tuple[Interval | None, str]:
@@ -365,6 +427,13 @@ def assess(f: ClaimFacts, avoidance: list[AvoidanceResult], min_net_gbp: float =
         reasons.append(near)
 
     codes = _codes(f, "unassessed" if cn_unassessed else None, len(avoidance), decision, ev, min_net_gbp, bool(near))
+    if f.paid_claim_gbp is not None:
+        _, scope_reasons, scope_codes = _in_scope(f)
+        reasons += scope_reasons
+        codes += scope_codes
+    elif f.excluded_damage_gbp or f.property_damage_gbp is not None:
+        reasons.append("scope exclusions (AEVA s.2(3), CPA s.5) apply to the paid amount; this value is a table "
+                       "estimate, so they were not applied")
     if _models_disagree(avoidance):
         codes.append("MODELS_DISAGREE")
     if decision == "pursue" and ev.low <= min_net_gbp:
