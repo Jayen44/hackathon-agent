@@ -238,6 +238,7 @@ def run_debate(c: Claim, client: Any = None, log: Callable[[dict], None] | None 
 
 
 # ----------------------------------------------------------------------------- CLI
+PRICE_IN_PER_TOKEN, PRICE_OUT_PER_TOKEN = 4 / 1e6, 20 / 1e6   # claude-opus-5-5 list price, USD
 def claims_from_synthetic(n: int, seed: int) -> list[Claim]:
     """Priced claims from the synthetic UK crash bundles (same pipeline as insurance.portfolio)."""
     from insurance.bridge import assess_bundle, claim_facts, to_avoidance_result
@@ -279,6 +280,7 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--n", type=int, default=5, help="synthetic crashes to generate (unpriced ones are skipped)")
     p.add_argument("--seed", type=int, default=7)
     p.add_argument("--offline", action="store_true", help="scripted stand-ins, no LLM calls")
+    p.add_argument("--max-claims", type=int, default=None, help="debate at most this many priced claims")
     p.add_argument("--db", help="also log every step to this SQLite file (agent.store events)")
     p.add_argument("--json", action="store_true")
     a = p.parse_args(argv)
@@ -293,7 +295,8 @@ def main(argv: list[str] | None = None) -> None:
         conn, seq = store.connect(Path(a.db)), iter(range(10**9))
         log = lambda row: store.log_event(conn, next(seq), "agent_step", row)  # noqa: E731
 
-    debates = [run_debate(c, client, log) for c in claims_from_synthetic(a.n, a.seed)]
+    claims = claims_from_synthetic(a.n, a.seed)[:a.max_claims]
+    debates = [run_debate(c, client, log) for c in claims]
     if a.json:
         print(json.dumps([d.to_dict() for d in debates], indent=1, default=str))
         return
@@ -301,6 +304,12 @@ def main(argv: list[str] | None = None) -> None:
         print(render(d) + "\n")
     print(f"{len(debates)} claims debated; {sum(d.contested for d in debates)} contested; "
           f"{sum(d.final['decision'] != d.original['decision'] for d in debates)} decisions changed by the challenge.")
+    tok = [t["detail"] for x in debates for t in x.trace if t["step"] == "usage"]
+    if tok:
+        i, o = sum(t["input_tokens"] for t in tok), sum(t["output_tokens"] for t in tok)
+        cost = i * PRICE_IN_PER_TOKEN + o * PRICE_OUT_PER_TOKEN
+        print(f"API usage: {len(tok)} calls, {i:,} input + {o:,} output tokens, about ${cost:.2f} "
+              f"(${cost / len(debates):.2f} per claim, list price)")
     print("Synthetic UK data; placeholder careful-driver models; triage evidence, not legal advice.")
 
 

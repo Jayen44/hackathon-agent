@@ -51,6 +51,10 @@ def run_agent(client: Any, *, name: str, system: str, prompt: str, tools: list[d
             betas=["server-side-fallback-2026-07-01"],
             fallbacks="default",
         )
+        usage = getattr(resp, "usage", None)
+        if usage is not None:
+            trace(name, "usage", {"input_tokens": usage.input_tokens, "output_tokens": usage.output_tokens,
+                                  "cache_read_input_tokens": getattr(usage, "cache_read_input_tokens", 0) or 0})
         if resp.stop_reason == "refusal":
             raise AgentError(f"{name}: model declined ({getattr(resp, 'stop_details', None)})")
         if resp.stop_reason == "max_tokens":
