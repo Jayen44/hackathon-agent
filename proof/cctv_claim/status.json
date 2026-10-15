@@ -1,0 +1,1 @@
+{"ok": true, "fps": 25.0, "width": 1920, "height": 1080, "n_frames": 241, "stride": 1, "frames_processed": 241, "model": "PekingU/rtdetr_r50vd_coco_o365 (Apache-2.0)", "tracker": "ByteTrack (supervision, MIT)", "threshold": 0.2, "plates_blurred": true, "thumbs": ["1", "2", "3"], "n_tracks": 3, "n_person_frames": 8}
