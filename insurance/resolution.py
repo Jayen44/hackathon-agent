@@ -36,34 +36,29 @@ class Resolution:
     next_steps: list[Step] = field(default_factory=list)
 
 
-def _gate_steps(reasons: list[str]) -> list[Step]:
-    out: list[Step] = []
-    for r in reasons:
-        low = r.lower()
-        if "engagement not verified" in low:
-            out.append(Step("engineer", "Pull the vehicle data storage (DSSAD) log to verify self-driving was engaged at impact",
-                            "PURSUE or RECOVER_FROM_INSURED"))
-        elif "odd" in low and ("outside" in low or "unknown" in low):
-            out.append(Step("engineer", "Confirm the operating conditions (ODD) at the crash location/time with the manufacturer",
-                            "PURSUE (target may be the operator instead)"))
-        elif "did not reproduce" in low:
-            out.append(Step("engineer", "Re-run the reconstruction with the raw logs until it reproduces the reported crash",
-                            "PURSUE"))
-        elif "contributory negligence not assessed" in low:
-            out.append(Step("claims handler", "Assess the injured party's contributory negligence (give a low-high share)",
-                            "PURSUE"))
-        elif "one careful-driver model" in low:
-            out.append(Step("engineer", "Run a second careful-driver model so the bracket closes (R157 Annex 3)", "PURSUE"))
-        elif "straddles" in low:
-            out.append(Step("insurer finance", "Replace the table value with the actual paid amount to narrow the range",
-                            "PURSUE or SETTLE_NO_RECOVERY"))
-        elif "aeva s.4" in low or "software" in low:
-            out.append(Step("claims handler", "Confirm no unauthorised software change or missed safety-critical update (AEVA s.4)",
-                            "PURSUE"))
-        elif "track limit" in low:
-            out.append(Step("counsel", "Value is near a court-track limit: get counsel's costs estimate before deciding",
-                            "PURSUE or SETTLE_NO_RECOVERY"))
-    return out
+_STEP_FOR_CODE = {
+    "ENGAGEMENT_UNVERIFIED": Step("engineer", "Pull the vehicle data storage (DSSAD) log to verify self-driving was engaged at impact",
+                                  "PURSUE or RECOVER_FROM_INSURED"),
+    "ODD_OUTSIDE": Step("engineer", "Confirm the operating conditions (ODD) at the crash location/time: the target may be the operator",
+                        "PURSUE (against the right party)"),
+    "ODD_UNKNOWN": Step("engineer", "Confirm the operating conditions (ODD) at the crash location/time with the manufacturer",
+                        "PURSUE"),
+    "NOT_REPRODUCED": Step("engineer", "Re-run the reconstruction with the raw logs until it reproduces the reported crash",
+                           "PURSUE"),
+    "CN_NOT_ASSESSED": Step("claims handler", "Assess the injured party's contributory negligence (give a low-high share)",
+                            "PURSUE"),
+    "ONE_MODEL": Step("engineer", "Run a second careful-driver model so the bracket closes (R157 Annex 3)", "PURSUE"),
+    "RANGE_STRADDLES": Step("insurer finance", "Replace the table value with the actual paid amount to narrow the range",
+                            "PURSUE or SETTLE_NO_RECOVERY"),
+    "SOFTWARE_UNCONFIRMED": Step("claims handler",
+                                 "Confirm no unauthorised software change or missed safety-critical update (AEVA s.4)", "PURSUE"),
+    "NEAR_TRACK_LIMIT": Step("counsel", "Value is near a court-track limit: get counsel's costs estimate before deciding",
+                             "PURSUE or SETTLE_NO_RECOVERY"),
+}
+
+
+def _gate_steps(codes: list[str]) -> list[Step]:
+    return [_STEP_FOR_CODE[c] for c in codes if c in _STEP_FOR_CODE]
 
 
 def resolve(r: BridgedAssessment, b: CrashBundle) -> Resolution:
@@ -91,7 +86,7 @@ def resolve(r: BridgedAssessment, b: CrashBundle) -> Resolution:
 
     a = r.recovery
     d = a.decision
-    gate = _gate_steps(a.reasons)
+    gate = _gate_steps(a.codes)
     if d == "pursue":
         return done("PURSUE", "Pursue the tech company.",
                     Step("counsel", "Send a letter before action citing AEVA s.5", "PURSUE"),

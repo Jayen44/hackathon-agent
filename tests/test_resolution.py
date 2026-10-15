@@ -13,3 +13,11 @@ def test_every_synthetic_crash_resolves_with_steps():
         r = assess_bundle(c.bundle, estimators=default_estimators(), reproduced=c.reproduced)
         x = resolve(r, c.bundle)
         assert x.outcome in OUTCOMES and x.next_steps, (c.bundle.case_id, x)
+
+
+def test_gate_codes_drive_steps_not_prose():
+    from finance.recovery import AvoidanceResult, ClaimFacts, assess
+    f = ClaimFacts("x", "cut_in", "Slight", "unknown", "unknown", False, None, 30_000, None, "unknown")
+    a = assess(f, [AvoidanceResult("a", .9, (.85, .95))])
+    for c in ("ENGAGEMENT_UNVERIFIED", "ODD_UNKNOWN", "NOT_REPRODUCED", "ONE_MODEL", "SOFTWARE_UNCONFIRMED"):
+        assert c in a.codes

@@ -124,6 +124,10 @@ class RecoveryAssessment:
     expected_recovery: Interval | None
     sources: list[str] = field(default_factory=list)
     disclaimer: str = DISCLAIMER
+    # Machine-readable twins of the gate/caveat reasons, so callers never parse prose. Stable names:
+    # ENGAGEMENT_UNVERIFIED, ODD_OUTSIDE, ODD_UNKNOWN, NOT_REPRODUCED, CN_NOT_ASSESSED, ONE_MODEL,
+    # RANGE_STRADDLES, SOFTWARE_UNCONFIRMED, NEAR_TRACK_LIMIT
+    codes: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -218,6 +222,31 @@ def _gates(f: ClaimFacts) -> list[str]:
     return g
 
 
+def _codes(f: ClaimFacts, cn_gate: str | None, n_models: int, decision: str, ev: Interval,
+           min_net: float, near_limit: bool) -> list[str]:
+    c = []
+    eng, odd = engagement_code(f.engagement_status), odd_code(f.within_odd)
+    if eng != "engaged_verified":
+        c.append("ENGAGEMENT_UNVERIFIED")
+    if odd in ("outside", "exiting"):
+        c.append("ODD_OUTSIDE")
+    elif odd != "inside":
+        c.append("ODD_UNKNOWN")
+    if not f.reproduced:
+        c.append("NOT_REPRODUCED")
+    if cn_gate:
+        c.append("CN_NOT_ASSESSED")
+    if n_models < 2:
+        c.append("ONE_MODEL")
+    if decision == "pull_logs_first" and ev.low <= min_net:
+        c.append("RANGE_STRADDLES")
+    if f.software_status == "unknown" and decision != "dont_pursue":
+        c.append("SOFTWARE_UNCONFIRMED")
+    if near_limit and decision != "dont_pursue":
+        c.append("NEAR_TRACK_LIMIT")
+    return c
+
+
 def _claim_value(f: ClaimFacts) -> tuple[Interval | None, str]:
     if f.paid_claim_gbp is not None:
         return Interval.point(f.paid_claim_gbp), "insurer claim file (amount paid)"
@@ -297,8 +326,9 @@ def assess(f: ClaimFacts, avoidance: list[AvoidanceResult], min_net_gbp: float =
     if near and decision != "dont_pursue":
         reasons.append(near)
 
+    codes = _codes(f, cn_gate, len(avoidance), decision, ev, min_net_gbp, bool(near))
     return RecoveryAssessment(**base, decision=decision, reasons=reasons, claim_value=value,
-                              legal_cost=cost, expected_recovery=ev, sources=[value_src, cost_src])
+                              legal_cost=cost, expected_recovery=ev, sources=[value_src, cost_src], codes=codes)
 
 
 CHANGE_KEYS = ("keep_model", "p_avoid_at_low_bound", "cn_low", "cn_high", "claim_value_gbp",

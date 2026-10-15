@@ -54,3 +54,4 @@ With PD 45 costs, a minor-injury claim (about £4-5k) never clears its own trial
 - Still modelled out: cost-shifting if the insurer loses, delay, settlement discount, cost of pulling logs.
 - `ClaimFacts.cost_shift_risk` (default False, also `assess_bundle(cost_shift_risk=)`): CPR 44.2(2) loser-pays. Widens the worst case by the other side's costs, ASSUMED equal to our high legal cost (unsourced). Mid/best unchanged.
 - Table-priced Serious/Fatal claims carry a "general damages only" reason (special damages and dependency excluded).
+- `RecoveryAssessment.codes`: stable machine-readable gate/caveat codes (ENGAGEMENT_UNVERIFIED, ODD_OUTSIDE, ODD_UNKNOWN, NOT_REPRODUCED, CN_NOT_ASSESSED, ONE_MODEL, RANGE_STRADDLES, SOFTWARE_UNCONFIRMED, NEAR_TRACK_LIMIT). Callers (insurance/resolution.py) use these, never the prose in `reasons`. Add a code when you add a gate.
