@@ -36,7 +36,15 @@ class Resolution:
     next_steps: list[Step] = field(default_factory=list)
 
 
+# Codes that need no action of their own (decision-context or handled by the outcome itself).
+INFORMATIONAL_CODES = {"NOT_ENGAGED", "S4_SOFTWARE_BREACH", "NO_SOURCED_VALUE", "NO_SOURCED_LEGAL_COST"}
+
 _STEP_FOR_CODE = {
+    "MODELS_DISAGREE": Step("engineer", "The careful-driver models fall either side of 50%: check the reconstruction inputs (gap, speed, "
+                            "perception time) and gather evidence that separates the models before relying on the result",
+                            "PURSUE or SETTLE_NO_RECOVERY"),
+    "LITIGATION_DOWNSIDE": Step("counsel", "Worst case is a lost trial: open with a pre-action letter only, reserve the adverse-costs "
+                                "exposure, and escalate to proceedings only if the response justifies it", "PURSUE"),
     "ENGAGEMENT_UNVERIFIED": Step("engineer", "Send a preservation letter for the vehicle's DSSAD/ADS logs and request them; if refused, apply for pre-action disclosure (CPR 31.16). No statutory right to the data exists",
                                   "PURSUE or RECOVER_FROM_INSURED"),
     "ODD_OUTSIDE": Step("engineer", "Confirm the operating conditions (ODD) at the crash location/time: the target may be the operator",

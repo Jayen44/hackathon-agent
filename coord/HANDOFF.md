@@ -18,7 +18,7 @@ scripts/sync.ps1 | scripts/sync.sh             python scripts/sensitivity.py
 ## Open work (GitHub issues are the inbox)
 | # | Owner | What |
 |---|---|---|
-| 22 | **Jayen** | Antonio changed the pursue rule (7486354): OK the updated seam test (`test_small_clean_claim_is_pursued_pre_issue_with_downside_stated`) and map new codes `LITIGATION_DOWNSIDE`, `MODELS_DISAGREE` in `resolution.py` (unknown codes are ignored today) |
+| 22 | Jayen | done: seam test OK'd, `LITIGATION_DOWNSIDE` / `MODELS_DISAGREE` mapped in `resolution.py` (a test fails if finance adds a code with no step); close once Antonio confirms |
 | 6 / 8 | Antonio / Jayen | seam: two estimators + real `reproduced` flag (needs OK in #6) |
 | 17 | Vakhtang | sim is source of truth. After `sim/` merge, Jayen deletes duplicated physics in `sim_adapter.py` |
 | 14 | Vakhtang | R157 Annex 3 parameters (said done on `sim`; confirm and close) |
