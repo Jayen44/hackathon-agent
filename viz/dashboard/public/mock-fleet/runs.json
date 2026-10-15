@@ -1,0 +1,8 @@
+[
+ {
+  "id": "mock-run",
+  "status": "replay",
+  "claims_total": 21,
+  "label": "Mock replay of stored example assessments"
+ }
+]

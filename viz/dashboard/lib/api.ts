@@ -1,0 +1,99 @@
+// Client for the Modal claims API (viz/api/app.py). The dashboard never computes a result itself.
+export const API_BASE = (process.env.NEXT_PUBLIC_API_BASE ?? "https://termvato--accel-claims-api-web.us-east.modal.run").replace(/\/$/, "");
+
+export type Interval = { low: number; mid: number; high: number };
+export type DriverResult = {
+  p_avoid: number;
+  ci90: [number, number];
+  n_samples: number;
+  avoids_at_p50: boolean;
+  median_impact_speed_mps: number;
+  model: string;
+  notes: string[];
+};
+export type SensRow = {
+  param: string; source: string; lo: number; hi: number; swing: number;
+  p_at_lo: Record<string, number>; p_at_hi: Record<string, number>;
+};
+export type InfoRequest = {
+  id: string; title: string; why: string; expected_effect: string; impact: number;
+  blocks_pricing: boolean; category: string; rank: number;
+};
+export type Recovery = {
+  claim_id: string; crash_type: string; decision: string; reasons: string[];
+  p_avoid: Interval; av_share: Interval; claim_value: Interval | null; legal_cost: Interval | null;
+  expected_recovery: Interval | null; sources: string[]; disclaimer: string;
+};
+export type Verdict = {
+  liable: string; confidence: string; summary: string; recovery_case: boolean;
+  steps: { name: string; outcome: string; detail: string; code: string }[];
+  findings: string[]; evidence_missing: string[]; review_items: string[]; exclusions: string[];
+};
+export type Claim = {
+  claim_id: string;
+  synthetic: boolean | null;
+  source: "form" | "bundle";
+  origin?: string;
+  crash_type: string | null;
+  evidence_tier: number;
+  sim: null | {
+    drivers: Record<string, DriverResult>;
+    paired?: Record<string, unknown>;
+    reproduction: null | { rate: number; ci90: [number, number]; n: number; reproduced_flag: boolean; mismatches: Record<string, number> };
+    data_sufficiency: { score: number; decisive: string[]; reported: string[]; narrative: string[]; prior: string[] };
+    ranges: Record<string, { lo: number; hi: number; source: string }>;
+    sensitivity: SensRow[];
+    go_get: string | null;
+    evidence_band: [number, number] | null;
+    scenario_type: string;
+  };
+  sim_error: string | null;
+  timeline_check: null | { consistent: boolean | null; reason?: string | null; time_to_close_at_constant_speed_s?: number; reported_time_to_crash_s?: number };
+  data_sufficiency: { score: number; decisive: string[]; reported: string[]; narrative: string[]; prior: string[] } | null;
+  sufficiency_gate: { threshold: number; score: number | null; applied: boolean };
+  projection: null | { tier: number; band_now: [number, number] | null; next: Record<string, { band: [number, number] | null; data_sufficiency: number }> };
+  gbp: { available: boolean; decision: string; reason: string | null; notes: string[]; verdict?: Verdict; recovery: Recovery | null };
+  decision: string;
+  decision_label: string;
+  engine_decision: string;
+  expected_recovery_gbp: Interval | null;
+  information_requests: InfoRequest[];
+  unknowns: string[];
+  assumptions: string[];
+  disclaimer: string;
+  has_replay?: boolean;
+  debate?: import("@/components/debate").Debate;
+};
+export type InboxRow = {
+  claim_id: string; crash_type?: string | null; evidence_tier?: number; synthetic?: boolean; source?: string; origin?: string;
+  p_avoid?: Record<string, { p: number; ci90: [number, number] }>;
+  evidence_band?: [number, number] | null;
+  expected_recovery_gbp?: Interval | null;
+  decision: string | null; decision_label: string; reason?: string | null;
+};
+
+async function j<T>(path: string, init?: RequestInit): Promise<T> {
+  const r = await fetch(API_BASE + path, { cache: "no-store", ...init });
+  if (!r.ok) {
+    let msg = `HTTP ${r.status}`;
+    try { const b = await r.json(); const d = b.detail ?? b.error; if (d) msg = typeof d === "string" ? d : JSON.stringify(d); } catch { /* keep */ }
+    throw new Error(msg);
+  }
+  return r.json() as Promise<T>;
+}
+
+export const listClaims = () => j<InboxRow[]>("/api/claims");
+export const assessExample = (id: string) => j<{ claim_id: string; status: string }>(`/api/examples/${encodeURIComponent(id)}/assess`, { method: "POST" });
+export const submitAssessment = (body: { form?: unknown; bundle?: unknown }) =>
+  j<{ claim_id: string; status: string }>("/api/assess", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+export const replayUrl = (id: string) => `${API_BASE}/api/replay/${encodeURIComponent(id)}`;
+
+/** Poll until the assessment is stored. Returns the claim, or throws with the backend's error. */
+export async function getClaim(id: string): Promise<{ status: "done"; claim: Claim } | { status: "running"; started?: number } | { status: "missing" }> {
+  const r = await fetch(`${API_BASE}/api/claims/${encodeURIComponent(id)}`, { cache: "no-store" });
+  if (r.status === 404) return { status: "missing" };
+  if (r.status === 202) { const b = await r.json(); return { status: "running", started: b.started }; }
+  const b = await r.json();
+  if (!r.ok) throw new Error(b.error ?? `HTTP ${r.status}`);
+  return { status: "done", claim: b as Claim };
+}
