@@ -1,0 +1,325 @@
+[
+ {
+  "schema_version": "0.1",
+  "synthetic": true,
+  "jurisdiction": "UK",
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": true,
+   "objects": [
+    {
+     "id": "hazard1",
+     "cls": "vehicle",
+     "first_detected_t": 100.0,
+     "confidence": 0.95
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "street_cam_demo"
+   ],
+   "witnesses": 1,
+   "police_report": true,
+   "medical_records": true,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0,
+    "camera": 0.02,
+    "cctv": 0.1
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "case_id": "DEMO-1_queue_late_brake",
+  "_fleet_source": "demo",
+  "_fleet_label": "synthetic demo claim (self-consistent; values illustrative)",
+  "narrative": "AV approaches a stationary queue visible from 55 m at 40 mph and brakes late and softly. Synthetic demo claim.",
+  "vehicle": {
+   "software_version": "2.4.1",
+   "approved_software": [
+    "2.4.1"
+   ],
+   "software_verified": true,
+   "occupant": "user_in_charge",
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "manual"
+    },
+    {
+     "t": 40.0,
+     "mode": "automated"
+    }
+   ],
+   "handover": {
+    "demand_t": null,
+    "human_response_t": null
+   },
+   "driver_monitoring": [
+    {
+     "t": 95.0,
+     "eyes_on_road": true,
+     "hands_on_wheel": false
+    }
+   ],
+   "faults": [],
+   "odd_inside": true,
+   "control_inputs": [
+    {
+     "t": 102.6,
+     "source": "system",
+     "brake": 0.45,
+     "throttle": 0.0,
+     "steer": 0.0
+    }
+   ]
+  },
+  "conflict": {
+   "hazard_id": "hazard1",
+   "t_start": 100.0,
+   "kind": "constant_hazard",
+   "crash_type": "lead_vehicle_decel",
+   "ego_speed_mps": 17.9,
+   "gap_m": 55.0,
+   "hazard_speed_mps": 0.0,
+   "friction_mu": 0.8
+  },
+  "t_crash": 103.1,
+  "outcome": {
+   "collided": true,
+   "impact_speed_mps": 16.13,
+   "injury_severity": "Serious",
+   "paid_claim_gbp": 62000,
+   "third_party_share": [
+    0.0,
+    0.05
+   ]
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "synthetic": true,
+  "jurisdiction": "UK",
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": true,
+   "objects": [
+    {
+     "id": "hazard1",
+     "cls": "vehicle",
+     "first_detected_t": 100.0,
+     "confidence": 0.95
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "street_cam_demo"
+   ],
+   "witnesses": 1,
+   "police_report": true,
+   "medical_records": true,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0,
+    "camera": 0.02,
+    "cctv": 0.1
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "case_id": "DEMO-2_lead_brake_late_response",
+  "_fleet_source": "demo",
+  "_fleet_label": "synthetic demo claim (self-consistent; values illustrative)",
+  "narrative": "Vehicle ahead brakes firmly at 50 mph; AV responds 2.2 s later with partial braking. Synthetic demo claim.",
+  "vehicle": {
+   "software_version": "2.4.1",
+   "approved_software": [
+    "2.4.1"
+   ],
+   "software_verified": true,
+   "occupant": "user_in_charge",
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "manual"
+    },
+    {
+     "t": 40.0,
+     "mode": "automated"
+    }
+   ],
+   "handover": {
+    "demand_t": null,
+    "human_response_t": null
+   },
+   "driver_monitoring": [
+    {
+     "t": 95.0,
+     "eyes_on_road": true,
+     "hands_on_wheel": false
+    }
+   ],
+   "faults": [],
+   "odd_inside": true,
+   "control_inputs": [
+    {
+     "t": 102.2,
+     "source": "system",
+     "brake": 0.5,
+     "throttle": 0.0,
+     "steer": 0.0
+    }
+   ]
+  },
+  "conflict": {
+   "hazard_id": "hazard1",
+   "t_start": 100.0,
+   "kind": "lead_braking",
+   "crash_type": "lead_vehicle_decel",
+   "ego_speed_mps": 22.0,
+   "gap_m": 30.0,
+   "hazard_speed_mps": 22.0,
+   "hazard_decel_mps2": 5.5,
+   "friction_mu": 0.8
+  },
+  "t_crash": 103.48,
+  "outcome": {
+   "collided": true,
+   "impact_speed_mps": 17.06,
+   "injury_severity": "Serious",
+   "paid_claim_gbp": 54000,
+   "third_party_share": [
+    0.0,
+    0.1
+   ]
+  }
+ },
+ {
+  "schema_version": "0.1",
+  "synthetic": true,
+  "jurisdiction": "UK",
+  "perception": {
+   "sensors": [
+    "camera",
+    "lidar",
+    "radar"
+   ],
+   "decision_log_present": true,
+   "objects": [
+    {
+     "id": "hazard1",
+     "cls": "vehicle",
+     "first_detected_t": 100.0,
+     "confidence": 0.95
+    }
+   ]
+  },
+  "external": {
+   "cctv": [
+    "street_cam_demo"
+   ],
+   "witnesses": 1,
+   "police_report": true,
+   "medical_records": true,
+   "weather": "dry",
+   "lighting": "daylight"
+  },
+  "integrity": {
+   "hashes_present": true,
+   "chain_of_custody": true,
+   "clock_offsets_s": {
+    "vehicle_log": 0.0,
+    "camera": 0.02,
+    "cctv": 0.1
+   },
+   "log_gaps": [],
+   "tamper_flag": false
+  },
+  "case_id": "DEMO-3_cut_in_ample_gap",
+  "_fleet_source": "demo",
+  "_fleet_label": "synthetic demo claim (self-consistent; values illustrative)",
+  "narrative": "Slower car merges 32 m ahead; AV keeps speed until it is in lane and brakes too gently. Synthetic demo claim.",
+  "vehicle": {
+   "software_version": "2.4.1",
+   "approved_software": [
+    "2.4.1"
+   ],
+   "software_verified": true,
+   "occupant": "user_in_charge",
+   "mode_events": [
+    {
+     "t": 0.0,
+     "mode": "manual"
+    },
+    {
+     "t": 40.0,
+     "mode": "automated"
+    }
+   ],
+   "handover": {
+    "demand_t": null,
+    "human_response_t": null
+   },
+   "driver_monitoring": [
+    {
+     "t": 95.0,
+     "eyes_on_road": true,
+     "hands_on_wheel": false
+    }
+   ],
+   "faults": [],
+   "odd_inside": true,
+   "control_inputs": [
+    {
+     "t": 103.2,
+     "source": "system",
+     "brake": 0.4,
+     "throttle": 0.0,
+     "steer": 0.0
+    }
+   ]
+  },
+  "conflict": {
+   "hazard_id": "hazard1",
+   "t_start": 100.0,
+   "kind": "cut_in",
+   "crash_type": "cut_in",
+   "ego_speed_mps": 20.0,
+   "gap_m": 32.0,
+   "hazard_speed_mps": 12.0,
+   "t_in_path_s": 2.0,
+   "friction_mu": 0.8
+  },
+  "t_crash": 104.18,
+  "outcome": {
+   "collided": true,
+   "impact_speed_mps": 16.99,
+   "injury_severity": "Serious",
+   "paid_claim_gbp": 72000,
+   "third_party_share": [
+    0.0,
+    0.1
+   ]
+  }
+ }
+]

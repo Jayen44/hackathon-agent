@@ -79,11 +79,20 @@ def classify_impact(ego: VehicleState, eg: Geometry, other: VehicleState) -> Imp
     return "side"
 
 
+# A run that ends while still closing counts as "avoidance not proven" only if the remaining
+# time-to-collision is short. Borrowed from R157 Annex 3 3.3.2.1's 2 s TTC danger threshold;
+# INTERPRETATION: a careful driver creeping slowly up to a stopped car (TTC well above 2 s)
+# is not on course for a collision.
+UNPROVEN_TTC_S = 2.0
+
+
 def _closing_in_lane(ego: VehicleState, eg: Geometry, actors: dict[str, VehicleState],
                      geoms: dict[str, Geometry]) -> bool:
     for n, st in actors.items():
         if st.x > ego.x and abs(st.y - ego.y) < (eg.width + geoms[n].width) / 2:
-            if ego.velocity()[0] - st.velocity()[0] > 0:
+            closing = ego.velocity()[0] - st.velocity()[0]
+            gap = st.x - ego.x - (eg.length + geoms[n].length) / 2
+            if closing > 0 and gap / closing < UNPROVEN_TTC_S:
                 return True
     return False
 

@@ -47,7 +47,8 @@ def _vendor_insurance() -> pathlib.Path | None:
 image = (modal.Image.debian_slim(python_version="3.12")
          .pip_install("numpy", "fastapi[standard]", "anthropic", "python-dotenv")
          .add_local_python_source("sim", "montecarlo")
-         .add_local_file(HERE / "claims.py", "/root/viz/api/claims.py"))
+         .add_local_file(HERE / "claims.py", "/root/viz/api/claims.py")
+         .add_local_file(HERE.parent.parent / "fleet" / "data" / "demo_claims.json", "/root/demo_claims.json"))
 if modal.is_local():
     _v = _vendor_insurance()
     if _v is not None:
@@ -74,10 +75,14 @@ def _modal_map(ranges, factories, chunks):
 
 def _examples() -> dict[str, dict]:
     import json
+    out: dict[str, dict] = {}
+    demo = pathlib.Path("/root/demo_claims.json")  # self-consistent synthetic demo claims (fleet/demo_claims.py)
+    if demo.exists():
+        out.update({b["case_id"]: b for b in json.loads(demo.read_text())})
     d = pathlib.Path("/root/insurance/examples")
-    if not d.exists():
-        return {}
-    return {p.stem: json.loads(p.read_text()) for p in sorted(d.glob("*.json"))}
+    if d.exists():
+        out.update({p.stem: json.loads(p.read_text()) for p in sorted(d.glob("*.json"))})
+    return out
 
 
 def _debate_client():

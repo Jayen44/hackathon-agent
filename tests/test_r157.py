@@ -197,13 +197,14 @@ def test_lead_decel_1g_at_thw2_is_avoided(name, kph):
     assert not run_policy(scen, MODELS[name])[0].collided
 
 
-def test_pm2_lead_decel_1g_at_thw2_60kph_is_a_low_speed_contact():
-    # Documented model limit: b_ego,max = 6 m/s^2 against a 1 g lead stop.
+def test_pm2_lead_decel_1g_at_thw2_60kph_is_avoided_with_d1_margin():
+    # With the Table 3 d1 stop margin applied in CFS (interpretation, see careful_b.py) PM2 avoids the
+    # 1 g lead stop at THW 2 s, consistent with Annex 3 3.3.4.3. Literal CFS gave a <1 m/s contact.
     v = 60 * KPH
     lead = ScriptedActor("lead", REF_CAR, VehicleState(2.0 * v + REF_CAR.length, 0, 0, v),
                          accel_profile=[(0.0, -careful_a.G)])
     r, _ = run_policy(SimScenario(REF_CAR, VehicleState(0, 0, 0, v), [lead], duration=15.0), careful_b)
-    assert r.collided and r.relative_speed_at_impact < 1.0
+    assert not r.collided
 
 
 @pytest.mark.parametrize("name", MODELS)
