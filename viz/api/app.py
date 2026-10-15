@@ -62,6 +62,18 @@ store = modal.Dict.from_name("accel-claims-store", create_if_missing=True)
 CORS_ORIGIN_REGEX = (r"https://accel-claims-dashboard[a-z0-9-]*\.vercel\.app|https://termvato--accel-simlab-web\.us-east\.modal\.run|"
                      r"http://localhost:\d+|http://127\.0\.0\.1:\d+")
 MAX_BODY_BYTES = 512_000
+# Sim Lab (viz/lab): the measured CCTV bundle is fetched from here server-side, never taken from the browser.
+SIMLAB_BASE = "https://termvato--accel-simlab-web.us-east.modal.run"
+
+
+def _fetch_cctv_bundle(vid: str, rid: str) -> dict:
+    import json
+    import re
+    import urllib.request
+    if not re.fullmatch(r"[0-9a-f]{32}", vid or "") or not re.fullmatch(r"[0-9a-f]{12}", rid or ""):
+        raise ValueError("bad CCTV video or run id")
+    with urllib.request.urlopen(f"{SIMLAB_BASE}/api/bundle/{vid}/{rid}", timeout=30) as r:
+        return json.loads(r.read(400_000))
 
 
 @app.function(cpu=1.0, memory=512, timeout=300)
@@ -239,7 +251,7 @@ def web():
     from fastapi.middleware.cors import CORSMiddleware
     from fastapi.responses import JSONResponse
 
-    from viz.api.claims import cctv_meta, form_to_bundle, insurance_available
+    from viz.api.claims import cctv_meta, form_to_bundle, insurance_available, merge_cctv
 
     api = FastAPI(title="Accel claims API")
     api.add_middleware(CORSMiddleware, allow_origin_regex=CORS_ORIGIN_REGEX, allow_methods=["GET", "POST"],
@@ -352,6 +364,21 @@ def web():
                 bundle, meta = form_to_bundle(body["form"] or {})
             except (ValueError, TypeError) as e:
                 raise HTTPException(400, f"form: {e}")
+            cc = body.get("cctv")
+            if isinstance(cc, dict) and cc.get("video_id"):
+                # CCTV measured in the intake form (Sim Lab run): merge its tier-1 ranges into the form bundle.
+                vid, rid = str(cc.get("video_id")), str(cc.get("run_id") or "")
+                try:
+                    cb = await asyncio.to_thread(_fetch_cctv_bundle, vid, rid)
+                except ValueError as e:
+                    raise HTTPException(400, f"cctv: {e}")
+                except Exception as e:
+                    raise HTTPException(502, f"cctv: could not fetch the measured run from the Sim Lab ({type(e).__name__})")
+                disp = cc.get("display") if isinstance(cc.get("display"), dict) else None
+                try:
+                    bundle, meta = merge_cctv(bundle, meta, body["form"] or {}, cb, disp, vid, rid)
+                except (ValueError, TypeError, KeyError) as e:
+                    raise HTTPException(400, f"cctv: {e}")
         elif "bundle" in body or "schema_version" in body:
             bundle, meta = body.get("bundle", body), None
             if not isinstance(bundle, dict) or bundle.get("schema_version") != "0.1":

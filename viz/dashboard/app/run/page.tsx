@@ -123,6 +123,10 @@ export default function AgentRun() {
   const feed = [...events].reverse().slice(0, 40);
   const run = runs?.find((r) => r.id === runId);
   const total = portfolio?.claims_total ?? run?.claims_total;
+  // Wall-clock run time from the run's own start (not from the first event loaded); finished runs stop at their last step.
+  const runStart = run?.started_at ? Date.parse(run.started_at) : events.length ? t0 : null;
+  const lastTs = events.length ? Math.max(...events.map((e) => e.ts)) : now;
+  const runEnd = !run?.status || run.status === "running" ? now : lastTs;
 
   return (
     <div className="space-y-5">
@@ -153,7 +157,7 @@ export default function AgentRun() {
       <div className="grid gap-3 sm:grid-cols-4">
         {[
           ["Status", run?.status ?? (events.length ? "running" : "waiting")],
-          ["Running time", events.length ? fmtDur((now - t0) / 1000) : "–"],
+          ["Running time", runStart ? fmtDur(Math.max(0, (runEnd - runStart) / 1000)) : "–"],
           ["Claims processed", `${portfolio?.claims_processed ?? priced.size}${total ? ` / ${total}` : ""}`],
           ["Agent steps", String(events.length)],
         ].map(([k, v]) => (
@@ -192,7 +196,7 @@ export default function AgentRun() {
                     <time className="num text-[11px] text-muted">{new Date(e.ts).toLocaleTimeString("en-GB")}</time>
                   </div>
                   <p className="mt-0.5">{e.summary}</p>
-                  {e.output_summary && <p className="mt-0.5 text-xs text-muted">{e.output_summary}</p>}
+                  {e.output_summary && !/^[[{]/.test(e.output_summary) && <p className="mt-0.5 text-xs text-muted">{e.output_summary}</p>}
                   {e.claim_id && <Link href={`/claims/${encodeURIComponent(e.claim_id)}`} className="text-xs text-accent hover:underline">{e.claim_id}</Link>}
                 </li>
               ))}

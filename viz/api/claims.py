@@ -461,6 +461,83 @@ def cctv_meta(bundle: dict) -> dict:
             "evidence": {"cctv": True, "dashcam": False, "av_logs": logs, "police_report": False, "witnesses": False}}
 
 
+# Form field -> the CCTV conflict_ranges it pins (SI factor applied to the form value).
+CCTV_FORM_FIELDS = {"ego_speed_mph": ("ego_speed", MPH), "other_speed_mph": ("other_speed", MPH), "gap_m": ("gap", 1.0),
+                    "lead_decel_mps2": ("other_decel", 1.0)}
+CCTV_RANGES_BY_TYPE = {"cut_in": ("lateral_offset", "cut_in_start", "cut_in_duration"),
+                       "lead_vehicle_decel": ("other_decel", "other_brake_time")}
+CCTV_RANGES_ANY = ("ego_speed", "other_speed", "gap", "av_brake_start", "av_decel")
+
+
+def _inside(v: float, r: dict, tol: float) -> bool:
+    return float(r["lo"]) - tol <= v <= float(r["hi"]) + tol
+
+
+def merge_cctv(bundle: dict, meta: dict, form: dict, cctv_bundle: dict, run_info: dict | None,
+               video_id: str, run_id: str) -> tuple[dict, dict]:
+    """Intake-form bundle + the Sim Lab's measured CCTV run (fetched server-side, not from the browser) -> one bundle.
+
+    A measured range is used for a fact unless the insurer typed a value OUTSIDE it (then their value wins and gets
+    the usual tier-1 half-width). Facts the form cannot express (lateral offset, AV braking, brake timing) always
+    come from CCTV. Ranges for another crash type than the form's are dropped. Evidence tier 1, video hash recorded.
+    """
+    if not _HEX32.match(video_id or "") or not _HEX12.match(run_id or ""):
+        raise ValueError("bad CCTV video or run id")
+    b, meta = copy.deepcopy(bundle), dict(meta)
+    c = b.get("conflict") or {}
+    ccr = (cctv_bundle.get("conflict_ranges") or {})
+    ctype = c.get("crash_type")
+    keep = set(CCTV_RANGES_ANY) | set(CCTV_RANGES_BY_TYPE.get(ctype, ()))
+    cr = b.get("conflict_ranges") or {}
+    used, overridden = [], []
+    for name, r in ccr.items():
+        if name not in keep:
+            continue
+        field = next((f for f, (p, _) in CCTV_FORM_FIELDS.items() if p == name), None)
+        if field is not None and _num_or_none(form.get(field)) is not None:
+            v = _num_or_none(form[field]) * CCTV_FORM_FIELDS[field][1]
+            if not _inside(v, r, max(0.05, 0.01 * abs(v))):
+                overridden.append(name)
+                cr.pop(name, None)
+                continue
+        cr[name] = {"lo": float(r["lo"]), "hi": float(r["hi"]), "source": "reported"}
+        used.append(name)
+    if ctype == "cut_in" and {"cut_in_start", "cut_in_duration"} <= set(used):
+        tt = _num_or_none(form.get("cut_in_time_s"))
+        mid = sum((ccr[k]["lo"] + ccr[k]["hi"]) / 2 for k in ("cut_in_start", "cut_in_duration"))
+        if tt is not None and abs(tt - mid) > 0.05:   # insurer overrode the cut-in timing
+            for k in ("cut_in_start", "cut_in_duration"):
+                cr.pop(k, None)
+                used.remove(k)
+            overridden.append("cut_in_timing")
+    b["conflict_ranges"] = cr
+    co = cctv_bundle.get("outcome") or {}
+    if form.get("collided") in (None, "", "unknown") and "collided" in co:
+        b["outcome"]["collided"] = bool(co["collided"])
+    sha = (cctv_bundle.get("integrity") or {}).get("video_sha256")
+    ext = b.setdefault("external", {})
+    ext["cctv"] = [video_id] + [x for x in ext.get("cctv", []) if x not in ("cctv", video_id)]
+    integ = b.setdefault("integrity", {})
+    if sha:
+        integ["hashes_present"] = True
+        integ["video_sha256"] = sha
+    run_info = run_info or {}
+    cal = run_info.get("calibration_input") or {}
+    b["cctv_evidence"] = {
+        "video_id": video_id, "run_id": run_id, "sha256": sha, "tier": 1,
+        "measured": run_info.get("measured") or {}, "ego_ids": run_info.get("ego_ids") or [],
+        "other_ids": run_info.get("other_ids") or [], "frame": run_info.get("frame") or {},
+        "calibration": {"mode": cal.get("mode"), "img_pts": cal.get("img_pts") or [],
+                        "reprojection_rms_m": (run_info.get("calibration") or {}).get("reprojection_rms_m")},
+        "paths": run_info.get("paths") or {}, "ranges_used": used, "overridden_by_insurer": overridden,
+    }
+    meta["tier"] = max(int(meta.get("tier") or 0), 1)
+    meta["evidence"] = {**(meta.get("evidence") or {}), "cctv": True}
+    meta["unknowns"] = [u for u in meta.get("unknowns", []) if not (
+        (u in CCTV_FORM_FIELDS and CCTV_FORM_FIELDS[u][0] in used) or (u == "cut_in_time_s" and "cut_in_duration" in used))]
+    return b, meta
+
+
 def cctv_summary(bundle: dict) -> dict | None:
     """Display-only CCTV provenance for the dashboard. Untrusted input: whitelisted keys, checked ids, numbers only."""
     ce = bundle.get("cctv_evidence")
@@ -493,6 +570,9 @@ def cctv_summary(bundle: dict) -> dict | None:
         "measured": {k: vs(m.get(k)) for k in ("ego_speed_mps", "other_speed_mps", "gap_m",
                                                 "ego_speed_before_impact_mps") if isinstance(m.get(k), dict)},
         "min_gap_m": num(m.get("min_gap_m")),
+        "ranges_used": [str(x) for x in (ce.get("ranges_used") or []) if str(x) in PARAM_LABEL or str(x).startswith("av_")][:12],
+        "overridden_by_insurer": [str(x) for x in (ce.get("overridden_by_insurer") or [])
+                                  if str(x) in PARAM_LABEL or str(x) == "cut_in_timing"][:12],
         "ego_ids": [int(i) for i in (ce.get("ego_ids") or []) if isinstance(i, int)][:20],
         "other_ids": [int(i) for i in (ce.get("other_ids") or []) if isinstance(i, int)][:20],
         "frame": {"width": num(fr.get("width")), "height": num(fr.get("height"))},

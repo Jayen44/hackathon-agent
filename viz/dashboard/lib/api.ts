@@ -3,15 +3,12 @@ export const API_BASE = (process.env.NEXT_PUBLIC_API_BASE ?? "https://termvato--
 
 // Sim Lab (viz/lab on Modal): CCTV upload -> measured speeds -> "Send to claims desk" -> /claims/<id> here.
 export const SIMLAB_BASE = (process.env.NEXT_PUBLIC_SIMLAB_BASE ?? "https://termvato--accel-simlab-web.us-east.modal.run").replace(/\/$/, "");
-/** Sim Lab CCTV page; `returnOrigin` is where "Send to claims desk" redirects (validated by the Sim Lab). */
-export const cctvUploadUrl = (returnOrigin?: string) =>
-  `${SIMLAB_BASE}/cctv${returnOrigin ? `?return=${encodeURIComponent(returnOrigin)}` : ""}`;
 
 export type Measured = { value: number | null; sd: number | null };
 export type CctvEvidence = {
   video_id: string; run_id: string; tier: number; sha256: string | null;
   measured: Partial<Record<"ego_speed_mps" | "other_speed_mps" | "gap_m" | "ego_speed_before_impact_mps", Measured>>;
-  min_gap_m: number | null; ego_ids: number[]; other_ids: number[];
+  min_gap_m: number | null; ranges_used?: string[]; overridden_by_insurer?: string[]; ego_ids: number[]; other_ids: number[];
   frame: { width: number | null; height: number | null };
   calibration: { mode: string | null; img_pts: [number, number][]; reprojection_rms_m: number | null };
   paths: { av: [number, number][]; other: [number, number][] };
@@ -101,7 +98,7 @@ async function j<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const listClaims = () => j<InboxRow[]>("/api/claims");
 export const assessExample = (id: string) => j<{ claim_id: string; status: string }>(`/api/examples/${encodeURIComponent(id)}/assess`, { method: "POST" });
-export const submitAssessment = (body: { form?: unknown; bundle?: unknown }) =>
+export const submitAssessment = (body: { form?: unknown; bundle?: unknown; cctv?: unknown }) =>
   j<{ claim_id: string; status: string }>("/api/assess", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
 export const replayUrl = (id: string) => `${API_BASE}/api/replay/${encodeURIComponent(id)}`;
 

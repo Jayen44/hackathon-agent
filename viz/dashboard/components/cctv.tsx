@@ -1,20 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Panel } from "@/components/ui";
-import { cctvUploadUrl, SIMLAB_BASE, type CctvEvidence, type Measured } from "@/lib/api";
-
-/** "Upload CCTV" entry: opens the Sim Lab CCTV page, which sends the finished claim back here. */
-export function UploadCctvButton({ className = "" }: { className?: string }) {
-  const [href, setHref] = useState(cctvUploadUrl());
-  useEffect(() => setHref(cctvUploadUrl(window.location.origin)), []);
-  return (
-    <a href={href} className={className || "rounded-md border border-accent px-3 py-2 text-sm font-medium text-accent hover:bg-accent-soft"}>
-      Upload CCTV
-    </a>
-  );
-}
+import { SIMLAB_BASE, type CctvEvidence, type Measured } from "@/lib/api";
 
 const kmh = (mps: number) => (mps * 3.6).toFixed(0);
 
@@ -78,7 +66,7 @@ export function CctvEvidencePanel({ c }: { c: CctvEvidence }) {
             <MeasuredRow label="Gap" m={m.gap_m} unit="m" />
           </div>
           <ul className="space-y-1 text-xs text-muted">
-            <li>Measured from video. Monte Carlo ranges: ± 2σ.</li>
+            <li>Measured from video. Monte Carlo ranges: ± 2σ.{c.overridden_by_insurer?.length ? ` Insurer's own values used for: ${c.overridden_by_insurer.join(", ")}.` : ""}</li>
             <li>No AV logs: engagement alleged, not verified.</li>
             <li>SHA-256 {c.sha256 ? <span className="font-mono">{c.sha256.slice(0, 12)}…</span> : "not recorded"}. Frame blurred; raw video stays in the Sim Lab.</li>
           </ul>
@@ -90,16 +78,4 @@ export function CctvEvidencePanel({ c }: { c: CctvEvidence }) {
 
 export function cctvViewerSrc(c: CctvEvidence) {
   return `${SIMLAB_BASE}/viewer/?data=/api/replay/${c.video_id}/${c.run_id}&cam=chase`;
-}
-
-export function NewClaimTabs({ active }: { active: "form" | "cctv" }) {
-  return (
-    <div className="flex flex-wrap gap-2" role="tablist" aria-label="How to start a claim">
-      <Link href="/new" role="tab" aria-selected={active === "form"}
-        className={`rounded-full border px-3 py-1 text-sm ${active === "form" ? "border-accent bg-accent-soft text-accent" : "border-line text-muted hover:text-fg"}`}>
-        Claim form
-      </Link>
-      <UploadCctvButton className="rounded-full border border-line px-3 py-1 text-sm text-muted hover:border-accent hover:text-accent" />
-    </div>
-  );
 }

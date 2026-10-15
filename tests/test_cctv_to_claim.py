@@ -205,3 +205,74 @@ def test_engine_accepts_bundle(lead):
     b = load_bundle(build_claim_bundle(a["bundle"], run, {"sha256": SHA}, DEMO_FILE, VID, RID))
     assert b.conflict.kind == "lead_braking" and b.outcome.third_party_share == (0.0, 0.1)
     assert b.vehicle.odd_inside is True and b.integrity.hashes_present
+
+
+# ------------------------------------------------------------------ intake form + CCTV (claims API merge_cctv)
+
+MPH = claims.MPH
+
+
+def _form_from_measured(a, **kw):
+    m, c = a["measured"], a["bundle"]["conflict"]
+    f = {"claim_ref": "T-CCTV", "location_type": "urban", "av_engaged": "yes", "within_odd": "yes",
+         "crash_type": c["crash_type"], "ego_speed_mph": round(m["ego_speed_mps"]["value"] / MPH, 1),
+         "other_speed_mph": round(m["other_speed_mps"]["value"] / MPH, 1), "gap_m": round(m["gap_m"]["value"], 1),
+         "injury_severity": "Serious", "claim_paid_gbp": 60000, "injured_party_share_low_pct": 0,
+         "injured_party_share_high_pct": 10, "evidence": {"cctv": True}}
+    f.update(kw)
+    return f
+
+
+def _merge(a, run, form):
+    b, meta = claims.form_to_bundle(form)
+    return claims.merge_cctv(b, meta, form, a["bundle"], run, VID, RID)
+
+
+def test_merge_uses_measured_ranges_when_form_matches(lead):
+    a, run = lead
+    b, meta = _merge(a, run, _form_from_measured(a))
+    cr = b["conflict_ranges"]
+    for k in ("ego_speed", "gap", "other_speed", "other_decel", "other_brake_time"):
+        assert cr[k] == {**a["bundle"]["conflict_ranges"][k], "source": "reported"}
+    assert b["external"]["cctv"] == [VID]
+    assert b["integrity"]["hashes_present"] is True and b["integrity"]["video_sha256"] == SHA
+    assert meta["tier"] == 1 and meta["engagement_override"] == "engaged_alleged"
+    assert evidence_tier(b) == 1
+    s = claims.cctv_summary(b)
+    assert s["video_id"] == VID and "ego_speed" in s["ranges_used"] and s["overridden_by_insurer"] == []
+
+
+def test_merge_insurer_override_wins(lead):
+    a, run = lead
+    b, _ = _merge(a, run, _form_from_measured(a, ego_speed_mph=80))
+    assert "ego_speed" not in b["conflict_ranges"]
+    assert b["conflict"]["ego_speed_mps"] == pytest.approx(80 * MPH)
+    assert b["cctv_evidence"]["overridden_by_insurer"] == ["ego_speed"]
+
+
+def test_merge_unknown_form_field_filled_from_cctv(lead):
+    a, run = lead
+    b, meta = _merge(a, run, _form_from_measured(a, gap_m=None))
+    assert b["conflict_ranges"]["gap"]["source"] == "reported" and "gap_m" not in meta["unknowns"]
+
+
+def test_merge_drops_ranges_of_other_crash_type(lead):
+    a, run = lead
+    b, _ = _merge(a, run, _form_from_measured(a, crash_type="cut_in", cut_in_time_s=1.5))
+    assert "other_decel" not in b["conflict_ranges"] and "other_brake_time" not in b["conflict_ranges"]
+
+
+def test_merge_rejects_bad_ids(lead):
+    a, run = lead
+    b, meta = claims.form_to_bundle(_form_from_measured(a))
+    with pytest.raises(ValueError):
+        claims.merge_cctv(b, meta, {}, a["bundle"], run, "../etc", RID)
+
+
+@pytest.mark.skipif(not claims.insurance_available(), reason="insurance/finance not vendored (set ACCEL_INSURANCE_DIR)")
+def test_engine_accepts_merged_bundle(lead):
+    from insurance.bundle import load_bundle
+    a, run = lead
+    b, _ = _merge(a, run, _form_from_measured(a))
+    lb = load_bundle(b)
+    assert lb.external.cctv == [VID] and lb.integrity.hashes_present

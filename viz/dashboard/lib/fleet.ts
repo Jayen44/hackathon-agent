@@ -33,6 +33,31 @@ export type Portfolio = {
 type RawEvent = Record<string, unknown>;
 const str = (v: unknown) => (v == null ? null : typeof v === "object" ? JSON.stringify(v).slice(0, 400) : String(v));
 
+const clip = (t: string, n = 180) => (t.length > n ? `${t.slice(0, n - 1)}…` : t);
+const gbpS = (x: unknown) => (typeof x === "number" ? `£${Math.round(x).toLocaleString("en-GB")}` : "");
+
+/** One-line human summary. Debate steps arrive with a JSON summary; never show raw JSON. */
+export function humanSummary(type: string, summary: string): string {
+  const t = summary.trim();
+  if (!(t.startsWith("{") || t.startsWith("["))) return clip(t);
+  let v: unknown;
+  try { v = JSON.parse(t); } catch { return clip(t.replace(/[{}"\[\]]/g, " ").replace(/\s+/g, " ").trim()); }
+  const o = (Array.isArray(v) ? { items: v } : v) as Record<string, unknown>;
+  const out = (o.output && typeof o.output === "object" ? o.output : {}) as Record<string, unknown>;
+  const tool = type.startsWith("debate.tool:") ? type.slice("debate.tool:".length) : null;
+  if (tool) {
+    if (Array.isArray(o.output)) return `${tool}: ${o.output.length} candidate weak assumptions`;
+    const er = out.expected_recovery as Record<string, unknown> | undefined;
+    const bits = [out.decision && `decision ${String(out.decision).replaceAll("_", " ")}`, er && `central ${gbpS(er.mid)}`].filter(Boolean);
+    return `${tool}${bits.length ? `: ${bits.join(", ")}` : ""}`;
+  }
+  if (typeof o.recommendation === "string") return clip(o.recommendation);
+  if (typeof o.verdict === "string") return clip(`${String(o.verdict).replaceAll("_", " ")}: ${String(o.reasoning ?? "")}`);
+  if (typeof o.argument === "string") return clip(`${String(o.assumption ?? "Challenge")}: ${o.argument}`);
+  if (o.decision != null) return `Final decision: ${String(o.decision).replaceAll("_", " ")}${o.contested ? " (contested)" : ""}`;
+  return clip(Object.keys(o).join(", "));
+}
+
 function norm(e: RawEvent, t0: number): FleetEvent {
   const tsRaw = e.timestamp ?? e.ts ?? e.time;
   const ts = typeof tsRaw === "number" ? (tsRaw > 1e12 ? tsRaw : tsRaw * 1000)
@@ -43,7 +68,7 @@ function norm(e: RawEvent, t0: number): FleetEvent {
     ts,
     agent: String(e.agent ?? "unknown"),
     type: String(e.type ?? e.step ?? ""),
-    summary: String(e.summary ?? ""),
+    summary: humanSummary(String(e.type ?? e.step ?? ""), String(e.summary ?? "")),
     tool: str(e.tool),
     input_summary: str(e.input_summary ?? e.input),
     output_summary: str(e.output_summary ?? e.output),
@@ -131,7 +156,7 @@ export const LANES: { key: string; label: string; match: string[] }[] = [
   { key: "investigator", label: "Investigator", match: ["investigator"] },
   { key: "reconstructor", label: "Reconstructor", match: ["reconstructor"] },
   { key: "counterfactual_analyst", label: "Counterfactual analyst", match: ["counterfactual_analyst", "counterfactual", "analyst"] },
-  { key: "adjuster", label: "Adjuster", match: ["adjuster", "adjuster_rebuttal", "rebuttal"] },
+  { key: "adjuster", label: "Adjuster", match: ["adjuster", "adjuster_rebuttal", "rebuttal", "referee"] },
   { key: "defence_counsel", label: "Defence counsel", match: ["defence_counsel", "defence", "defense_counsel"] },
 ];
 

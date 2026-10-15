@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AgentTraceList, type TraceEntry } from "@/components/agent-trace";
-import { NewClaimTabs } from "@/components/cctv";
+import { CctvIntake, type CctvFill } from "@/components/cctv-intake";
 import { Panel } from "@/components/ui";
 import { submitAssessment } from "@/lib/api";
 
@@ -28,7 +28,7 @@ const EMPTY: Form = {
 };
 
 const EVIDENCE: [keyof Form["evidence"], string][] = [
-  ["cctv", "CCTV"], ["dashcam", "Dashcam"], ["av_logs", "AV data logs"], ["police_report", "Police report"], ["witnesses", "Witnesses"],
+  ["cctv", "CCTV evidence available"], ["dashcam", "Dashcam"], ["av_logs", "AV data logs"], ["police_report", "Police report"], ["witnesses", "Witnesses"],
 ];
 
 const input = "w-full rounded-md border border-line bg-panel px-2.5 py-1.5 text-sm num placeholder:text-muted/70";
@@ -50,9 +50,16 @@ export default function NewClaim() {
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const router = useRouter();
+  const [cctv, setCctv] = useState<CctvFill["cctv"] | null>(null);
+  const [hints, setHints] = useState<Record<string, string>>({});
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setF((x) => ({ ...x, [k]: v }));
+  const onMeasured = (x: CctvFill) => {
+    setF((cur) => ({ ...cur, ...x.fields }));
+    setHints(x.hints);
+    setCctv(x.cctv);
+  };
   const num = (k: keyof Form, label: string, unit: string, hint?: string) => (
-    <Field label={`${label} (${unit})`} hint={hint}>
+    <Field label={`${label} (${unit})`} hint={hints[k] ?? hint}>
       <input className={input} inputMode="decimal" placeholder="unknown" value={f[k] as string} onChange={(e) => set(k, e.target.value as never)} />
     </Field>
   );
@@ -96,7 +103,7 @@ export default function NewClaim() {
     }
   };
 
-  const submit = async (body: { form?: unknown; bundle?: unknown }) => {
+  const submit = async (body: { form?: unknown; bundle?: unknown; cctv?: unknown }) => {
     setBusy("Submitting to the simulator…"); setErr(null);
     try {
       const r = await submitAssessment(body);
@@ -130,7 +137,6 @@ export default function NewClaim() {
           Enter what is known. Leave anything you do not know blank: unknowns become wide, clearly labelled ranges, lower the
           data-sufficiency score, and turn into information requests. Nothing is guessed silently.
         </p>
-        <div className="mt-3"><NewClaimTabs active="form" /></div>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[1fr_360px]">
@@ -154,7 +160,7 @@ export default function NewClaim() {
                   <option value="unknown">Unknown</option><option value="urban">Urban</option><option value="a_road">A-road</option><option value="motorway">Motorway</option>
                 </select>
               </Field>
-              <Field label="Crash type">
+              <Field label="Crash type" hint={hints.crash_type}>
                 <select className={input} value={f.crash_type} onChange={(e) => set("crash_type", e.target.value)}>
                   <option value="unknown">Unknown</option><option value="cut_in">Cut-in</option><option value="lead_vehicle_decel">Lead vehicle braking</option><option value="stationary_hazard">Stationary hazard</option>
                 </select>
@@ -204,11 +210,12 @@ export default function NewClaim() {
                 ))}
               </div>
             </fieldset>
+            {f.evidence.cctv && <CctvIntake onMeasured={onMeasured} />}
           </Panel>
 
           {err && <p className="rounded border border-bad/30 bg-bad-soft p-3 text-sm text-bad">{err}</p>}
           <div className="flex flex-wrap items-center gap-3">
-            <button type="button" disabled={!!busy} onClick={() => submit({ form: formBody() })}
+            <button type="button" disabled={!!busy} onClick={() => submit({ form: formBody(), ...(f.evidence.cctv && cctv ? { cctv } : {}) })}
               className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-on-accent disabled:opacity-50">Assess claim</button>
             <label className="cursor-pointer rounded-md border border-line px-4 py-2 text-sm hover:border-accent">
               Upload crash bundle JSON

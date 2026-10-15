@@ -101,6 +101,10 @@ def web():
     from sim.world import run
 
     api = FastAPI(title="Sim Lab")
+    from fastapi.middleware.cors import CORSMiddleware
+    # The claims dashboard (Vercel) uploads CCTV straight to this app from its intake form.
+    api.add_middleware(CORSMiddleware, allow_methods=["GET", "POST"], allow_headers=["content-type"],
+                       allow_origin_regex=r"https://accel-claims-dashboard[a-z0-9-]*\.vercel\.app|http://localhost:\d+")
 
     def driver_factory(p: dict):
         return functools.partial(ReactiveBrakingDriver, DriverParams(**{k: float(v) for k, v in p.items()}))

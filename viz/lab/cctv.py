@@ -200,6 +200,8 @@ def add_cctv_routes(api, vol, vol_root: str, detect_fn, map_fn, max_bytes, video
             raise HTTPException(404, "unknown run")
         p = vdir(vid) / f"bundle_{rid}.json"
         if not p.exists():
+            reload()
+        if not p.exists():
             raise HTTPException(404, "unknown run")
         return FileResponse(p, media_type="application/json", filename=f"bundle_{vid[:8]}_{rid}.json")
 
