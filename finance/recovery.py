@@ -4,20 +4,28 @@ Pure functions: inputs in, GBP out. No I/O, no LLM calls. The Adjuster agent cal
 assess(); Defence counsel calls weakest_assumption(); the orchestrator calls
 rank() and recoverability_map().
 
-Legal frame (UK):
-- Automated and Electric Vehicles Act 2018 s.2: the insurer pays the victim first;
-  s.5: it may then recover from anyone else liable (e.g. the manufacturer).
-- Automated Vehicles Act 2024: the standard is a careful and competent human driver.
-  We read P(a careful driver avoids the crash) as the probability that the AV is found
-  to have fallen below that standard.
-- Law Reform (Contributory Negligence) Act 1945: the other party's share of fault
-  reduces what can be recovered.
+Legal frame (UK, all read on legislation.gov.uk unless marked):
+- Automated and Electric Vehicles Act 2018 (AEVA) s.2: the insurer pays the injured party first.
+- AEVA s.5(1): anyone else liable to the injured party (e.g. the AV company) is under the same
+  liability to the insurer once the insurer's liability is settled; s.5(4): never more than that
+  person's liability to the injured party.
+- AEVA s.3(1) + Law Reform (Contributory Negligence) Act 1945: the injured party's own fault
+  reduces what is owed to them, by the insurer AND by the AV company.
+- AEVA s.4: unauthorised software alterations or a missed safety-critical update shift recovery
+  to the insured person under the policy (s.4(4)), not the manufacturer.
+- Automated Vehicles Act 2024: the safety benchmark is a careful and competent human driver.
+  We read P(a careful driver avoids the crash) as P(the AV company is liable). Proxy, not the
+  civil test: say so in the pitch.
 
-    AV share of fault    = P(careful driver avoids) x (1 - third-party share)
-    expected recovery    = AV share of fault x claim value - legal cost
+    AV share          = P(careful driver avoids) x (1 - injured party's contributory negligence)
+    expected recovery = AV share x claim value - legal cost
 
-Every figure is an Interval (low, central, high), never a bare number. Low and high
-combine the worst and best ends of every input, so they are deliberately wide.
+Contributory negligence is applied once: a paid amount is already net of it (s.3(1)), a table
+value is gross. Other drivers' fault does not reduce recovery: the AV company is liable for the
+whole of the injured party's (reduced) loss jointly with them [Knowledge: joint and several
+liability in English tort law].
+
+Every figure is an Interval (low, central, high), never a bare number.
 """
 from __future__ import annotations
 
@@ -28,10 +36,31 @@ from finance import tables
 
 DISCLAIMER = (
     "Triage evidence for a human claims handler. Not a liability ruling and not legal advice. "
-    "Based on public NHTSA SGO data and a simulation with stated assumptions."
+    "UK law and UK figures; demo crashes are synthetic, sampled from DfT STATS19."
 )
 
 Decision = Literal["pursue", "dont_pursue", "pull_logs_first", "not_av_recovery", "cannot_price"]
+
+# UK input codes. Engagement comes from the vehicle's data storage system (DSSAD, UN R157 as
+# applied in GB); ODD is the operating conditions the self-driving feature is authorised for.
+ENGAGEMENT = ("engaged_verified", "engaged_alleged", "not_engaged", "unknown")
+ODD = ("inside", "outside", "exiting", "unknown")
+SOFTWARE = ("compliant", "unauthorised_alteration", "safety_update_missing", "unknown")
+
+# Legacy input: NHTSA SGO strings (US), still sent by insurance/bridge.py. Remove once the bridge
+# sends UK codes (issue for Jayen).
+_LEGACY_ENGAGEMENT = {"Verified Engaged": "engaged_verified", "Alleged Engaged": "engaged_alleged",
+                      "Verified Not Engaged": "not_engaged", "Unknown, see Narrative": "unknown"}
+_LEGACY_ODD = {"Yes": "inside", "No, see Narrative": "outside", "Exiting ODD": "exiting",
+               "Unknown, see Narrative": "unknown"}
+
+
+def engagement_code(v: str) -> str:
+    return v if v in ENGAGEMENT else _LEGACY_ENGAGEMENT.get(v, "unknown")
+
+
+def odd_code(v: str) -> str:
+    return v if v in ODD else _LEGACY_ODD.get(v, "unknown")
 
 
 @dataclass(frozen=True)
@@ -63,15 +92,18 @@ class AvoidanceResult:
 
 @dataclass(frozen=True)
 class ClaimFacts:
-    claim_id: str                 # SGO Report ID, or the insurer's claim reference
+    claim_id: str                 # insurer's claim reference
     crash_type: str               # e.g. "cut_in", "lead_vehicle_decel", "other"
-    injury_severity: str          # SGO field 73, exact drop-down value
-    engagement_status: str        # SGO field 22, exact drop-down value
-    within_odd: str               # SGO field 113, exact drop-down value
+    injury_severity: str          # UK: "Fatal" | "Serious" | "Slight" | "Damage only" | "Unknown" (legacy SGO accepted)
+    engagement_status: str        # ENGAGEMENT code (legacy SGO accepted)
+    within_odd: str               # ODD code (legacy SGO accepted)
     reproduced: bool              # Reconstructor reproduced the reported crash
-    third_party_share: tuple[float, float] = (0.0, 0.0)  # other party's share of fault, range
-    paid_claim_gbp: float | None = None   # amount the insurer actually paid; beats the table
+    # The INJURED PARTY's contributory negligence share, low..high (AEVA s.3(1), 1945 Act).
+    # None = not assessed. Not other drivers' fault. Name kept for the bridge contract.
+    third_party_share: tuple[float, float] | None = None
+    paid_claim_gbp: float | None = None   # amount the insurer actually paid (net of contributory negligence)
     legal_cost_gbp: tuple[float, float] | None = None    # override for the legal cost table
+    software_status: str = "unknown"      # SOFTWARE code (AEVA s.4)
 
 
 @dataclass
@@ -96,10 +128,6 @@ def fmt_gbp(x: float) -> str:
     return f"-£{-x:,.0f}" if x < 0 else f"£{x:,.0f}"
 
 
-def _is_redacted(v: str) -> bool:
-    return v.startswith("[REDACTED")
-
-
 def avoidance_bracket(results: list[AvoidanceResult]) -> Interval:
     """Run both R157 models and treat them as bounds: lowest CI end to highest CI end."""
     if not results:
@@ -111,11 +139,22 @@ def avoidance_bracket(results: list[AvoidanceResult]) -> Interval:
     )
 
 
-def av_share(p: Interval, third_party: tuple[float, float]) -> Interval:
-    tp_lo, tp_hi = third_party
-    if not 0 <= tp_lo <= tp_hi <= 1:
-        raise ValueError(f"third_party_share must be 0 <= low <= high <= 1, got {third_party}")
-    return Interval(p.low * (1 - tp_hi), p.mid * (1 - (tp_lo + tp_hi) / 2), p.high * (1 - tp_lo))
+def contributory_negligence(f: ClaimFacts) -> tuple[tuple[float, float], str | None, str | None]:
+    """(share range to apply, gate or None, note or None). Applied once, see module docstring."""
+    if f.paid_claim_gbp is not None:
+        note = ("paid amount is already net of the injured party's contributory negligence (AEVA s.3(1)); "
+                "not applied again") if f.third_party_share else None
+        return (0.0, 0.0), None, note
+    if f.third_party_share is None:
+        return (0.0, 1.0), "injured party's contributory negligence not assessed (AEVA s.3(1)): range 0-100%", None
+    return f.third_party_share, None, None
+
+
+def av_share(p: Interval, cn: tuple[float, float]) -> Interval:
+    lo, hi = cn
+    if not 0 <= lo <= hi <= 1:
+        raise ValueError(f"contributory negligence must be 0 <= low <= high <= 1, got {cn}")
+    return Interval(p.low * (1 - hi), p.mid * (1 - (lo + hi) / 2), p.high * (1 - lo))
 
 
 def expected_recovery(share: Interval, value: Interval, cost: Interval) -> Interval:
@@ -129,12 +168,14 @@ def expected_recovery(share: Interval, value: Interval, cost: Interval) -> Inter
 def _gates(f: ClaimFacts) -> list[str]:
     """Facts that stop a 'pursue' until someone pulls the vehicle logs."""
     g = []
-    if f.engagement_status != "Verified Engaged":
-        g.append(f"ADS engagement not verified ({f.engagement_status})")
-    if f.within_odd in ("No, see Narrative", "Exiting ODD"):
-        g.append(f"outside ODD ({f.within_odd}): recovery target may be the operator, not the manufacturer")
-    elif f.within_odd != "Yes":
-        g.append(f"ODD status unknown ({f.within_odd})")
+    eng, odd = engagement_code(f.engagement_status), odd_code(f.within_odd)
+    if eng != "engaged_verified":
+        g.append(f"self-driving engagement not verified from the vehicle data ({f.engagement_status})")
+    if odd in ("outside", "exiting"):
+        g.append(f"outside ODD, its authorised operating conditions ({f.within_odd}): recovery target may be "
+                 "the operator, not the manufacturer")
+    elif odd != "inside":
+        g.append(f"operating-conditions (ODD) status unknown ({f.within_odd})")
     if not f.reproduced:
         g.append("simulation did not reproduce the reported crash (low confidence)")
     return g
@@ -160,13 +201,21 @@ def _legal_cost(f: ClaimFacts, value: Interval) -> tuple[Interval | None, str]:
 
 def assess(f: ClaimFacts, avoidance: list[AvoidanceResult], min_net_gbp: float = 0.0) -> RecoveryAssessment:
     """Culpability, expected recovery in GBP and a pursue / don't / pull-logs decision."""
+    if f.software_status not in SOFTWARE:
+        raise ValueError(f"software_status must be one of {SOFTWARE}, got {f.software_status!r}")
     p = avoidance_bracket(avoidance)
-    share = av_share(p, f.third_party_share)
+    cn, cn_gate, cn_note = contributory_negligence(f)
+    share = av_share(p, cn)
     base = dict(claim_id=f.claim_id, crash_type=f.crash_type, p_avoid=p, av_share=share)
 
-    if f.engagement_status == "Verified Not Engaged":
+    if engagement_code(f.engagement_status) == "not_engaged":
         return RecoveryAssessment(**base, decision="not_av_recovery",
-                                  reasons=["ADS verified not engaged: ordinary motor claim, no s.5 recovery"],
+                                  reasons=["self-driving verified not engaged: ordinary motor claim, no s.5 recovery"],
+                                  claim_value=None, legal_cost=None, expected_recovery=None)
+    if f.software_status in ("unauthorised_alteration", "safety_update_missing"):
+        return RecoveryAssessment(**base, decision="not_av_recovery",
+                                  reasons=[f"AEVA s.4 ({f.software_status}): recover from the insured person to the "
+                                           "extent the policy provides (s.4(4)), not from the manufacturer"],
                                   claim_value=None, legal_cost=None, expected_recovery=None)
 
     value, value_src = _claim_value(f)
@@ -178,7 +227,7 @@ def assess(f: ClaimFacts, avoidance: list[AvoidanceResult], min_net_gbp: float =
                                   sources=[s for s in (value_src, cost_src) if s])
 
     ev = expected_recovery(share, value, cost)
-    gates = _gates(f)
+    gates = _gates(f) + ([cn_gate] if cn_gate else [])
     if len(avoidance) < 2:
         gates.append("only one careful-driver model: bracket incomplete")
 
@@ -192,6 +241,11 @@ def assess(f: ClaimFacts, avoidance: list[AvoidanceResult], min_net_gbp: float =
         decision = "pull_logs_first"
         reasons = gates + ([] if ev.low > min_net_gbp else
                            [f"range {fmt_gbp(ev.low)} to {fmt_gbp(ev.high)} straddles {fmt_gbp(min_net_gbp)}"])
+    if f.software_status == "unknown" and decision != "dont_pursue":
+        reasons.append("confirm no unauthorised software alteration or missed safety-critical update (AEVA s.4) "
+                       "before issuing proceedings")
+    if cn_note:
+        reasons.append(cn_note)
 
     return RecoveryAssessment(**base, decision=decision, reasons=reasons, claim_value=value,
                               legal_cost=cost, expected_recovery=ev, sources=[value_src, cost_src])
@@ -214,7 +268,8 @@ def weakest_assumption(f: ClaimFacts, avoidance: list[AvoidanceResult],
     a = assess(f, avoidance, min_net_gbp)
     if a.expected_recovery is None:
         return []
-    tp = sum(f.third_party_share) / 2
+    cn, _, _ = contributory_negligence(f)
+    tp = sum(cn) / 2
     p, v, c = a.p_avoid.mid, a.claim_value.mid, a.legal_cost.mid
 
     def ev(p_=p, tp_=tp, v_=v, c_=c) -> float:
@@ -223,7 +278,7 @@ def weakest_assumption(f: ClaimFacts, avoidance: list[AvoidanceResult],
     trials = [(f"use {r.model} only (p_avoid {r.p_avoid:.2f})", ev(p_=r.p_avoid)) for r in avoidance]
     trials += [
         (f"p_avoid at lower 90% bound ({a.p_avoid.low:.2f})", ev(p_=a.p_avoid.low)),
-        (f"third party at max share ({f.third_party_share[1]:.0%})", ev(tp_=f.third_party_share[1])),
+        (f"injured party's contributory negligence at max ({cn[1]:.0%})", ev(tp_=cn[1])),
         (f"claim value at low end ({fmt_gbp(a.claim_value.low)})", ev(v_=a.claim_value.low)),
         (f"legal cost at high end ({fmt_gbp(a.legal_cost.high)})", ev(c_=a.legal_cost.high)),
     ]

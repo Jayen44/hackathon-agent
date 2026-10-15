@@ -20,20 +20,12 @@ from finance.recovery import ClaimFacts
 
 PROFILE = Path(__file__).parent / "profile_2024.json"
 
-# STATS19 severity -> SGO "Highest Injury Severity Alleged" value used by finance.tables.
-# Design choice: Slight = minor, Serious = serious with hospitalisation (STATS19 serious includes
-# fractures and hospital admission), Fatal = fatality.
-SEVERITY_TO_SGO = {
-    "Slight": "Minor Without Hospitalization",
-    "Serious": "Serious With Hospitalization",
-    "Fatal": "Fatality",
-}
-
-# Demo knobs for the made-up AV facts. Not data: change them to stage different stories.
+# Demo knobs for the made-up AV facts (UK codes, see finance.recovery). Not data: change them to stage different stories.
 DEMO_KNOBS = {
     "p_engagement_verified": 0.8,   # else "Alleged Engaged"
     "p_within_odd": 0.85,           # else "Unknown, see Narrative"
     "p_reproduced": 0.9,
+    "third_party_share": None,      # injured party's contributory negligence; None = not assessed
 }
 
 
@@ -73,16 +65,16 @@ def generate(n: int, seed: int = 0, profile: dict | None = None,
         ct = rng.choices(list(types), weights=[t["n"] for t in types.values()])[0]
         p = types[ct]
         sev = _pick(rng, p["severity"])
-        sgo_sev = SEVERITY_TO_SGO[sev]
-        row = tables.claim_value_for_severity(sgo_sev)
+        row = tables.claim_value_for_severity(sev)  # STATS19 severity is the UK key
         paid = round(rng.uniform(row.low, row.high), -1) if row.priced else None
         facts = ClaimFacts(
             claim_id=f"SYN-{seed}-{i:03d}",
             crash_type=ct,
-            injury_severity=sgo_sev,
-            engagement_status="Verified Engaged" if rng.random() < knobs["p_engagement_verified"] else "Alleged Engaged",
-            within_odd="Yes" if rng.random() < knobs["p_within_odd"] else "Unknown, see Narrative",
+            injury_severity=sev,
+            engagement_status="engaged_verified" if rng.random() < knobs["p_engagement_verified"] else "engaged_alleged",
+            within_odd="inside" if rng.random() < knobs["p_within_odd"] else "unknown",
             reproduced=rng.random() < knobs["p_reproduced"],
+            third_party_share=knobs["third_party_share"],
             paid_claim_gbp=paid,
         )
         out.append(SyntheticCrash(True, ct, sev, int(_pick(rng, p["speed_limit_mph"])),

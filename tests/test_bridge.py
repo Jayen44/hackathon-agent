@@ -61,9 +61,10 @@ def test_contract_engagement_and_odd_strings_match_finance_gates():
     assert engagement_status(bundle("02_human_driving_manual")) == "Verified Not Engaged"
     assert within_odd_status(bundle("01_av_late_detection")) == "Yes"
     assert within_odd_status(bundle("07_outside_odd")) == "No, see Narrative"
-    src = inspect.getsource(recovery._gates) + inspect.getsource(recovery.assess)
-    for s in ("Verified Engaged", "Verified Not Engaged", "No, see Narrative"):
-        assert s in src, f"finance/ no longer uses {s!r}: update insurance/bridge.py"
+    # finance/ normalises these legacy SGO strings to its UK codes; check the mapping, not source text.
+    assert recovery.engagement_code("Verified Engaged") == "engaged_verified"
+    assert recovery.engagement_code("Verified Not Engaged") == "not_engaged"
+    assert recovery.odd_code("Yes") == "inside" and recovery.odd_code("No, see Narrative") == "outside"
 
 
 # Verbatim from the official NHTSA "SGO-2021-01 Data Element Definitions" (dictionary dated 17 Aug 2026):

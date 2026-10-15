@@ -6,8 +6,11 @@ Every row carries its source and a status:
   "TODO":      not yet sourced. Value is None; the engine refuses to price with it.
 
 Never put a number here without a source. If the insurer knows the amount it actually
-paid on a claim, pass that instead (ClaimValue.paid); these tables only estimate
-a value for public SGO crashes, which carry no claim amounts.
+paid on a claim, pass that instead (ClaimFacts.paid_claim_gbp); these tables only estimate
+a value when no claim amount is known (e.g. synthetic demo crashes).
+
+All figures are UK. Severity uses the DfT STATS19 categories (Fatal / Serious / Slight) plus
+"Damage only" (STATS19 records injury collisions only).
 """
 from __future__ import annotations
 
@@ -54,8 +57,36 @@ JCG18_DEATH_FULL_AWARENESS = (16_570, 31_460)   # estate's PSLA where the person
 # Fatal Accidents Act 1976 s.1A(3), as varied by SI 2020/316 from 1 May 2020 (legislation.gov.uk).
 BEREAVEMENT_AWARD = 15_120
 
-# Keys are the exact SGO "Highest Injury Severity Alleged" drop-down values
-# (NHTSA SGO-2021-01 Data Element Definitions, field 73).
+_SLIGHT = GBPRange(
+    WHIPLASH_TARIFF_2025["<=3m"] + FCA_AVG_MOTOR_CLAIM_2025,
+    WHIPLASH_TARIFF_2025["9-12m"] + FCA_AVG_MOTOR_CLAIM_2025,
+    f"{_SI_2025_615} (<=3m to 9-12m) + FCA 2025 average claim", "secondary")
+_SERIOUS = GBPRange(
+    JCG18_BACK_7Bcii[0], JCG18_TETRAPLEGIA_2A[1],
+    f"{_JCG18}: 7(B)(c)(ii) back injury low end to 2A tetraplegia top end; general damages only",
+    "secondary")
+_FATAL = GBPRange(
+    BEREAVEMENT_AWARD, BEREAVEMENT_AWARD + JCG18_DEATH_FULL_AWARENESS[1],
+    "Fatal Accidents Act 1976 s.1A(3) bereavement GBP 15,120 (statutory) + "
+    f"{_JCG18} death with full awareness; dependency excluded", "secondary")
+_DAMAGE_ONLY = GBPRange(
+    FCA_AVG_MOTOR_CLAIM_2025, FCA_AVG_MOTOR_CLAIM_2025,
+    "FCA GI Value Measures 2025, average motor claim payout (all claim types, used as a "
+    "property-damage proxy)", "secondary")
+
+# UK severity (DfT STATS19 definitions). Slight: sprain incl. whiplash, bruise, minor cut ->
+# whiplash tariff. Serious: fracture, internal injury, crushing, burns, concussion, severe shock,
+# hospital in-patient -> JCG range. Fatal: death within 30 days.
+CLAIM_VALUE_BY_UK_SEVERITY: dict[str, GBPRange] = {
+    "Damage only": _DAMAGE_ONLY,
+    "Slight": _SLIGHT,
+    "Serious": _SERIOUS,
+    "Fatal": _FATAL,
+    "Unknown": GBPRange(None, None, "Severity unknown: needs insurer claim file", "TODO"),
+}
+
+# LEGACY (US input): exact NHTSA SGO "Highest Injury Severity Alleged" values, still sent by
+# insurance/bridge.py and pinned by tests/test_bridge.py. Remove once the bridge sends UK values.
 CLAIM_VALUE_BY_SGO_SEVERITY: dict[str, GBPRange] = {
     "Property Damage, No Injury": GBPRange(
         FCA_AVG_MOTOR_CLAIM_2025, FCA_AVG_MOTOR_CLAIM_2025,
@@ -153,8 +184,11 @@ def legal_cost_for_claim(value_low: float, value_high: float) -> GBPRange:
 
 
 def claim_value_for_severity(severity: str) -> GBPRange:
-    try:
+    """UK severity (STATS19 categories); legacy SGO strings are still accepted."""
+    if severity in CLAIM_VALUE_BY_UK_SEVERITY:
+        return CLAIM_VALUE_BY_UK_SEVERITY[severity]
+    if severity in CLAIM_VALUE_BY_SGO_SEVERITY:
         return CLAIM_VALUE_BY_SGO_SEVERITY[severity]
-    except KeyError:
-        raise ValueError(f"not an SGO injury severity value: {severity!r}") from None
+    raise ValueError(f"not a UK (or legacy SGO) injury severity value: {severity!r}")
+
 

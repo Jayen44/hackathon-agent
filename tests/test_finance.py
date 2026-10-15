@@ -13,8 +13,8 @@ BOTH_LOW = [r.AvoidanceResult("careful_a", 0.02, (0.00, 0.03)),
 
 
 def facts(**kw):
-    base = dict(claim_id="TEST-1", crash_type="cut_in", injury_severity="Property Damage, No Injury",
-                engagement_status="Verified Engaged", within_odd="Yes", reproduced=True,
+    base = dict(claim_id="TEST-1", crash_type="cut_in", injury_severity="Damage only",
+                engagement_status="engaged_verified", within_odd="inside", reproduced=True,
                 paid_claim_gbp=50_000, legal_cost_gbp=(2_000, 6_000))
     return r.ClaimFacts(**{**base, **kw})
 
@@ -37,27 +37,62 @@ def test_careful_driver_would_also_crash_means_dont_pursue():
     assert r.assess(facts(), BOTH_LOW).decision == "dont_pursue"
 
 
-def test_contributory_negligence_reduces_share():
-    a = r.assess(facts(third_party_share=(0.4, 0.6)), BOTH_HIGH)
+def test_contributory_negligence_reduces_share_of_a_table_value():
+    a = r.assess(facts(injury_severity="Fatal", paid_claim_gbp=None, third_party_share=(0.4, 0.6)), BOTH_HIGH)
     assert a.av_share.low == pytest.approx(0.78 * 0.4)
     assert a.av_share.high == pytest.approx(0.98 * 0.6)
 
 
-@pytest.mark.parametrize("kw", [dict(engagement_status="Alleged Engaged"),
-                                dict(within_odd="Unknown, see Narrative"),
-                                dict(within_odd="Exiting ODD"),
+def test_paid_amount_is_already_net_of_contributory_negligence():
+    a = r.assess(facts(third_party_share=(0.4, 0.6)), BOTH_HIGH)
+    assert a.av_share.low == pytest.approx(0.78) and a.decision == "pursue"
+    assert any("not applied again" in x for x in a.reasons)
+
+
+def test_unassessed_contributory_negligence_blocks_pursue_on_table_values():
+    a = r.assess(facts(injury_severity="Fatal", paid_claim_gbp=None), BOTH_HIGH)
+    assert a.decision == "pull_logs_first" and a.av_share.low == 0
+    assert any("not assessed" in x for x in a.reasons)
+
+
+@pytest.mark.parametrize("status", ["unauthorised_alteration", "safety_update_missing"])
+def test_s4_software_points_recovery_at_the_insured(status):
+    a = r.assess(facts(software_status=status), BOTH_HIGH)
+    assert a.decision == "not_av_recovery" and "s.4(4)" in a.reasons[0]
+
+
+def test_unknown_software_status_is_flagged_not_blocking():
+    a = r.assess(facts(), BOTH_HIGH)
+    assert a.decision == "pursue" and any("AEVA s.4" in x for x in a.reasons)
+    assert r.assess(facts(software_status="compliant"), BOTH_HIGH).reasons == [a.reasons[0]]
+
+
+def test_bad_software_status_is_rejected():
+    with pytest.raises(ValueError):
+        r.assess(facts(software_status="fine"), BOTH_HIGH)
+
+
+def test_legacy_sgo_strings_still_accepted():
+    a = r.assess(facts(engagement_status="Verified Engaged", within_odd="Yes",
+                       injury_severity="Property Damage, No Injury"), BOTH_HIGH)
+    assert a.decision == "pursue"
+
+
+@pytest.mark.parametrize("kw", [dict(engagement_status="engaged_alleged"),
+                                dict(within_odd="unknown"),
+                                dict(within_odd="exiting"),
                                 dict(reproduced=False)])
 def test_unverified_facts_block_pursue(kw):
     assert r.assess(facts(**kw), BOTH_HIGH).decision == "pull_logs_first"
 
 
 def test_not_engaged_is_not_an_av_recovery():
-    a = r.assess(facts(engagement_status="Verified Not Engaged"), BOTH_HIGH)
+    a = r.assess(facts(engagement_status="not_engaged"), BOTH_HIGH)
     assert a.decision == "not_av_recovery" and a.expected_recovery is None
 
 
 def test_unsourced_value_refuses_to_price():
-    a = r.assess(facts(paid_claim_gbp=None, injury_severity="Moderate With Hospitalization"), BOTH_HIGH)
+    a = r.assess(facts(paid_claim_gbp=None, injury_severity="Unknown"), BOTH_HIGH)
     assert a.decision == "cannot_price" and a.expected_recovery is None
 
 
@@ -80,8 +115,8 @@ def test_multi_track_legal_cost_refuses_to_price():
     assert a.decision == "cannot_price"
 
 
-def test_severity_table_uses_exact_sgo_values():
-    assert tables.claim_value_for_severity("Minor Without Hospitalization").priced
+def test_severity_table_uses_exact_uk_values():
+    assert tables.claim_value_for_severity("Slight").priced
     with pytest.raises(ValueError):
         tables.claim_value_for_severity("minor")
 
@@ -96,7 +131,7 @@ def test_weakest_assumption_finds_the_flip():
 def test_rank_and_map():
     a1 = r.assess(facts(claim_id="A"), BOTH_HIGH)
     a2 = r.assess(facts(claim_id="B", paid_claim_gbp=10_000), BOTH_HIGH)
-    a3 = r.assess(facts(claim_id="C", injury_severity="Moderate With Hospitalization", paid_claim_gbp=None), BOTH_HIGH)
+    a3 = r.assess(facts(claim_id="C", injury_severity="Unknown", paid_claim_gbp=None), BOTH_HIGH)
     assert [a.claim_id for a in r.rank([a3, a2, a1])] == ["A", "B", "C"]
     m = r.recoverability_map([a1, a2, a3])
     assert m["cut_in"].mid == pytest.approx(a1.expected_recovery.mid + a2.expected_recovery.mid)
@@ -107,18 +142,19 @@ def test_fmt_gbp():
 
 
 def test_serious_and_fatal_are_priced_with_sources():
-    s = tables.claim_value_for_severity("Serious With Hospitalization")
+    s = tables.claim_value_for_severity("Serious")
     assert s.priced and (s.low, s.high) == (5_750, 533_720) and "JCG 18th" in s.source
-    f = tables.claim_value_for_severity("Fatality")
+    f = tables.claim_value_for_severity("Fatal")
     assert f.priced and (f.low, f.high) == (15_120, 15_120 + 31_460) and "s.1A(3)" in f.source
 
 
 def test_fatal_claim_prices_end_to_end_on_intermediate_track():
-    a = r.assess(facts(injury_severity="Fatality", paid_claim_gbp=None, legal_cost_gbp=None), BOTH_HIGH)
+    a = r.assess(facts(injury_severity="Fatal", paid_claim_gbp=None, legal_cost_gbp=None,
+                       third_party_share=(0.0, 0.0)), BOTH_HIGH)
     assert a.decision in ("pursue", "pull_logs_first", "dont_pursue") and a.expected_recovery is not None
 
 
 def test_serious_range_above_100k_needs_multi_track_costs():
-    a = r.assess(facts(injury_severity="Serious With Hospitalization", paid_claim_gbp=None,
+    a = r.assess(facts(injury_severity="Serious", paid_claim_gbp=None,
                        legal_cost_gbp=None), BOTH_HIGH)
     assert a.decision == "cannot_price" and "multi-track" in a.reasons[0]
