@@ -54,7 +54,7 @@ export function CctvIntake({ onMeasured, initialVideoId, demoRef }: { onMeasured
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<string | null>(null);
   const [debugOpen, setDebugOpen] = useState(false);
-  const live = useRef({ vid, info, status, measure: async () => false as boolean });
+  const live = useRef({ vid, info, status, measure: async (_cached?: string) => false as boolean });
 
   useEffect(() => {
     if (!vid) return;
@@ -103,12 +103,14 @@ export function CctvIntake({ onMeasured, initialVideoId, demoRef }: { onMeasured
 
   const ready = !!info && clicks.length === 4 && +L > 0 && +W > 0 && ego.length > 0;
 
-  const measure = async (): Promise<boolean> => {
+  // cachedUrl (demo mode only): a stored real measurement of this same video and calibration, loaded instead of
+  // re-running the ~45 s GPU/Modal analysis. The run id stays the original, so the claims API re-reads it from Sim Lab.
+  const measure = async (cachedUrl?: string): Promise<boolean> => {
     if (!vid || !info) return false;
     setBusy(true); setDone(null); setStatus("Measuring trajectories and running the counterfactual on Modal…");
     const calibration = { mode: "rectangle", img_pts: clicks, length_m: +L, width_m: +W, click_sigma_px: 2, world_sigma_m: 0.05 };
     try {
-      const r = await fetch(`${P}/${vid}/analyze`, {
+      const r = cachedUrl ? await fetch(cachedUrl) : await fetch(`${P}/${vid}/analyze`, {
         method: "POST", headers: { "content-type": "application/json" },
         body: JSON.stringify({ calibration, ego_track: ego, other_track: other.length ? other : null, lane_width_m: +W, crash_type: null,
           collided: contact === "auto" ? null : contact === "yes", n: 2000, seed: 0 }),
@@ -187,6 +189,13 @@ export function CctvIntake({ onMeasured, initialVideoId, demoRef }: { onMeasured
       for (const t of e.otherTracks) { flash(`track-${t}`); setOther((a) => [...a, t]); await sleep(600); }
       flash("measure", 1500); await sleep(500);
       const t0 = Date.now();
+      if (e.cached) {
+        // Demo: show ~10 s of processing, then load the stored real measurement of this clip (same calibration).
+        const msg = () => `Measuring speeds from the video… ${Math.round((Date.now() - t0) / 1000)} s`;
+        say(msg());
+        const tick = setInterval(() => say(msg()), 1000);
+        try { await sleep(e.cached.waitMs); return await live.current.measure(e.cached.url); } finally { clearInterval(tick); }
+      }
       const msg = () => `Measuring speeds on GPU… ${Math.round((Date.now() - t0) / 1000)} s (usually about 45 s)`;
       say(msg());
       const tick = setInterval(() => say(msg()), 1000);
