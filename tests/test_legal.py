@@ -32,9 +32,8 @@ def test_no_deadline_without_dates_and_leap_day():
 
 
 def test_p_liable_scales_share_and_widens_interval():
-    from insurance.counterfactual import KinematicEstimator
-    from insurance.bundle import Conflict
-    cf = KinematicEstimator(n=200).estimate(Conflict("h", 0.0, 13.4, 40.0, 0.0, 0.7))
+    from tests.support import stub_result
+    cf = stub_result(0.9, n=200)
     plain = to_avoidance_result("m", cf)
     scaled = to_avoidance_result("m", cf, (0.5, 0.6, 0.9))
     assert scaled.p_avoid == pytest.approx(plain.p_avoid * 0.6)
@@ -55,10 +54,10 @@ def test_bundle_rejects_bad_legal_fields(tmp_path):
 
 def test_pursue_example_carries_deadline_and_legal_steps():
     b = load_bundle_file(EX / "21_pursue_cut_in.json")
-    from insurance.portfolio import default_estimators
-    r = assess_bundle(b, estimators=default_estimators(), reproduced=True, today=date(2027, 2, 1))
+    from tests.support import two
+    r = assess_bundle(b, estimators=two(0.95, 1.0), reproduced=True, today=date(2027, 2, 1))
     assert r.deadline.due == date(2029, 3, 1) and any("Limitation" in n for n in r.notes)
     x = resolve(r, b)
     assert x.outcome == "PURSUE" and "Limitation" in x.next_steps[0].action
-    urgent = assess_bundle(b, estimators=default_estimators(), reproduced=True, today=date(2029, 1, 15))
+    urgent = assess_bundle(b, estimators=two(0.95, 1.0), reproduced=True, today=date(2029, 1, 15))
     assert "URGENT" in resolve(urgent, b).next_steps[0].action

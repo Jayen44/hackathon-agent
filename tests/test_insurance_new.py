@@ -7,7 +7,7 @@ import pytest
 
 from insurance import gaps, portfolio, synth_bundles
 from insurance.bundle import BundleError, load_bundle, load_bundle_file
-from insurance.counterfactual import KinematicEstimator
+from tests.support import stub
 from insurance.engine import decide
 
 EX = Path(__file__).resolve().parent.parent / "insurance" / "examples"
@@ -104,7 +104,7 @@ def test_alleged_engagement_becomes_a_log_gap_that_forces_review():
     for c in alleged:
         assert decide(c.bundle).steps[-1].code == "integrity.blocked"
     # Guard against silent code drift between finance/ and this generator: verified crashes must NOT be blocked
-    fast = KinematicEstimator(n=100)
+    fast = stub(0.5)
     assert all(decide(c.bundle, estimator=fast).steps[-1].code != "integrity.blocked" for c in verified)
 
 
@@ -119,7 +119,7 @@ def test_portfolio_prices_and_never_invents_a_figure():
         if r.recovery is not None and r.recovery.decision == "cannot_price":
             assert r.recovery.expected_recovery is None
     text = portfolio.render(results)
-    assert "Recoverable by crash type" in text and "placeholder" in text
+    assert "Recoverable by crash type" in text and "R157" in text
 
 
 def test_single_estimator_keeps_the_bracket_gate_open():

@@ -51,38 +51,25 @@ base = {
 }
 
 
-G = 9.81
-
-
-def _simulate(d):
-    """Ego braking from the logged control inputs vs the hazard. Returns (t_impact, impact_speed) or None.
-    Brake -> deceleration = brake * mu * g (a synthetic simplification, same spirit as the engine's own kinematics)."""
-    c = d["conflict"]
-    mu, kind = c.get("friction_mu", 0.7), c.get("kind", "constant_hazard")
-    ins = sorted((i for i in d["vehicle"]["control_inputs"] if i.get("brake") is not None), key=lambda i: i["t"])
-    t, v, gap, vh = c["t_start"], c["ego_speed_mps"], c["gap_m"], c["hazard_speed_mps"]
-    a_h = c.get("hazard_decel_mps2", 0.0) if kind == "lead_braking" else 0.0
-    t_in = c["t_start"] + (c.get("t_in_path_s", 0.0) if kind == "cut_in" else 0.0)
-    dt = 0.001
-    while t < c["t_start"] + 30:
-        b = 0.0
-        for i in ins:
-            if i["t"] <= t:
-                b = i["brake"]
-        v = max(0.0, v - b * mu * G * dt)
-        vh = max(0.0, vh - a_h * dt)
-        gap += (vh - v) * dt
-        t += dt
-        if t >= t_in and gap <= 0:
-            return t, v
-        if v == 0.0 and t > t_in:
-            return None
-    return None
+def _sim_impact(d):
+    """(seconds after t_start, ego speed at impact) from the SIM's median scenario with the AV replaying its logged braking
+    (montecarlo ranges + sim.world). No physics lives here: we only ask the sim. None = no collision."""
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
+    from insurance import sim_link
+    sim_link.load_estimate()
+    import numpy as np
+    from montecarlo.evidence import ranges_from_bundle
+    from montecarlo.ranges import PARAM_NAMES, av_replay_policy, build_scenario, values_from_u
+    from sim.world import run
+    ranges, _ = ranges_from_bundle(d)
+    v = values_from_u(ranges, np.full(len(PARAM_NAMES), 0.5))
+    res = run(build_scenario(ranges, v), av_replay_policy(ranges, v))
+    return (res.t_collision, res.ego_speed_at_impact) if res.collided else None
 
 
 def settle(d, det_off=1.8):
     """Make the bundle's timeline self-consistent: the hazard is detected det_off s after t_start, braking follows,
-    the simulated impact lands exactly on t_crash, and outcome.impact_speed_mps is the simulated impact speed.
+    the SIM's impact lands exactly on t_crash, and outcome.impact_speed_mps is the sim's impact speed.
     (Hand-typed values used to contradict each other: see issue #20.)"""
     if not d["outcome"].get("collided") or not d.get("conflict"):
         return
@@ -102,10 +89,10 @@ def settle(d, det_off=1.8):
         new += [{"t": det + 0.3, "source": "system", "brake": 0.4, "throttle": 0.0, "steer": 0.0},
                 {"t": det + 0.8, "source": "system", "brake": 0.9, "throttle": 0.0, "steer": 0.0}]
     d["vehicle"]["control_inputs"] = sorted(new, key=lambda i: i["t"])
-    r = _simulate(d)
+    r = _sim_impact(d)
     if r is None:
         raise SystemExit(f"{d['case_id']}: no collision in the settled timeline; adjust the case")
-    shift = d["t_crash"] - r[0]
+    shift = d["t_crash"] - (c["t_start"] + r[0])
     c["t_start"] = round(c["t_start"] + shift, 3)
     for o in d["perception"]["objects"]:
         if o["id"] == c["hazard_id"]:

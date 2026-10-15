@@ -1,6 +1,6 @@
 """Insurer-facing claims queue as one self-contained HTML file (no server, no dependencies).
 
-    python -m insurance.queue_html --dir insurance/examples -o queue.html [--recon-error 0.1] [--min-net 2000]
+    python -m insurance.queue_html --dir insurance/examples -o queue.html [--min-net 2000]
 
 One row per claim: outcome, who is liable, GBP range, deadline; click a row for the next steps, reasons and provenance.
 Open the file in a browser or attach it to an email.
@@ -53,18 +53,17 @@ def render_queue(results: list, today: date) -> str:
             f"<title>Claims queue</title><style>{CSS}</style><h1>Claims queue</h1><p>{html.escape(summary)} &middot; run {today}</p>"
             "<table><tr><th>Claim</th><th>Outcome</th><th>Liable</th><th>Expected recovery (low / mid / high)</th><th>Deadline</th></tr>"
             f"{body}</table><p><small>Triage evidence for a claims handler, not legal advice or a liability finding. Synthetic data, "
-            "placeholder human-driver model, thresholds illustrative.</small></p></html>")
+            "R157 careful-driver models from the sim, thresholds illustrative.</small></p></html>")
 
 
 def main(argv: list[str] | None = None) -> None:
     a = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     a.add_argument("--dir", type=Path, required=True)
     a.add_argument("-o", "--out", type=Path, default=Path("queue.html"))
-    a.add_argument("--recon-error", type=float, default=None)
     a.add_argument("--min-net", type=float, default=0.0)
     args = a.parse_args(argv)
-    cases = [(load_bundle_file(p), True) for p in sorted(args.dir.glob("*.json"))]
-    results = run(cases, recon_error=args.recon_error, min_net_gbp=args.min_net)
+    cases = [load_bundle_file(p) for p in sorted(args.dir.glob("*.json"))]
+    results = run(cases, min_net_gbp=args.min_net)
     args.out.write_text(render_queue(results, date.today()), encoding="utf-8")
     print(f"wrote {args.out} ({len(results)} claims)")
 

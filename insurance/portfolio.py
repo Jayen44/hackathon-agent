@@ -2,45 +2,39 @@
 
     python -m insurance.portfolio --n 20 --seed 7            # synthetic UK crashes (insurance/synth_bundles.py)
     python -m insurance.portfolio --dir insurance/examples   # your own bundle files
-    add --single to use one estimator (finance then holds every claim at pull_logs_first)
+    add --single to use one careful-driver model (finance then holds every claim at pull_logs_first)
 
-Two PLACEHOLDER human models bracket the uncertainty: a quick one (0.7/1.0/1.5 s) and a slower one (0.7/1.2/2.0 s).
-They are NOT the R157 CCDM/FSM models; swap them in via `estimators` once sim/ has the real parameters.
+The counterfactual comes from the sim (UN R157 Annex 3 models A and B, via insurance/sim_estimator.py); about 3 s per claim.
+First run: `python -m insurance.sim_link` to fetch the sim snapshot.
 """
 from __future__ import annotations
 
 import argparse
-import dataclasses
 from pathlib import Path
 
 from finance.recovery import fmt_gbp, rank, recoverability_map
 from insurance.bridge import BridgedAssessment, assess_bundle
 from insurance.bundle import load_bundle_file
 from insurance.resolution import resolve
-from insurance.counterfactual import HumanParams, KinematicEstimator
-
-PLACEHOLDER_QUICK = HumanParams()
-PLACEHOLDER_SLOW = dataclasses.replace(HumanParams(), reaction_mode_s=1.2, reaction_high_s=2.0,
-                                       label="placeholder slow human (not R157)")
 
 
-def default_estimators(single: bool = False, recon_error: float | None = None) -> dict:
-    # n=400 keeps a 20-crash run to a few seconds; the CI passed to finance widens accordingly (Wilson on n)
-    est = {"placeholder_quick_human": KinematicEstimator(PLACEHOLDER_QUICK, n=400)}
-    if not single:
-        est["placeholder_slow_human"] = KinematicEstimator(PLACEHOLDER_SLOW, n=400)
-    if recon_error:
-        from insurance.uncertainty import PerturbedEstimator, ReconError
-        est = {k: PerturbedEstimator(v, ReconError.uniform(recon_error)) for k, v in est.items()}
-    return est
+def sim_inputs(b, single: bool = False):
+    """(estimators, reproduced) to pass to assess_bundle. Normally (None, None): the bridge asks the sim for both models and
+    takes the sim's own reproduction check. `single` keeps only careful driver A (finance then holds the claim at pull_logs)."""
+    if not single or b.conflict is None or not b.outcome.collided:
+        return None, None
+    from insurance.sim_estimator import run_sim
+    run = run_sim(b)
+    return dict(list(run.estimators.items())[:1]), bool(run.reproduced)
 
 
-def run(cases: list[tuple], single: bool = False, recon_error: float | None = None, min_net_gbp: float = 0.0,
-        ledger: Path | None = None) -> list[BridgedAssessment]:
-    """cases: (bundle, reproduced) pairs."""
+def run(cases: list, single: bool = False, min_net_gbp: float = 0.0, ledger: Path | None = None) -> list[BridgedAssessment]:
+    """cases: bundles, or (bundle, reproduced) pairs where reproduced=None lets the sim decide."""
     out = []
-    for b, rep in cases:
-        r = assess_bundle(b, estimators=default_estimators(single, recon_error), reproduced=rep, min_net_gbp=min_net_gbp)
+    for c in cases:
+        b, rep = c if isinstance(c, tuple) else (c, None)
+        est, sim_rep = sim_inputs(b, single)
+        r = assess_bundle(b, estimators=est, reproduced=rep if rep is not None else sim_rep, min_net_gbp=min_net_gbp)
         r.resolution = resolve(r, b)   # outcome + next steps, see insurance/resolution.py
         if ledger:
             from insurance import ledger as L
@@ -79,7 +73,7 @@ def render(results: list[BridgedAssessment]) -> str:
             byo[o.outcome] = byo.get(o.outcome, 0) + 1
     lines += ["", "Outcomes (every crash lands in one): " + ", ".join(f"{k}={v}" for k, v in sorted(byo.items()))]
     lines += ["", "Decisions: " + ", ".join(f"{k}={v}" for k, v in sorted(counts.items())),
-              "Synthetic data; placeholder human models; decision support only. See docs/verification.md."]
+              "Synthetic data; careful-driver models A and B from the sim (UN R157 Annex 3); decision support only. See docs/verification.md."]
     return "\n".join(lines)
 
 
@@ -89,16 +83,15 @@ def main(argv: list[str] | None = None) -> None:
     a.add_argument("--seed", type=int, default=7)
     a.add_argument("--dir", type=Path, default=None)
     a.add_argument("--single", action="store_true")
-    a.add_argument("--recon-error", type=float, default=None, help="ASSUMED +- fraction on gap, speed, friction (e.g. 0.1)")
     a.add_argument("--min-net", type=float, default=0.0, help="policy: minimum net GBP to pursue (default 0)")
     a.add_argument("--ledger", type=Path, default=None, help="append every run to this JSONL and print what changed")
     args = a.parse_args(argv)
     if args.dir:
-        cases = [(load_bundle_file(p), True) for p in sorted(args.dir.glob("*.json"))]
+        cases = [load_bundle_file(p) for p in sorted(args.dir.glob("*.json"))]
     else:
         from insurance.synth_bundles import generate_cases
-        cases = [(c.bundle, c.reproduced) for c in generate_cases(args.n, args.seed)]
-    results = run(cases, args.single, args.recon_error, args.min_net, args.ledger)
+        cases = [c.bundle for c in generate_cases(args.n, args.seed)]
+    results = run(cases, args.single, args.min_net, args.ledger)
     print(render(results))
     ch = [(r.verdict.case_id, c) for r in results for c in getattr(r, "changes", [])]
     if ch:

@@ -15,7 +15,7 @@ from finance import recovery, tables
 from insurance.bridge import (assess_bundle, claim_facts, engagement_status, software_status, to_avoidance_result,
                               wilson_ci90, within_odd_status)
 from insurance.bundle import load_bundle, load_bundle_file
-from insurance.counterfactual import KinematicEstimator
+from tests.support import stub, stub_result, two
 
 EX = Path(__file__).resolve().parent.parent / "insurance" / "examples"
 LEGAL = (2000.0, 5000.0)  # TEST FIXTURE ONLY: finance/tables.py legal cost is still TODO
@@ -105,12 +105,12 @@ def test_wilson_interval_properties():
 
 
 def test_avoidance_result_carries_the_estimator_numbers():
-    cf = KinematicEstimator().estimate(bundle("06_borderline_needs_review").conflict)
-    r = to_avoidance_result("kinematic_placeholder", cf)
+    cf = stub_result(0.6)
+    r = to_avoidance_result("stub", cf)
     assert r.p_avoid == cf.p_avoid and r.ci90[0] <= r.p_avoid <= r.ci90[1]
 
 
-TWO_MODELS = {"a": KinematicEstimator(), "b": KinematicEstimator(seed=11)}
+TWO_MODELS = two(0.95, 1.0)
 
 
 def test_tech_liable_case_gets_priced_in_gbp():
@@ -138,7 +138,8 @@ def test_small_clean_claim_is_pursued_pre_issue_with_downside_stated():
 
 
 def test_one_model_or_unreproduced_holds_at_pull_logs():
-    r = assess_bundle(bundle("01_av_late_detection"), legal_cost_gbp=LEGAL)  # one model, reproduced=False
+    r = assess_bundle(bundle("01_av_late_detection"), legal_cost_gbp=LEGAL, estimators={"a": stub(0.95)},
+                      reproduced=False)  # one model, not reproduced
     assert r.recovery.decision == "pull_logs_first"
     assert any("one careful-driver model" in x for x in r.recovery.reasons)
     assert any("did not reproduce" in x for x in r.recovery.reasons)
@@ -156,7 +157,7 @@ def test_legal_cost_todo_means_cannot_price_not_a_guess():
 
 def test_unavoidable_crash_is_not_worth_pursuing():
     r = assess_bundle(bundle("05_unavoidable_close_cutin"), legal_cost_gbp=LEGAL, reproduced=True,
-                      estimators={"a": KinematicEstimator(), "b": KinematicEstimator(seed=3)})
+                      estimators=two(0.0, 0.0))
     assert r.verdict.liable == "NO_FAULT_DRIVING"
     assert r.recovery.decision == "dont_pursue"
 
@@ -183,7 +184,7 @@ def test_no_collision_or_no_conflict_is_not_priced():
 
 def test_outside_odd_is_gated_by_finance():
     r = assess_bundle(bundle("07_outside_odd"), legal_cost_gbp=LEGAL, reproduced=True,
-                      estimators={"a": KinematicEstimator(), "b": KinematicEstimator(seed=5)})
+                      estimators=TWO_MODELS)
     assert r.recovery.decision == "pull_logs_first"
     assert any("outside ODD" in x for x in r.recovery.reasons)
 
@@ -192,7 +193,7 @@ def test_paid_claim_beats_the_table():
     d = copy.deepcopy(raw("01_av_late_detection"))
     d["outcome"]["paid_claim_gbp"] = 12000.0
     r = assess_bundle(load_bundle(d), legal_cost_gbp=LEGAL, reproduced=True,
-                      estimators={"a": KinematicEstimator(), "b": KinematicEstimator(seed=2)})
+                      estimators=TWO_MODELS)
     assert r.recovery.claim_value.low == r.recovery.claim_value.high == 12000.0
 
 

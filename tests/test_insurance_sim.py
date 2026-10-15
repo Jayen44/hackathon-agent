@@ -1,35 +1,38 @@
-"""Runs only when the `sim` package is importable (after merging the sim branch)."""
+"""Live checks against the REAL sim (skipped when the sim snapshot is unavailable). Slow: about 3 s per claim."""
 import json
 from pathlib import Path
 
 import pytest
 
-pytest.importorskip("sim")
+from insurance import sim_link
+from insurance.bundle import load_bundle_file
+from insurance.engine import decide
+from insurance.sim_estimator import run_sim
 
-from insurance.bundle import load_bundle  # noqa: E402
-from insurance.counterfactual import KinematicEstimator  # noqa: E402
-from insurance.engine import decide  # noqa: E402
-from insurance.sim_adapter import SimEstimator  # noqa: E402
+pytestmark = pytest.mark.live_sim
 
 EX = Path(__file__).resolve().parent.parent / "insurance" / "examples"
+SNAP = Path(__file__).resolve().parent / "data" / "sim_snapshots.json"
 
 
-def bundle(name):
-    return load_bundle(json.loads((EX / f"{name}.json").read_text(encoding="utf-8")))
+@pytest.fixture(scope="module", autouse=True)
+def need_sim():
+    try:
+        sim_link.load_estimate()
+    except sim_link.SimUnavailable as e:
+        pytest.skip(str(e))
 
 
-@pytest.mark.parametrize("name", ["01_av_late_detection", "05_unavoidable_close_cutin",
-                                  "06_borderline_needs_review", "15_lead_braking_avoidable",
-                                  "16_lead_braking_unavoidable", "17_cut_in_avoidable", "18_cut_in_unavoidable"])
-def test_sim_agrees_with_closed_form(name):
-    c = bundle(name).conflict
-    a, b = SimEstimator(n=300).estimate(c), KinematicEstimator(n=300).estimate(c)
-    assert abs(a.p_avoid - b.p_avoid) < 0.15
-    assert (a.avoids_at_p5, a.avoids_at_p95) == (b.avoids_at_p5, b.avoids_at_p95)
+@pytest.mark.parametrize("name", ["05_unavoidable_close_cutin", "06_borderline_needs_review", "21_pursue_cut_in"])
+def test_snapshots_still_match_the_live_sim(name):
+    snap = json.loads(SNAP.read_text())["cases"][name]
+    live = run_sim(load_bundle_file(EX / f"{name}.json"), n=300)
+    for k, d in snap["drivers"].items():
+        assert live.estimators[k].result.p_avoid == pytest.approx(d["p_avoid"], abs=0.05)
+    assert live.reproduced == snap["reproduced"]
 
 
-def test_engine_verdicts_unchanged_with_sim_estimator():
-    for name, liable in [("01_av_late_detection", "TECH_COMPANY"),
-                         ("05_unavoidable_close_cutin", "NO_FAULT_DRIVING"),
+def test_engine_verdicts_follow_the_live_sim():
+    for name, liable in [("01_av_late_detection", "TECH_COMPANY"), ("05_unavoidable_close_cutin", "NO_FAULT_DRIVING"),
                          ("06_borderline_needs_review", "NEEDS_REVIEW")]:
-        assert decide(bundle(name), estimator=SimEstimator(n=300)).liable == liable
+        assert decide(load_bundle_file(EX / f"{name}.json")).liable == liable

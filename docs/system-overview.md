@@ -35,7 +35,7 @@ A fixed sequence. The first check that applies decides the case; each decision r
 
 Thresholds (80% / 20%, 10 s, 2 s) are illustrative policy values, not law.
 
-**The estimator** (`insurance/counterfactual.py`) is a plug point. Today it is a placeholder: straight-line braking, reaction time sampled from 0.7 / 1.0 / 1.5 s, numeric integration for lead-braking and cut-in. It reports P(avoid) and whether a fast, median or slow human would avoid. The real estimator is Vakhtang's UN R157 Annex 3 models (CCDM and FSM) in `sim/`; `sim_adapter.py` is the seam, not wired until `sim/` merges.
+**The estimator.** insurance/ contains no driver physics. `insurance/sim_estimator.py` asks the sim (`montecarlo.estimate`, Vakhtang) for the UN R157 Annex 3 careful drivers A (PM1/CCDM) and B (PM2/FSM): P(avoid) with a 90% interval, the sim's own reproduction check, the evidence tier and data sufficiency. The sim spreads its inputs by evidence tier, so reconstruction uncertainty is modelled there, not here. `insurance/sim_link.py` copies the sim from `origin/sim` into a gitignored `.sim_src` (run `python -m insurance.sim_link` once); about 3 s per claim. The engine reaches a verdict only when BOTH models agree on the side of the thresholds, otherwise the case is borderline and goes to review. Offline tests use golden results recorded from the real sim (`tests/data/sim_snapshots.json`).
 
 ## 3. Step two: the bridge (`insurance/bridge.py`)
 The only place that touches both `insurance/` and `finance/`. It stops early, with a reason, on: no collision, failed integrity, human liable, no reconstructed conflict, or invalid claim inputs. Otherwise it:
@@ -69,7 +69,7 @@ Every crash lands in exactly one outcome, with ordered next steps naming who act
 Steps are chosen from finance's codes: preservation letter for the vehicle logs then pre-action disclosure (CPR 31.16; no statutory right to the data), re-run the reconstruction, assess contributory negligence, run a second model, resolve model disagreement, confirm the recovery route. For open claims the limitation deadline is the first step (URGENT under 90 days), and a step asks counsel to assess `p_liable_to_victim` when unset. A test fails if finance adds a code with no step.
 
 ## 5b. Workflow tools around the pipeline
-- **Reconstruction uncertainty** (`insurance/uncertainty.py`, opt-in `--recon-error F`): re-runs the estimator at the pessimistic and optimistic corners of an ASSUMED error on gap, speed and friction and widens the interval sent to finance. The verdict also notes when it would flip within that error. The fraction is the caller's assumption, not a sourced number.
+- **Input uncertainty** comes from the sim (evidence tiers 0 to 2 set how tightly gap and speed are known); `insurance/` adds no error model of its own.
 - **Provenance** on every result: estimators, thresholds, `min_net_gbp`, run date. Printed in the report and written to the ledger.
 - **Ledger** (`insurance/ledger.py`, `--ledger FILE`): append-only JSONL of every run; a re-run prints what changed (outcome, decision, gates cleared, deadline, settings).
 - **Deadline watch** (`python -m insurance.watch --dir ...`): claims by days left to limitation, URGENT under 90 days.
@@ -86,7 +86,6 @@ python -m insurance <bundle.json> [--price]       one crash; --price adds recove
 python -m insurance.portfolio --n 20 --seed 7     synthetic crashes, ranked recoverability map in GBP
 python -m insurance.portfolio --dir insurance/examples
 python -m insurance.gaps                          decision paths with no example
-python scripts/sensitivity.py                     how reaction-time assumptions move the verdict
 python -m pytest -q
 ```
 `--price` on one bundle uses one estimator and `reproduced=False`, so it stops at `pull_logs_first`; the portfolio run uses two estimators and reaches `pursue`.
@@ -98,13 +97,16 @@ GitHub issues are the inbox, labelled `for:antonio|jayen|vakhtang`. Open an issu
 | Issue | Status |
 |---|---|
 | Cheap claims now `pursue` on a small central case with a big negative worst case (about GBP 1.4k vs about -12k) | Mitigated: headline says "pursue pre-action only", the downside is stated, counsel gets a step to reserve adverse costs, and `--min-net` makes the threshold an explicit, logged policy choice. The value is still for Jayen and Antonio to set; default 0 |
-| Interval covered sampling noise only | Mitigated: opt-in `--recon-error` widens it for reconstruction error (the fraction is assumed, not sourced); model error (human driver) remains until `sim/` is wired in |
+| Interval covered sampling noise only | Mitigated: the sim spreads its inputs by evidence tier. Human-driver model error is still not in the interval |
 | No case lifecycle, audit trail or insurer view | Mitigated: ledger, provenance, deadline watch, HTML queue (file based, no server). No live UI or case-management integration |
 | `p_liable_to_victim` has no sourced value | Mitigated: flagged in notes, and a resolution step asks counsel to assess it. A real value needs counsel |
 | No vehicle is AEVA-listed today; s.5 pricing is a proxy for supervised pilots | Documented per claim (regime note, counsel step to confirm the route); needs a lawyer |
 | Legal cost above GBP 100k unsourced | Open (Antonio, #4 / #23); `cannot_price` with a break-even cost shown |
-| Human-driver model is a placeholder (optimistic, no swerving) | Open until `sim/` merges and `sim_adapter.py` is wired (Vakhtang #14, #17) |
-| Friction values unsourced; example timelines use a simple brake x mu x g model, not the `sim` physics | Open; ask Vakhtang to re-run reproduction on the examples (#20) |
+| Human-driver model | Done: the R157 Annex 3 models from the sim (A and B). Caveat: R157 is guidance scoped to motorway-type roads; scope tags are Vakhtang #24 |
+| Friction values and the AV braking mapping (brake x mu x g) are the sim's assumptions, not sourced | Open (sim side) |
 | No settlement or delay model | Open; needs practitioner data |
 | All crashes synthetic | By design; real claim files need a data-protection review |
 | R157 scope tags and typical-driver sensitivity | Open (Vakhtang, #24) |
+
+## 10. One vocabulary, one entry point
+Finance's `decision`, the fleet's old labels and our `outcome` used to differ. `insurance/vocab.py` is the single mapping (finance decision to outcome, plus the fleet's legacy labels such as `get_more_evidence` to `PULL_LOGS`); a test fails if finance adds a decision without a mapping. `insurance/api.py::price_claim(bundle, drivers=None, reproduced=None, debate=False)` is the one call for anything that holds a claim as a dict (the fleet orchestrator, dashboards): it returns the liability verdict, the finance decision, the canonical `outcome`, next steps, sign-off roles, evidence requests (derived from the steps), the limitation deadline and, optionally, the debate priced from the same numbers.

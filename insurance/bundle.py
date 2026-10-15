@@ -164,6 +164,7 @@ class CrashBundle:
     outcome: Outcome
     schema_version: str = SCHEMA_VERSION
     legal: Legal = Legal()
+    raw: dict | None = field(default=None, compare=False, repr=False)   # the source dict, handed to the sim
 
 
 # ---------------------------------------------------------------- loading
@@ -276,7 +277,7 @@ def load_bundle(d: dict) -> CrashBundle:
         t_crash=_num(_req(d, "t_crash", "bundle"), "t_crash"),
         jurisdiction=d.get("jurisdiction", "UK"),
         vehicle=vehicle, perception=perception, external=external,
-        integrity=integrity, conflict=conflict, outcome=outcome, legal=_parse_legal(d.get("legal")),
+        integrity=integrity, conflict=conflict, outcome=outcome, legal=_parse_legal(d.get("legal")), raw=d,
     )
 
 

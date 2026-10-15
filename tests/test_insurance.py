@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from insurance.bundle import BundleError, load_bundle, load_bundle_file
-from insurance.counterfactual import KinematicEstimator
+from tests.support import stub, stub_result
 from insurance.engine import Policy, decide
 
 EX = Path(__file__).resolve().parent.parent / "insurance" / "examples"
@@ -99,12 +99,16 @@ def test_thresholds_are_configurable():
 
 
 def test_estimator_is_pluggable():
-    class AlwaysAvoids:
-        def estimate(self, c):
-            r = KinematicEstimator().estimate(c)
-            return type(r)(**{**r.__dict__, "p_avoid": 1.0, "avoids_at_p95": True, "model": "stub"})
-    v = verdict("06_borderline_needs_review", estimator=AlwaysAvoids())
+    v = verdict("06_borderline_needs_review", estimator=stub(1.0, model="stub", p95=True))
     assert v.liable == "TECH_COMPANY" and v.counterfactual.model == "stub"
+
+
+def test_models_must_agree_for_a_verdict():
+    from tests.support import two
+    v = decide(load_bundle_file(EX / "06_borderline_needs_review.json"), estimators=two(0.0, 0.59))
+    assert v.liable == "NEEDS_REVIEW" and any("disagree" in f for f in v.findings)
+    assert decide(load_bundle_file(EX / "06_borderline_needs_review.json"), estimators=two(0.85, 1.0)).liable == "TECH_COMPANY"
+    assert decide(load_bundle_file(EX / "06_borderline_needs_review.json"), estimators=two(0.0, 0.1)).liable == "NO_FAULT_DRIVING"
 
 
 def test_missing_evidence_listed():
@@ -113,28 +117,6 @@ def test_missing_evidence_listed():
     d["external"]["cctv"] = []
     v = decide(load_bundle(d))
     assert "lidar data" in v.evidence_missing and "independent CCTV" in v.evidence_missing
-
-
-# ---- counterfactual physics sanity
-def test_faster_means_harder_to_avoid():
-    c = load_bundle(raw("01_av_late_detection")).conflict
-    slow = KinematicEstimator().estimate(c)
-    fast = KinematicEstimator().estimate(type(c)(**{**c.__dict__, "ego_speed_mps": 25.0}))
-    assert fast.p_avoid < slow.p_avoid
-    assert fast.median_impact_speed_mps > 0
-
-
-def test_wet_road_lowers_avoidance():
-    c = load_bundle(raw("06_borderline_needs_review")).conflict
-    dry = KinematicEstimator().estimate(c)
-    wet = KinematicEstimator().estimate(type(c)(**{**c.__dict__, "friction_mu": 0.4}))
-    assert wet.p_avoid < dry.p_avoid
-
-
-def test_not_closing_on_hazard_is_always_avoided():
-    c = load_bundle(raw("01_av_late_detection")).conflict
-    r = KinematicEstimator().estimate(type(c)(**{**c.__dict__, "hazard_speed_mps": c.ego_speed_mps}))
-    assert r.p_avoid == 1.0
 
 
 # ---- bundle validation
@@ -161,17 +143,10 @@ def test_rejects_malformed_bundles(mutate):
         load_bundle(d)
 
 
-def test_none_extremes_from_sim_give_medium_not_high():
-    """sim's estimate() reports a CI, not fast/slow driver outcomes (avoids_at_p5/p95 = None)."""
-    class NoExtremes:
-        def estimate(self, c):
-            r = KinematicEstimator().estimate(c)
-            return type(r)(**{**r.__dict__, "p_avoid": 1.0, "avoids_at_p5": None, "avoids_at_p95": None})
-    v = verdict("01_av_late_detection", estimator=NoExtremes())
-    assert v.liable == "TECH_COMPANY" and v.confidence == "MEDIUM"
-    class NoExtremesLow(NoExtremes):
-        def estimate(self, c):
-            r = super().estimate(c)
-            return type(r)(**{**r.__dict__, "p_avoid": 0.0})
-    v = verdict("05_unavoidable_close_cutin", estimator=NoExtremesLow())
-    assert v.liable == "NO_FAULT_DRIVING" and v.confidence == "MEDIUM"
+def test_ci_only_results_give_medium_unless_very_confident():
+    """The sim reports a CI, not fast/slow driver outcomes (avoids_at_p5/p95 = None): HIGH needs P(avoid) >= 95%."""
+    assert verdict("01_av_late_detection", estimator=stub(0.9)).confidence == "MEDIUM"
+    assert verdict("01_av_late_detection", estimator=stub(0.99)).confidence == "HIGH"
+    low = verdict("01_av_late_detection", estimator=stub(0.1))
+    assert low.liable == "NO_FAULT_DRIVING" and low.confidence == "MEDIUM"
+    assert verdict("01_av_late_detection", estimator=stub(0.01)).confidence == "HIGH"

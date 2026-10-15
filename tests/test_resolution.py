@@ -1,6 +1,5 @@
 """Every crash must resolve to an outcome with at least one next step."""
 from insurance.bridge import assess_bundle
-from insurance.portfolio import default_estimators
 from insurance.resolution import resolve
 from insurance.synth_bundles import generate_cases
 
@@ -10,7 +9,7 @@ OUTCOMES = {"CLOSE_NO_CLAIM", "HUMAN_REVIEW", "MOTOR_CLAIM", "SETTLE_NO_RECOVERY
 
 def test_every_synthetic_crash_resolves_with_steps():
     for c in generate_cases(30, 3):
-        r = assess_bundle(c.bundle, estimators=default_estimators(), reproduced=c.reproduced)
+        r = assess_bundle(c.bundle)
         x = resolve(r, c.bundle)
         assert x.outcome in OUTCOMES and x.next_steps, (c.bundle.case_id, x)
 
@@ -49,7 +48,7 @@ def test_cheap_pursue_is_headlined_pre_action_only_and_asks_for_p_liable():
     from insurance.bundle import load_bundle_file
     ex = Path(__file__).resolve().parent.parent / "insurance" / "examples"
     b = load_bundle_file(ex / "01_av_late_detection.json")
-    r = assess_bundle(b, estimators=default_estimators(), reproduced=True)
+    r = assess_bundle(b, reproduced=True)
     x = resolve(r, b)
     if x.outcome == "PURSUE" and "LITIGATION_DOWNSIDE" in r.recovery.codes:
         assert "pre-action only" in x.headline and "lost trial" in x.headline

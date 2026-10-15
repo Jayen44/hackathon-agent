@@ -9,14 +9,14 @@ from dataclasses import dataclass, field
 from typing import Literal
 
 from insurance.bundle import CrashBundle
-from insurance.counterfactual import CounterfactualResult, Estimator, KinematicEstimator
+from insurance.counterfactual import CounterfactualResult, Estimator
 from insurance.integrity import check_integrity
 
 Liable = Literal["HUMAN_DRIVER", "TECH_COMPANY", "NO_FAULT_DRIVING", "NEEDS_REVIEW"]
 Confidence = Literal["HIGH", "MEDIUM", "LOW"]
 
-DISCLAIMER = ("Decision support only: synthetic/simplified inputs, UK assumptions, placeholder human-driver "
-              "model unless stated. Not legal or financial advice. A human claims handler decides. Triage evidence, not a "
+DISCLAIMER = ("Decision support only: synthetic/simplified inputs, UK assumptions, careful-driver "
+              "models from the sim (UN R157 Annex 3 guidance, not a legal standard). Not legal or financial advice. A human claims handler decides. Triage evidence, not a "
               "liability finding. UK law as at Oct 2026: most of the Automated Vehicles Act 2024 is not yet in force and "
               "no vehicle is listed under AEVA 2018, so the s.5 recovery model is a proxy for today's claims. "
               "Careful-driver models are published UN R157 Annex 3 guidance, used outside their motorway scope where flagged.")
@@ -90,8 +90,13 @@ def missing_evidence(b: CrashBundle) -> list[str]:
     return m
 
 
-def decide(b: CrashBundle, policy: Policy = Policy(), estimator: Estimator | None = None) -> Verdict:
-    estimator = estimator or KinematicEstimator()
+def decide(b: CrashBundle, policy: Policy = Policy(), estimator: Estimator | None = None,
+           estimators: dict[str, Estimator] | None = None) -> Verdict:
+    """`estimators` = the careful-driver models to bracket (the sim's A and B). A verdict is reached only when ALL models
+    agree on the side of the thresholds; otherwise the case is borderline and goes to review. With neither argument the
+    counterfactual is fetched from the sim (insurance/sim_estimator.py)."""
+    if estimators is None:
+        estimators = {"estimator": estimator} if estimator is not None else None
     v = Verdict(b.case_id, "NEEDS_REVIEW", "LOW", False, "")
     v.evidence_missing = missing_evidence(b)
 
@@ -203,8 +208,13 @@ def decide(b: CrashBundle, policy: Policy = Policy(), estimator: Estimator | Non
         v.summary = "Cannot decide: the crash has not been reconstructed."
         return v
 
-    cf = estimator.estimate(b.conflict)
+    if estimators is None:
+        from insurance.sim_estimator import run_sim
+        estimators = run_sim(b).estimators
+    cfs = {name: est.estimate(b.conflict) for name, est in estimators.items()}
+    cf = next(iter(cfs.values()))
     v.counterfactual = cf
+    p_lo, p_hi = min(c.p_avoid for c in cfs.values()), max(c.p_avoid for c in cfs.values())
     obj = next((o for o in b.perception.objects if o.id == b.conflict.hazard_id), None)
     if obj is not None:
         delay = obj.first_detected_t - b.conflict.t_start
@@ -215,25 +225,19 @@ def decide(b: CrashBundle, policy: Policy = Policy(), estimator: Estimator | Non
     elif b.perception.objects or b.perception.decision_log_present:
         v.findings.append("The hazard does not appear in the system's object list.")
 
-    if cf.p_range is not None:
-        lo_r, hi_r = cf.p_range
-        if cf.p_avoid >= policy.p_system_fell_short > lo_r:
-            v.findings.append(f"Verdict is sensitive to reconstruction error: P(avoid) falls to {lo_r:.0%}, below the "
-                              f"{policy.p_system_fell_short:.0%} threshold, within the assumed error.")
-        elif cf.p_avoid <= policy.p_unavoidable < hi_r:
-            v.findings.append(f"Verdict is sensitive to reconstruction error: P(avoid) rises to {hi_r:.0%}, above the "
-                              f"{policy.p_unavoidable:.0%} threshold, within the assumed error.")
-    pct = (f"avoids at fast/median/slow reaction: {cf.avoids_at_p5}/{cf.avoids_at_p50}/{cf.avoids_at_p95}; "
-           f"P(avoid)={cf.p_avoid:.0%} via {cf.model}")
-    if cf.p_avoid >= policy.p_system_fell_short:
-        conf = "HIGH" if cf.avoids_at_p95 is True else "MEDIUM"
+    per_model = "; ".join(f"{n}: P(avoid)={c.p_avoid:.0%} ({c.model})" for n, c in cfs.items())
+    pct = f"{per_model}; bracket {p_lo:.0%} to {p_hi:.0%}"
+    if len(cfs) > 1 and p_hi - p_lo > 0.3:
+        v.findings.append(f"The careful-driver models disagree (P(avoid) {p_lo:.0%} to {p_hi:.0%}): the answer is model-dependent.")
+    if p_lo >= policy.p_system_fell_short:
+        conf = "HIGH" if all(c.avoids_at_p95 is True or c.p_avoid >= 0.95 for c in cfs.values()) else "MEDIUM"
         return done("TECH_COMPANY", conf, "A competent human would very likely have avoided this crash.", pct, "counterfactual", "cf.system_fell_short")
-    if cf.p_avoid <= policy.p_unavoidable:
-        conf = "HIGH" if cf.avoids_at_p5 is False else "MEDIUM"
+    if p_hi <= policy.p_unavoidable:
+        conf = "HIGH" if all(c.avoids_at_p5 is False or c.p_avoid <= 0.05 for c in cfs.values()) else "MEDIUM"
         return done("NO_FAULT_DRIVING", conf,
                     "A competent human would very likely not have avoided this crash either; no driving fault.",
                     pct, "counterfactual", "cf.unavoidable")
-    v.review_items.append(f"Counterfactual is borderline (P(avoid)={cf.p_avoid:.0%}); needs human review.")
+    v.review_items.append(f"Counterfactual is borderline (P(avoid) {p_lo:.0%} to {p_hi:.0%}); needs human review.")
     v.steps.append(Step("counterfactual", "review", pct, "cf.borderline"))
     v.summary = "Borderline: the competent-driver test does not clearly favour either side."
     return v

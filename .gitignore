@@ -11,3 +11,4 @@ __pycache__/
 data/
 queue.html
 *.jsonl
+.sim_src/

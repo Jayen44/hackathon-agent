@@ -7,13 +7,13 @@
 ## Try it
 ```bash
 pip install -r requirements.txt
-python -m insurance.portfolio --dir insurance/examples --recon-error 0.1   # ranked recoverability map in GBP
+python -m insurance.portfolio --dir insurance/examples   # ranked recoverability map in GBP
 python -m insurance insurance/examples/21_pursue_cut_in.json --price       # one claim: verdict, GBP range, next steps
 python -m insurance.queue_html --dir insurance/examples -o queue.html      # insurer-facing claims queue (open in a browser)
 python -m insurance.watch --dir insurance/examples                         # limitation deadlines, most urgent first
 python -m pytest -q
 ```
-Useful flags: `--recon-error 0.1` (assume +-10% error on the reconstruction; widens the interval), `--min-net 2000` (pursue threshold in GBP; a policy choice), `--ledger runs.jsonl` (log every run and print what changed since the last one).
+Useful flags: `--single` (one careful-driver model), `--min-net 2000` (pursue threshold in GBP; a policy choice), `--ledger runs.jsonl` (log every run and print what changed since the last one). The counterfactual comes from the sim: run `python -m insurance.sim_link` once to fetch it (about 3 s per claim).
 
 ## Layout
 | Path | Owner | Purpose |
