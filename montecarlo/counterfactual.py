@@ -47,13 +47,18 @@ def wilson(k: int, n: int, conf: float = 0.90) -> tuple[float, float]:
 
 def evaluate_chunk(ranges: ScenarioRanges, factories: dict[str, PolicyFactory],
                    u: np.ndarray) -> dict[str, list[bool]]:
-    """Collision outcome per driver for each uniform row. Pure; safe to run remotely."""
+    """Collision outcome per driver for each uniform row. Pure; safe to run remotely.
+
+    A run that ends still closing on an in-lane vehicle counts as NOT avoided
+    (conservative: it lowers P(avoid), i.e. never overstates the recovery case).
+    """
     policies = {name: f() for name, f in factories.items()}
     out: dict[str, list[bool]] = {name: [] for name in factories}
     for row in u:
         scenario = build_scenario(ranges, values_from_u(ranges, row))
         for name, pol in policies.items():
-            out[name].append(run(scenario, pol).collided)
+            r = run(scenario, pol, record_trace=False)
+            out[name].append(r.collided or r.ended_closing)
     return out
 
 
@@ -154,7 +159,7 @@ def reproduce_rate(ranges: ScenarioRanges, av_policy: Policy | None, reported: R
     for row in u:
         v = values_from_u(ranges, row)
         pol = av_policy if av_policy is not None else av_replay_policy(ranges, v)
-        c = check(run(build_scenario(ranges, v), pol), reported)
+        c = check(run(build_scenario(ranges, v), pol, record_trace=False), reported)
         ok += c.reproduced
         mism.update(m.split(":", 1)[0] for m in c.mismatches)
     return {"rate": ok / n if n else float("nan"), "ci90": wilson(ok, n), "n": n,

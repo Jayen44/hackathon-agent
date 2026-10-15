@@ -83,3 +83,22 @@ def test_single_run_is_fast():
         run(cut_in(gap_m=25.0), careful_a.make_policy(TEST_DRIVER))
     per_run = (time.perf_counter() - t0) / 20
     assert per_run < 0.1, per_run
+
+
+def test_record_trace_off_gives_same_outcome():
+    a = run(cut_in(gap_m=15.0), AVReplayPolicy([]))
+    b = run(cut_in(gap_m=15.0), AVReplayPolicy([]), record_trace=False)
+    assert (a.collided, a.t_collision, a.impact_type) == (b.collided, b.t_collision, b.impact_type)
+    assert b.trace["t"] == []
+
+
+def test_ended_closing_flags_unproven_avoidance():
+    short = cut_in(gap_m=60.0)
+    short = SimScenario(short.ego_geometry, short.ego_initial, short.actors, duration=3.0)  # cutter in lane, collision at ~8 s
+    r = run(short, AVReplayPolicy([]))
+    assert not r.collided and r.ended_closing
+
+
+def test_mid_lane_change_contact_is_front_to_rear():
+    r = run(cut_in(gap_m=11.0), AVReplayPolicy([]))  # contact at ~1.6 s, lane change ends 2.5 s
+    assert r.collided and r.impact_type == "rear_end"
