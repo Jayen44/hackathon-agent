@@ -49,3 +49,9 @@ def test_serious_fatal_table_values_flagged_general_damages_only():
     assert any("general damages only" in x for x in assess(_f(injury_severity="Fatal"), _av()).reasons)
     assert any("general damages only" in x for x in assess(_f(injury_severity="Serious"), _av()).reasons)
     assert not any("general damages only" in x for x in assess(_f(injury_severity="Fatal", paid_claim_gbp=30_000), _av()).reasons)
+
+
+def test_weakest_assumption_works_when_paid_below_table_range():
+    from finance.recovery import weakest_assumption
+    f = _f(paid_claim_gbp=1_000)   # Slight table range starts higher than this
+    assert weakest_assumption(f, _av())   # used to raise ChangeError

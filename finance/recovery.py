@@ -379,6 +379,8 @@ def apply_change(f: ClaimFacts, avoidance: list[AvoidanceResult],
         row = tables.claim_value_for_severity(f.injury_severity)
         lo = row.low if row.priced else 0.0
         hi = max(f.paid_claim_gbp or 0.0, row.high if row.priced else 0.0)
+        if f.paid_claim_gbp is not None:
+            lo = min(lo, f.paid_claim_gbp)   # the paid amount itself is always a valid value, even below the table range
         if not (0 < v and lo <= v <= hi):
             raise ChangeError(f"claim value {fmt_gbp(v)} outside the sourced range {fmt_gbp(lo)} to {fmt_gbp(hi)}")
         repl["paid_claim_gbp"] = v
