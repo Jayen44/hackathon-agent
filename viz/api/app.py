@@ -12,6 +12,15 @@ Endpoints (FastAPI, CORS for the Vercel dashboard and localhost):
     POST /api/examples/{id}/assess     assess one example bundle
     GET  /api/replay/{id}              viewer JSON for viz/web (3D replay)
     POST /api/debate                   {"claim_id"}: re-run agents/debate.py (Antonio, read-only) on a claim
+    GET  /api/profiles                 insurer profiles (pricing plug-in + rules), the active one, rule specs
+    GET  /api/profiles/{id}
+    PUT  /api/profiles                 {"profile": {...}} upsert | {"active": id} | {"delete": id} | {"reset": true}
+    POST /api/profiles/test            {"url"}: send the sample payload to a pricing webhook, validate the reply
+    POST /api/claims/{id}/reprice      {"profile_id"}: re-price a stored claim under a profile (no new simulation)
+    POST /api/profiles/{id}/reprice-all  re-price every stored claim under a profile
+    GET  /api/portfolio-comparison?profile_id=  built-in vs insurer model over current claim results
+    POST /api/demo-insurer-model       DEMO MODEL webhook ("Demo Insurer Ltd pricing v3", not a real insurer)
+    See PRICING_PLUGIN.md.
 
 Monte Carlo chunks fan out over Modal CPU containers (eval_chunk). Results are stored in a Modal Dict.
 
@@ -48,6 +57,7 @@ image = (modal.Image.debian_slim(python_version="3.12")
          .pip_install("numpy", "fastapi[standard]", "anthropic", "python-dotenv")
          .add_local_python_source("sim", "montecarlo")
          .add_local_file(HERE / "claims.py", "/root/viz/api/claims.py")
+         .add_local_file(HERE / "pricing.py", "/root/viz/api/pricing.py")
          .add_local_file(HERE.parent.parent / "fleet" / "data" / "demo_claims.json", "/root/demo_claims.json"))
 if modal.is_local():
     _v = _vendor_insurance()
@@ -58,6 +68,23 @@ if modal.is_local():
 
 app = modal.App("accel-claims-api", image=image)
 store = modal.Dict.from_name("accel-claims-store", create_if_missing=True)
+# Insurer profiles (name, pricing plug-in, rules). Only configuration: no insurer model output is stored here.
+profiles_store = modal.Dict.from_name("accel-insurer-profiles", create_if_missing=True)
+
+
+def _profiles() -> tuple[list[dict], str]:
+    from viz.api.pricing import DEFAULT_ACTIVE, DEFAULT_PROFILES
+    ps = profiles_store.get("profiles") or DEFAULT_PROFILES
+    active = profiles_store.get("active") or DEFAULT_ACTIVE
+    if not any(p["id"] == active for p in ps):
+        active = ps[0]["id"]
+    return ps, active
+
+
+def _profile(pid: str | None) -> dict | None:
+    ps, active = _profiles()
+    pid = pid or active
+    return next((p for p in ps if p["id"] == pid), None)
 
 CORS_ORIGIN_REGEX = (r"https://accel-claims-dashboard[a-z0-9-]*\.vercel\.app|https://termvato--accel-simlab-web\.us-east\.modal\.run|"
                      r"http://localhost:\d+|http://127\.0\.0\.1:\d+")
@@ -204,13 +231,14 @@ def investigate(narrative: str) -> dict:
 
 
 @app.function(cpu=2.0, memory=1024, timeout=600)
-def assess_and_store(bundle: dict, meta: dict | None = None, origin: str = "submitted", token: str | None = None) -> dict:
+def assess_and_store(bundle: dict, meta: dict | None = None, origin: str = "submitted", token: str | None = None,
+                     profile_id: str | None = None) -> dict:
     import sys
     sys.path.insert(0, "/root")
     from viz.api.claims import assess_claim, summary_row
 
     try:
-        r = assess_claim(bundle, meta, map_fn=_modal_map, debate_client=_debate_client())
+        r = assess_claim(bundle, meta, map_fn=_modal_map, debate_client=_debate_client(), profile=_profile(profile_id))
     except Exception as e:  # surfaced to the dashboard via the status key, then re-raised for the logs
         store[f"status:{bundle.get('case_id')}"] = {"status": "error", "error": f"{type(e).__name__}: {e}"}
         raise
@@ -254,7 +282,7 @@ def web():
     from viz.api.claims import cctv_meta, form_to_bundle, insurance_available, merge_cctv
 
     api = FastAPI(title="Accel claims API")
-    api.add_middleware(CORSMiddleware, allow_origin_regex=CORS_ORIGIN_REGEX, allow_methods=["GET", "POST"],
+    api.add_middleware(CORSMiddleware, allow_origin_regex=CORS_ORIGIN_REGEX, allow_methods=["GET", "POST", "PUT"],
                        allow_headers=["content-type"])
     examples = _examples()
 
@@ -276,14 +304,14 @@ def web():
         rows += [v for k, v in idx.items() if k not in examples]
         return rows
 
-    def start(bundle: dict, meta: dict | None, origin: str) -> dict:
+    def start(bundle: dict, meta: dict | None, origin: str, profile_id: str | None = None) -> dict:
         """Assessment takes 20-90 s (Monte Carlo fan-out): run it in the background, the dashboard polls."""
         cid = bundle["case_id"]
         for k in (f"claim:{cid}", f"replay:{cid}"):
             store.pop(k, None)
         token = uuid.uuid4().hex
         store[f"status:{cid}"] = {"status": "running", "started": time.time(), "token": token}
-        assess_and_store.spawn(bundle, meta, origin, token)
+        assess_and_store.spawn(bundle, meta, origin, token, profile_id)
         return {"claim_id": cid, "status": "running"}
 
     @api.get("/api/claims/{cid}")
@@ -391,6 +419,149 @@ def web():
             raise HTTPException(400, "send {'bundle': {...}} or {'form': {...}}")
         if not re.fullmatch(r"[A-Za-z0-9_.\-]{1,64}", str(bundle["case_id"])):
             raise HTTPException(400, "case_id / claim reference: 1-64 letters, digits, _ . -")
-        return await asyncio.to_thread(start, bundle, meta, "submitted")
+        pid = body.get("profile_id")
+        if pid is not None and (not isinstance(pid, str) or await asyncio.to_thread(_profile, pid) is None):
+            raise HTTPException(400, "unknown profile_id")
+        return await asyncio.to_thread(start, bundle, meta, "submitted", pid)
+
+    # ------------------------------------------------------------ insurer pricing plug-ins and rules
+
+    from viz.api import pricing as P
+    from viz.api.claims import apply_profile, claim_facts_dict, portfolio_comparison, summary_row
+
+    async def _json(request: Request, limit: int = 32_000):
+        raw = await request.body()
+        if len(raw) > limit:
+            raise HTTPException(413, "body too large")
+        try:
+            import json
+            body = json.loads(raw or b"{}")
+        except ValueError:
+            raise HTTPException(400, "body must be JSON")
+        if not isinstance(body, dict):
+            raise HTTPException(400, "body must be a JSON object")
+        return body
+
+    def profiles_view():
+        ps, active = _profiles()
+        return {"active": active, "profiles": ps, "rule_specs": P.RULE_SPECS,
+                "allowed_webhook_hosts": sorted(P.allowed_hosts()), "demo_model_url": P.DEMO_MODEL_URL}
+
+    @api.get("/api/profiles")
+    def get_profiles():
+        return profiles_view()
+
+    @api.get("/api/profiles/{pid}")
+    def get_profile(pid: str):
+        p = _profile(pid)
+        if p is None:
+            raise HTTPException(404, "unknown profile")
+        return p
+
+    @api.put("/api/profiles")
+    async def put_profiles(request: Request):
+        body = await _json(request)
+        if set(body) - {"profile", "active", "delete", "reset"}:
+            raise HTTPException(400, "send profile, active, delete or reset")
+        if body.get("reset") is True:
+            await profiles_store.pop.aio("profiles", None)
+            await profiles_store.pop.aio("active", None)
+            return profiles_view()
+        ps, active = await asyncio.to_thread(_profiles)
+        ps = [dict(p) for p in ps]
+        if "profile" in body:
+            try:
+                p = P.validate_profile(body["profile"])
+            except ValueError as e:
+                raise HTTPException(400, f"profile: {e}")
+            if p["id"] == "builtin" and p["pricing"]["type"] != "builtin":
+                raise HTTPException(400, "the built-in profile always prices with the built-in engine")
+            if any(x["id"] == p["id"] for x in ps):
+                ps = [p if x["id"] == p["id"] else x for x in ps]
+            else:
+                ps.append(p)
+            if len(ps) > P.MAX_PROFILES:
+                raise HTTPException(400, f"at most {P.MAX_PROFILES} profiles")
+        if "delete" in body:
+            if body["delete"] == "builtin":
+                raise HTTPException(400, "the built-in profile cannot be deleted")
+            ps = [x for x in ps if x["id"] != body["delete"]]
+            if active == body["delete"]:
+                active = "builtin"
+        if "active" in body:
+            if not any(x["id"] == body["active"] for x in ps):
+                raise HTTPException(400, "unknown profile for active")
+            active = body["active"]
+        await profiles_store.put.aio("profiles", ps)
+        await profiles_store.put.aio("active", active)
+        return profiles_view()
+
+    @api.post("/api/profiles/test")
+    async def test_webhook(request: Request):
+        body = await _json(request)
+        url = body.get("url")
+        try:
+            P.check_webhook_url(url)
+        except ValueError as e:
+            return {"ok": False, "error": str(e)}
+        res = await asyncio.to_thread(P.call_webhook, url, P.SAMPLE_PAYLOAD)
+        return {**res, "sample_payload": P.SAMPLE_PAYLOAD}
+
+    @api.post("/api/demo-insurer-model")
+    async def demo_insurer_model(request: Request):
+        """DEMO MODEL: a labelled mock of an insurer's own pricing model. Not a real insurer. Deterministic."""
+        body = await _json(request, P.MAX_REQUEST_BYTES)
+        return P.demo_insurer_model(body)
+
+    def reprice(cid: str, profile: dict) -> dict:
+        r = store.get(f"claim:{cid}")
+        if r is None:
+            raise KeyError(cid)
+        if r.get("claim_facts") is None:   # assessed before profiles existed: rebuild facts from the stored input
+            saved = store.get(f"input:{cid}") or {}
+            if saved.get("bundle"):
+                r["claim_facts"] = claim_facts_dict(saved["bundle"], r.get("sim"), saved.get("meta"))
+        r.setdefault("engine_decision", (r.get("gbp") or {}).get("decision"))
+        apply_profile(r, profile)
+        store[f"claim:{cid}"] = r
+        store[f"row:{cid}"] = {**summary_row(r), "origin": r.get("origin", "submitted")}
+        return r
+
+    @api.post("/api/claims/{cid}/reprice")
+    async def reprice_one(cid: str, request: Request):
+        body = await _json(request)
+        pid = body.get("profile_id")
+        p = await asyncio.to_thread(_profile, pid) if isinstance(pid, str) else None
+        if p is None:
+            raise HTTPException(400, "unknown profile_id")
+        try:
+            return await asyncio.to_thread(reprice, cid, p)
+        except KeyError:
+            raise HTTPException(404, "claim not assessed yet")
+
+    @api.post("/api/profiles/{pid}/reprice-all")
+    async def reprice_all(pid: str):
+        p = await asyncio.to_thread(_profile, pid)
+        if p is None:
+            raise HTTPException(404, "unknown profile")
+        def run():
+            from concurrent.futures import ThreadPoolExecutor
+            cids = [k[6:] for k in store.keys() if k.startswith("claim:")]
+            def one(c):
+                try:
+                    reprice(c, p)
+                    return True
+                except Exception:
+                    return False
+            with ThreadPoolExecutor(8) as ex:
+                done = sum(ex.map(one, cids))
+            rows = [v for k, v in store.items() if k.startswith("row:")]
+            return {"repriced": done, "of": len(cids), "comparison": portfolio_comparison(rows, pid)}
+        return await asyncio.to_thread(run)
+
+    @api.get("/api/portfolio-comparison")
+    def portfolio(profile_id: str):
+        rows = [v for k, v in store.items() if k.startswith("row:")]
+        return portfolio_comparison(rows, profile_id)
 
     return api

@@ -41,6 +41,11 @@ const STEPS: Step[] = [
     text: (c) => `What to obtain next, ranked by how much it narrows the answer.${c && c.evidence_tier >= 2 ? " Already tier 2 (AV logs)." : " AV logs = tier 2."}${c?.information_requests?.[0] ? ` First: ${c.information_requests[0].title}.` : ""}`,
   },
   { path: claimPath, target: "debate", text: () => "Adjuster vs defence counsel: the system argues against itself. Every GBP figure is re-priced by the finance engine, never by a model." },
+  {
+    path: claimPath, target: "pricing",
+    text: (c) => "Vision: insurers bring their own pricing models and rules; the system runs them alongside its own assessment and shows where they differ."
+      + (c?.pricing ? ` Priced by: ${c.pricing.profile.name}.` : ""),
+  },
   { path: () => `/new?cctv=${demoVideo()}`, target: "cctv", text: () => "New claim with CCTV: calibrate four road points, pick the AV, Measure. Speeds and gap fill the form with ±σ." },
   { path: () => "/run", target: "lanes", text: () => "The long-running Managed Agents team, live: one lane per agent, hand-offs between them, recoverable GBP by crash type." },
 ];
@@ -103,7 +108,7 @@ export function Tour() {
   }, [step, cid]);
 
   useEffect(() => {
-    if (!cid || step == null || step < 1 || step > 5) return;
+    if (!cid || step == null || STEPS[step].path !== claimPath) return;
     let alive = true;
     const poll = () => getClaim(cid).then((r) => { if (!alive) return; if (r.status === "done") setClaim(r.claim); else setTimeout(poll, 3000); }).catch(() => {});
     poll();
@@ -188,7 +193,7 @@ export function Tour() {
           <span>Step {step + 1}/{STEPS.length}</span>
           <button type="button" onClick={() => go(null)} className="hover:text-fg">Exit</button>
         </div>
-        <p className="mt-2">{s.text(step >= 1 && step <= 5 ? claim : null)}</p>
+        <p className="mt-2">{s.text(s.path === claimPath ? claim : null)}</p>
         {onCctv && (
           <div className="mt-2 space-y-2">
             {demo && <p className={`text-xs ${demo.state === "error" ? "text-bad" : demo.state === "done" ? "font-medium" : "text-muted"}`}>{demo.text}</p>}
