@@ -63,10 +63,20 @@ def test_lead_vehicle_braking():
 
 
 def test_r157_params_are_not_invented():
+    """Unset PARAMS must raise; set PARAMS must cite R157 Annex 3 next to every constant."""
+    import inspect
+    import re
     for m in (careful_a, careful_b):
         if m.PARAMS is None:
             with pytest.raises(ParamsMissing):
                 m.make_policy()
+            continue
+        src = inspect.getsource(m)
+        block = src[src.index("PARAMS = "):]
+        block = block[:block.index("\n)\n")]
+        for line in block.splitlines()[1:]:
+            if "=" in line:
+                assert re.search(r"# Annex 3 (Table \d|\d\.\d)", line), line
 
 
 def test_reproduction_check():
