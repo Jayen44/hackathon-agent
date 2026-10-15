@@ -16,6 +16,7 @@ import random
 from dataclasses import dataclass
 from pathlib import Path
 
+from finance.recovery import engagement_code, odd_code
 from insurance.bundle import CrashBundle, load_bundle
 from ukcrash.synthetic import SyntheticCrash, generate
 
@@ -46,13 +47,14 @@ def to_bundle_dict(sc: SyntheticCrash, rng: random.Random) -> dict:
     else:   # cut_in
         conflict.update(gap_m=round(v * rng.uniform(0.5, 2.0), 1), hazard_speed_mps=round(v * rng.uniform(0.5, 0.9), 2),
                         t_in_path_s=round(rng.uniform(0.3, 1.5), 2))
-    engaged_verified = f.engagement_status == "Verified Engaged"
+    # finance/ owns the codes (UK codes, with legacy SGO strings normalised): use its normalisers, never string compares.
+    engaged_verified = engagement_code(f.engagement_status) == "engaged_verified"
     return {
         "schema_version": "0.1", "case_id": f.claim_id, "synthetic": True, "t_crash": T_CRASH, "jurisdiction": "UK",
         "vehicle": {
             "software_version": "synthetic-1.0", "approved_software": ["synthetic-1.0"], "occupant": "none",
             "mode_events": [{"t": 0.0, "mode": "automated"}],
-            "odd_inside": True if f.within_odd == "Yes" else None,
+            "odd_inside": True if odd_code(f.within_odd) == "inside" else None,
             "control_inputs": [{"t": T_CRASH - 1.0, "source": "system", "brake": 0.9}],
         },
         "perception": {"sensors": ["camera", "lidar", "radar"], "decision_log_present": True,

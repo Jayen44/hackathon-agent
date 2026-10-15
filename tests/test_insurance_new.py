@@ -7,6 +7,7 @@ import pytest
 
 from insurance import gaps, portfolio, synth_bundles
 from insurance.bundle import BundleError, load_bundle, load_bundle_file
+from insurance.counterfactual import KinematicEstimator
 from insurance.engine import decide
 
 EX = Path(__file__).resolve().parent.parent / "insurance" / "examples"
@@ -95,11 +96,16 @@ def test_synthetic_bundles_are_valid_deterministic_and_labelled():
 
 
 def test_alleged_engagement_becomes_a_log_gap_that_forces_review():
-    cases = synth_bundles.generate_cases(40, 3)
-    alleged = [c for c in cases if c.source.facts.engagement_status == "Alleged Engaged"]
-    assert alleged, "seed should contain at least one 'Alleged Engaged' crash"
+    from finance.recovery import engagement_code
+    cases = synth_bundles.generate_cases(60, 3)
+    alleged = [c for c in cases if engagement_code(c.source.facts.engagement_status) == "engaged_alleged"]
+    verified = [c for c in cases if engagement_code(c.source.facts.engagement_status) == "engaged_verified"]
+    assert alleged and verified, "seed should contain both verified and alleged engagement"
     for c in alleged:
-        assert decide(c.bundle).liable == "NEEDS_REVIEW"
+        assert decide(c.bundle).steps[-1].code == "integrity.blocked"
+    # Guard against silent code drift between finance/ and this generator: verified crashes must NOT be blocked
+    fast = KinematicEstimator(n=100)
+    assert all(decide(c.bundle, estimator=fast).steps[-1].code != "integrity.blocked" for c in verified)
 
 
 def test_portfolio_prices_and_never_invents_a_figure():
