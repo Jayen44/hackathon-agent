@@ -9,7 +9,7 @@ const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
 const mono = JetBrains_Mono({ variable: "--font-mono-face", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "AV Recovery Desk",
+  title: "CounterFactual",
   description: "Triage for UK insurers: which autonomous-vehicle claims can be recovered from the AV company, and how much.",
 };
 
@@ -28,7 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="mx-auto flex max-w-7xl items-center gap-6 px-4 py-3 sm:px-6">
             <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
               <span aria-hidden className="inline-block h-5 w-5 rounded-sm bg-accent" />
-              AV Recovery Desk
+              CounterFactual
             </Link>
             <nav className="flex items-center gap-4 text-sm text-muted">
               <Link href="/run" className="hover:text-fg">Agent run</Link>
