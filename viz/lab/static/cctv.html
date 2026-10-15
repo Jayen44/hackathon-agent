@@ -110,17 +110,17 @@ svg text{fill:var(--muted);font:11px Inter,sans-serif}
   <div class="row"><label>Contact in video?</label><select id="col"><option value="auto">auto (boxes meet)</option><option value="1">yes</option><option value="0">no</option></select></div>
   <div class="row"><label>Monte Carlo samples</label><input id="n" type="number" value="4000" min="100" max="20000" step="500"></div>
   <h2 id="h5" style="margin-top:14px"><span class="n">5</span>Claim file (what the insurer knows)</h2>
-  <p class="note">Each field is optional; leave it <b>unknown</b> if your file does not say. Unknowns become information requests, never guesses.</p>
+  <p class="note">All optional. Unknown stays unknown and becomes an information request.</p>
   <div class="row"><label>Claim reference (optional)</label><input id="cref" type="text" maxlength="64" placeholder="auto"></div>
   <div class="row"><label>AV engaged at the crash</label><select id="ceng"><option value="unknown">unknown</option><option value="yes">yes</option><option value="no">no</option></select></div>
   <div class="row"><label>Within its ODD</label><select id="codd"><option value="unknown">unknown</option><option value="yes">yes</option><option value="no">no</option></select></div>
   <div class="row"><label>Injury severity</label><select id="csev"><option>Unknown</option><option>Fatal</option><option>Serious</option><option>Slight</option><option>Damage only</option></select></div>
   <div class="row"><label>Amount paid (GBP)</label><input id="cpaid" type="number" min="0" step="100" placeholder="unknown"></div>
-  <div class="row"><label>Injured party contributory negligence (%)</label><span style="display:flex;gap:4px;align-items:center"><input id="cnlo" type="number" min="0" max="100" placeholder="low">–<input id="cnhi" type="number" min="0" max="100" placeholder="high"></span></div>
-  <div class="row"><label>Software version verified (AEVA s.4)</label><select id="csw"><option value="unknown">unknown</option><option value="yes">yes</option></select></div>
+  <div class="row"><label>Contributory negligence, injured party (%)</label><span style="display:flex;gap:4px;align-items:center"><input id="cnlo" type="number" min="0" max="100" placeholder="low">–<input id="cnhi" type="number" min="0" max="100" placeholder="high"></span></div>
+  <div class="row"><label>Software verified (AEVA s.4)</label><select id="csw"><option value="unknown">unknown</option><option value="yes">yes</option></select></div>
   <button class="primary" id="run" disabled>Measure &amp; run on Modal</button>
   <p class="note" id="runStatus"></p>
-  <button class="primary" id="send" hidden style="background:var(--good);border-color:var(--good);color:#04110a">Send to claims desk →</button>
+  <button class="primary" id="send" hidden>Send to claims desk</button>
   <p class="note" id="sendStatus"></p>
 </aside>
 <section class="out">
@@ -314,7 +314,7 @@ function renderOut(res){
    ${e.top_sensitivity?` · most decisive fact: <b>${esc(e.top_sensitivity.param)}</b>`:''}. Supporting evidence only; the GBP figure comes from the insurance model.</p>
   ${m.notes.length?`<div class="card" style="border-color:var(--warn);margin-top:10px"><div class="k warn">Measurement notes</div><ul class="as">${m.notes.map(n=>`<li>${esc(n)}</li>`).join('')}</ul>
    <div class="note">Contact used: <b>${b.outcome.collided?'yes':'no'}</b> (${$('#col').value==='auto'?'auto':'set by you'}).</div></div>`:''}
-  <div class="actions"><button class="go" id="send2" style="background:var(--good);border-color:var(--good);color:#04110a;font-weight:600">Send to claims desk →</button><a class="go" href="${res.viewer_url}" target="_blank" rel="noopener">Open 3D replay (AV vs careful A vs B) ↗</a>
+  <div class="actions"><button class="go" id="send2" style="background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600">Send to claims desk</button><a class="go" href="${res.viewer_url}" target="_blank" rel="noopener">Open 3D replay (AV vs careful A vs B) ↗</a>
    <a href="api/bundle/${vid}/${res.run_id}" download>Download measured bundle JSON</a>
    <button id="del">Delete this video</button></div>
   <div class="grid2">

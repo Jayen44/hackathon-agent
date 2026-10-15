@@ -136,7 +136,7 @@ export default function ClaimPage() {
         {cctv && <CctvEvidencePanel c={cctv} />}
         <Panel title="Replay: reported AV vs careful drivers A and B" className="overflow-hidden" aside={cctv ? (
           <div className="flex gap-1 text-[11px]" role="tablist" aria-label="Replay source">
-            {([["cctv", "CCTV reconstruction"], ["sim", "claims sim median"]] as const).map(([k, l]) => (
+            {([["cctv", "CCTV"], ["sim", "Sim median"]] as const).map(([k, l]) => (
               <button key={k} role="tab" aria-selected={replaySrc === k} onClick={() => setReplaySrc(k)}
                 className={`rounded border px-2 py-0.5 ${replaySrc === k ? "border-accent text-accent" : "border-line text-muted hover:text-fg"}`}>{l}</button>
             ))}

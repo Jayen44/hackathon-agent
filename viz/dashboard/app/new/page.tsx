@@ -131,7 +131,6 @@ export default function NewClaim() {
           data-sufficiency score, and turn into information requests. Nothing is guessed silently.
         </p>
         <div className="mt-3"><NewClaimTabs active="form" /></div>
-        <p className="mt-2 text-xs text-muted">Have CCTV of the crash? Upload CCTV measures speeds and gap from the video (tier 1) and sends the claim back here.</p>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[1fr_360px]">
