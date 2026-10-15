@@ -3,6 +3,7 @@
 11 slides, about 5 minutes, United States first (decision #32).
 
 - **Present it live (with speaker notes):** [Claude Slides artifact](https://claude.ai/artifact/Q96PgYWxN8CTCcgpCuNbcP)
+- **Speaker script (5 minutes, who says what):** [script.md](script.md)
 - **Download:** [PDF](Automated-Vehicle-Recovery-Desk.pdf)
 - **Open offline:** download [`deck.html`](deck.html) and open it in a browser (arrow keys move between slides; print for one slide per page)
 
