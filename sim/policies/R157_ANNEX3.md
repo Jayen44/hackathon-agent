@@ -80,3 +80,11 @@ Formulas (3.4.2.1-3.4.2.3.1, read from the rendered pages):
 - Regulation reference cases reproduced: PM1 on 3.3.4.1 Figure 8 panel 2 (60 km/h, ΔV 20 km/h, dy0 1.6 m, Vy 2 m/s): collision at dx0 4 m, none at 20 and 40 m (figure: red below about 10 m). PM1 avoids a 1 g lead stop at THW 2 s at 20/40/60 km/h (3.3.4.3). Both models avoid the stopped vehicle revealed by a cut-out at THW 2 s (3.3.4.2). PM2 avoids the 1 g lead stop at 20/40 km/h and touches at 60 km/h (< 1 m/s; b_ego,max = 6 m/s2 < 1 g).
 - Cut-in fixture of tests/test_sim.py (ego 20 m/s, cutter 12 m/s, cosine lane change from 0.5 s over 2 s): PM1 avoids from a 23.0 m gap, PM2 from 18.5 m. PM2 starts proportionate braking earlier and so brackets the "over-cautious" side; PM1 the "brakes late" side, consistent with the Olleja et al. 2025 framing.
 - PM2 also brakes gently (PFS > 0) when simply following at the same speed closer than about 2.0 s THW at 20 m/s (gap < 40.4 m). That is the model as written (anticipatory), not a bug.
+
+## Amendment check: GRVA-13-43 (13th GRVA, 23-27 May 2022)
+
+Checked by Vakhtang and Claude on 15 Oct 2026 from the human's local copy `GRVA-13-43e.pdf` (base version; Rev.2 not yet checked). It amends ECE/TRANS/WP.29/2022/59 and **does not change any Annex 3 Performance model 1 or 2 value**. It only updates cross-references from "Annex 4 Appendix 3" to "Annex 3". Relevant content:
+- 5.1.1.1 (new): ALKS "shall respond whilst active to any collision which requires a response according to national traffic rules ... and which could be expected to be recognised by a competent and careful human driver."
+- Annex 5 Appendix 1 (moved from Annex 6), PM2 difficulty classes. Cut-in: Easy PFS <= 0.85; Medium PFS > 0.85 and CFS < 0.9; Difficult CFS >= 0.9. Cut-out and deceleration: Easy PFS = 0; Medium PFS > 0 and CFS < 0.5; Difficult CFS >= 0.5. (Candidate feature: label each claim's scenario with its R157 difficulty class.)
+- 8.2.1 / Justification 28: DSSAD data elements on lane changes and lane crossings are recorded "to determine liability of the system and assess its performance". This is the regulatory basis for the tier-2 "obtain AV logs" information request.
+- 5.2.3.1: maximum permitted ALKS speed 130 km/h (above 60 km/h only with MRM lane-change capability).
