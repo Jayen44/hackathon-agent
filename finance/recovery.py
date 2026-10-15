@@ -29,6 +29,7 @@ Every figure is an Interval (low, central, high), never a bare number.
 """
 from __future__ import annotations
 
+import math
 from dataclasses import asdict, dataclass, field, replace
 from typing import Literal
 
@@ -165,6 +166,30 @@ def expected_recovery(share: Interval, value: Interval, cost: Interval) -> Inter
     )
 
 
+def validate_facts(f: ClaimFacts) -> None:
+    """Reject inputs that would silently flatter or crash a claim. Raises ValueError with the field named."""
+    def finite(x): return isinstance(x, (int, float)) and math.isfinite(x)
+    if f.paid_claim_gbp is not None and not (finite(f.paid_claim_gbp) and f.paid_claim_gbp > 0):
+        raise ValueError(f"paid_claim_gbp must be a positive finite amount, got {f.paid_claim_gbp!r}")
+    if f.legal_cost_gbp is not None:
+        lo, hi = f.legal_cost_gbp
+        if not (finite(lo) and finite(hi) and 0 < lo <= hi):
+            raise ValueError(f"legal_cost_gbp must be (low, high) with 0 < low <= high, got {f.legal_cost_gbp!r}")
+    if f.third_party_share is not None:
+        lo, hi = f.third_party_share
+        if not (finite(lo) and finite(hi) and 0 <= lo <= hi <= 1):
+            raise ValueError(f"third_party_share must be 0 <= low <= high <= 1, got {f.third_party_share!r}")
+
+
+def _near_track_limit(v: Interval) -> str | None:
+    """Legal cost is a step function of claim value (CPR 26.9 tracks), so a value close to a limit can flip the decision."""
+    for limit in (tables.FAST_TRACK_LIMIT, tables.INTERMEDIATE_TRACK_LIMIT):
+        if v.low <= limit * 1.1 and v.high >= limit * 0.9:
+            return (f"claim value {fmt_gbp(v.low)} to {fmt_gbp(v.high)} is within 10% of the {fmt_gbp(limit)} track limit: "
+                    "legal cost steps up sharply across it, so a small change in value can flip the decision")
+    return None
+
+
 def _gates(f: ClaimFacts) -> list[str]:
     """Facts that stop a 'pursue' until someone pulls the vehicle logs."""
     g = []
@@ -201,6 +226,7 @@ def _legal_cost(f: ClaimFacts, value: Interval) -> tuple[Interval | None, str]:
 
 def assess(f: ClaimFacts, avoidance: list[AvoidanceResult], min_net_gbp: float = 0.0) -> RecoveryAssessment:
     """Culpability, expected recovery in GBP and a pursue / don't / pull-logs decision."""
+    validate_facts(f)
     if f.software_status not in SOFTWARE:
         raise ValueError(f"software_status must be one of {SOFTWARE}, got {f.software_status!r}")
     p = avoidance_bracket(avoidance)
@@ -222,7 +248,8 @@ def assess(f: ClaimFacts, avoidance: list[AvoidanceResult], min_net_gbp: float =
     cost, cost_src = (None, "") if value is None else _legal_cost(f, value)
     if value is None or cost is None:
         missing = value_src if value is None else cost_src
-        return RecoveryAssessment(**base, decision="cannot_price", reasons=[f"no sourced figure: {missing}"],
+        return RecoveryAssessment(**base, decision="cannot_price", reasons=[f"no sourced figure: {missing}",
+                                           "supply paid_claim_gbp and/or legal_cost_gbp (a counsel budget) to price this claim"],
                                   claim_value=value, legal_cost=cost, expected_recovery=None,
                                   sources=[s for s in (value_src, cost_src) if s])
 
@@ -246,6 +273,9 @@ def assess(f: ClaimFacts, avoidance: list[AvoidanceResult], min_net_gbp: float =
                        "before issuing proceedings")
     if cn_note:
         reasons.append(cn_note)
+    near = _near_track_limit(value)
+    if near and decision != "dont_pursue":
+        reasons.append(near)
 
     return RecoveryAssessment(**base, decision=decision, reasons=reasons, claim_value=value,
                               legal_cost=cost, expected_recovery=ev, sources=[value_src, cost_src])

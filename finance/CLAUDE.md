@@ -46,3 +46,9 @@ With PD 45 costs, a minor-injury claim (about £4-5k) never clears its own trial
 | Demo and pitch | 15% | "Claim X: pursue, £a to £b" plus the defence-counsel flip |
 | Demo clarity | 15% | Three numbers per claim: P(avoid), AV share, GBP |
 | Responsible design | 15% | Ranges not points, refuses to price unsourced claims, disclaimer, logs gate |
+
+## Cost edge cases (Jayen, Oct 2026)
+- `validate_facts` rejects paid amount <= 0/NaN, legal cost override not 0 < low <= high, bad contributory negligence. The bridge turns these into "unpriced" instead of crashing a portfolio run.
+- Legal cost is a step function at the £25k/£100k track limits (real CPR behaviour, not a bug). Claims within 10% of a limit get a reason saying the decision may flip.
+- Still open: multi-track (> £100k) cost, so every table-priced Serious claim is `cannot_price` unless `paid_claim_gbp` or `legal_cost_gbp` is supplied. Needs a sourced budget estimate.
+- Still modelled out: cost-shifting if the insurer loses, delay, settlement discount, cost of pulling logs.

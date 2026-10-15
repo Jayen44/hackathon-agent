@@ -131,5 +131,8 @@ def assess_bundle(b: CrashBundle, *, estimators: dict[str, Estimator] | None = N
         notes.append("Only one careful-driver model supplied: finance/ will hold 'pursue' at pull_logs_first.")
     if not reproduced:
         notes.append("Simulation not confirmed to reproduce the reported crash (reproduced=False).")
-    facts = claim_facts(b, reproduced, third_party_share, legal_cost_gbp, policy)
-    return BridgedAssessment(verdict, assess(facts, avoidance, min_net_gbp), notes)
+    try:
+        facts = claim_facts(b, reproduced, third_party_share, legal_cost_gbp, policy)
+        return BridgedAssessment(verdict, assess(facts, avoidance, min_net_gbp), notes)
+    except ValueError as e:   # bad claim inputs must not take down a portfolio run
+        return unpriced(f"Invalid claim inputs, not priced: {e}")
