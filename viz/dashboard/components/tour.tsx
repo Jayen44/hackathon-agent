@@ -9,7 +9,7 @@ import { getClaim, type Claim } from "@/lib/api";
 import { DEMO_CCTV, DEMO_FILL, DEMO_PROGRESS, type DemoProgress } from "@/lib/demo";
 import { gbp, pct } from "@/lib/format";
 
-const KEY = "accel-tour-step", CLAIM_KEY = "accel-tour-claim", VIDEO_KEY = "accel-tour-video";
+const KEY = "accel-tour-step", CLAIM_KEY = "accel-tour-claim", VIDEO_KEY = "accel-tour-video", ASSESSED_KEY = "accel-tour-assessed";
 const PREFERRED = "22_pursue_lead_braking", FALLBACK = "DEMO-1_queue_late_brake";
 export const DEMO_VIDEO_ID = "d741ae8d0d8c4bc482ae242222eaa610"; // Blender CCTV render (was ce5730a6…, the cartoon clip)
 
@@ -47,6 +47,8 @@ const STEPS: Step[] = [
       + (c?.pricing ? ` Priced by: ${c.pricing.profile.name}.` : ""),
   },
   { path: () => `/new?cctv=${demoVideo()}`, target: "cctv", text: () => "New claim with CCTV: calibrate four road points, pick the AV, Measure. Speeds and gap fill the form with ±σ." },
+  { path: () => `/claims/${encodeURIComponent(load(ASSESSED_KEY) || "CHECK-blender")}`, target: "claim-decision",
+    text: () => "The decision from the video: pursue or not, the recoverable GBP range, and why. Triage for a human, not a ruling." },
   { path: () => "/run", target: "lanes", text: () => "The long-running Managed Agents team, live: one lane per agent, hand-offs between them, recoverable GBP by crash type." },
 ];
 
@@ -57,6 +59,15 @@ function load(k: string) { try { return sessionStorage.getItem(k); } catch { ret
 // ?demo=1&video=<id> picks the DEMO_CCTV entry; default is the stage clip.
 function demoVideo() { const v = load(VIDEO_KEY); return v && DEMO_CCTV[v] ? v : DEMO_VIDEO_ID; }
 const CCTV_STEP = STEPS.findIndex((x) => x.target === "cctv");
+
+/** Called by the new-claim form after "Assess claim": if the tour is on the CCTV step, move it to the decision step
+ * for the claim just submitted (otherwise the tour would send the browser back to the form). */
+export function tourActiveOnCctv() { return load(KEY) === String(CCTV_STEP); }
+
+export function tourAfterAssess(claimId: string) {
+  store(ASSESSED_KEY, claimId);
+  if (load(KEY) === String(CCTV_STEP)) { store(KEY, String(CCTV_STEP + 1)); window.dispatchEvent(new Event("accel-tour")); }
+}
 
 export function startTour() {
   store(KEY, "0");

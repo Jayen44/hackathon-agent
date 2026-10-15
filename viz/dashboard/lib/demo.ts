@@ -13,6 +13,8 @@ export type DemoEntry = {
   avTracks: number[]; otherTracks: number[]; claim: DemoClaim;
   // Optional: stored real measurement of this clip (public/demo/...) used instead of the live ~45 s analysis.
   cached?: { url: string; waitMs: number };
+  // Optional: claim already assessed from this same clip; the tour shows it after Assess instead of waiting 30-90 s.
+  assessedClaim?: string;
 };
 
 export const DEMO_CCTV: Record<string, DemoEntry> = {
@@ -22,6 +24,7 @@ export const DEMO_CCTV: Record<string, DemoEntry> = {
     clicks: [[1047.2, 589.09], [740.86, 259.97], [848.81, 251.63], [1245.4, 555.34]],
     L: 24, W: 3.5, contact: "yes", avTracks: [3], otherTracks: [1],
     cached: { url: "/demo/d741ae8d0d8c4bc482ae242222eaa610_805a3509f51f.json", waitMs: 10000 },
+    assessedClaim: "CHECK-blender",
     claim: {
       av_engaged: "yes", within_odd: "yes", injury_severity: "Serious", claim_paid_gbp: "60000",
       injured_party_share_low_pct: "0", injured_party_share_high_pct: "10", software_verified: "unknown",

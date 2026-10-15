@@ -7,6 +7,7 @@ import { CctvIntake, type CctvDemo, type CctvFill } from "@/components/cctv-inta
 import { DEMO_CCTV, DEMO_FILL, flash, sayDemo, sleep, type DemoClaim } from "@/lib/demo";
 import { Panel } from "@/components/ui";
 import { submitAssessment } from "@/lib/api";
+import { tourActiveOnCctv, tourAfterAssess } from "@/components/tour";
 
 type Tri = "yes" | "no" | "unknown";
 type Form = {
@@ -159,7 +160,14 @@ export default function NewClaim() {
     setBusy("Submitting to the simulator…"); setErr(null);
     try {
       const r = await submitAssessment(body);
-      router.push(`/claims/${encodeURIComponent(r.claim_id)}`);
+      // Demo tour with a CCTV clip that was already assessed: show that decision after a short pause instead of
+      // waiting 30-90 s for the fresh assessment (which still runs and is stored under r.claim_id).
+      const vid = (body.cctv as { video_id?: string } | undefined)?.video_id;
+      const pre = vid && tourActiveOnCctv() ? DEMO_CCTV[vid]?.assessedClaim : undefined;
+      if (pre) { setBusy("Assessing on Modal: simulating careful drivers A and B, pricing, debate…"); await sleep(5000); }
+      const shown = pre || r.claim_id;
+      tourAfterAssess(shown);
+      router.push(`/claims/${encodeURIComponent(shown)}`);
     } catch (e) {
       setErr(String((e as Error).message ?? e)); setBusy(null);
     }
