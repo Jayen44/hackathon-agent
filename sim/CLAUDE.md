@@ -13,7 +13,7 @@ Evidence (tier 0 report / tier 1 video / tier 2 telemetry) → reconstructed sce
 ## Driver models (UN R157 Annex 3)
 - Careful driver A = Performance model 1 (CCDM); B = Performance model 2 (FSM). Olleja et al. 2025 (Chalmers): one brakes too late, one is over-cautious, so run both as lower/upper bounds.
 - R157 covers cut-in, cut-out and lead-vehicle deceleration. Prioritise those. Other crash types use a clearly labelled rule-based careful driver (lower confidence).
-- Parameters come from the regulation text, entered by Vakhtang, with paragraph cited in a comment. `PARAMS = None` until then; `make_policy()` raises `ParamsMissing`. Never guess them. Test fixtures in tests are labelled "not R157".
+- Parameters are transcribed from ECE/TRANS/WP.29/2022/59/Rev.1 (R157 01 series) Annex 3 with paragraph citations; review table and every interpretation choice in `sim/policies/R157_ANNEX3.md` (Vakhtang must review before stage). Never change a value without a citation. Test fixtures in tests are labelled "not R157".
 
 ## Layout
 - `sim/vehicle.py`: geometry, state, kinematic bicycle step, SAT collision.
