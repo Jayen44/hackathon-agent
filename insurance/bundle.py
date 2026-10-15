@@ -18,6 +18,9 @@ Source = Literal["system", "human"]
 Severity = Literal["info", "warning", "critical"]
 
 MODES = ("manual", "assisted", "automated")
+KINDS = ("constant_hazard", "lead_braking", "cut_in")
+# finance/ groups crashes by these labels (R157 covers cut_in, cut_out, lead_vehicle_decel)
+DEFAULT_CRASH_TYPE = {"constant_hazard": "other", "lead_braking": "lead_vehicle_decel", "cut_in": "cut_in"}
 
 
 class BundleError(ValueError):
@@ -70,6 +73,10 @@ class Vehicle:
     control_inputs: list[ControlInput] = field(default_factory=list)
     faults: list[Fault] = field(default_factory=list)
     odd_inside: bool | None = None  # None = unknown
+    # AEVA 2018 inputs (set by the investigator from the evidence; default = no such finding)
+    unauthorised_software_change: bool = False   # s.4: prohibited software alteration
+    safety_update_missed: bool = False           # s.4: safety-critical update the person knew/ought to have known about
+    engaged_when_inappropriate: bool = False     # s.3(2): person in charge let the car drive itself when inappropriate
 
 
 @dataclass(frozen=True)
@@ -120,6 +127,10 @@ class Conflict:
     hazard_speed_mps: float = 0.0
     friction_mu: float = 0.7
     crash_type: str = "other"  # "cut_in" | "cut_out" | "lead_vehicle_decel" | "other" (finance/ uses this)
+    # Hazard kind: constant_hazard (stationary or constant speed) | lead_braking | cut_in
+    kind: str = "constant_hazard"
+    hazard_decel_mps2: float = 0.0   # lead_braking: how hard the vehicle ahead brakes from t_start until it stops
+    t_in_path_s: float = 0.0         # cut_in: seconds after t_start until the hazard is in the ego lane
 
 
 @dataclass(frozen=True)
@@ -189,6 +200,9 @@ def load_bundle(d: dict) -> CrashBundle:
                                for x in v.get("control_inputs", [])), key=lambda c: c.t),
         faults=[Fault(_num(x["t"], "fault.t"), x["code"], x["severity"]) for x in v.get("faults", [])],
         odd_inside=v.get("odd_inside"),
+        unauthorised_software_change=bool(v.get("unauthorised_software_change", False)),
+        safety_update_missed=bool(v.get("safety_update_missed", False)),
+        engaged_when_inappropriate=bool(v.get("engaged_when_inappropriate", False)),
     )
     for c in vehicle.control_inputs:
         if c.source not in ("system", "human"):
@@ -213,6 +227,9 @@ def load_bundle(d: dict) -> CrashBundle:
         tamper_flag=bool(i.get("tamper_flag", False)),
     )
     c = d.get("conflict")
+    kind = "constant_hazard" if c is None else c.get("kind", "constant_hazard")
+    if kind not in KINDS:
+        raise BundleError(f"conflict.kind: unknown value {kind!r} (expected one of {KINDS})")
     conflict = None if c is None else Conflict(
         hazard_id=_req(c, "hazard_id", "conflict"),
         t_start=_num(_req(c, "t_start", "conflict"), "conflict.t_start"),
@@ -220,10 +237,17 @@ def load_bundle(d: dict) -> CrashBundle:
         gap_m=_num(_req(c, "gap_m", "conflict"), "conflict.gap_m"),
         hazard_speed_mps=_num(c.get("hazard_speed_mps", 0.0), "conflict.hazard_speed_mps"),
         friction_mu=_num(c.get("friction_mu", 0.7), "conflict.friction_mu"),
-        crash_type=c.get("crash_type", "other"),
+        crash_type=c.get("crash_type", DEFAULT_CRASH_TYPE[kind]),
+        kind=kind,
+        hazard_decel_mps2=_num(c.get("hazard_decel_mps2", 0.0), "conflict.hazard_decel_mps2"),
+        t_in_path_s=_num(c.get("t_in_path_s", 0.0), "conflict.t_in_path_s"),
     )
     if conflict and (conflict.gap_m < 0 or conflict.ego_speed_mps < 0 or not 0 < conflict.friction_mu <= 1.2):
         raise BundleError("conflict: gap_m/ego_speed_mps must be >= 0 and friction_mu in (0, 1.2]")
+    if conflict and (conflict.hazard_decel_mps2 < 0 or conflict.t_in_path_s < 0):
+        raise BundleError("conflict: hazard_decel_mps2 and t_in_path_s must be >= 0")
+    if conflict and kind == "lead_braking" and conflict.hazard_decel_mps2 <= 0:
+        raise BundleError("conflict: kind 'lead_braking' needs hazard_decel_mps2 > 0")
     o = _req(d, "outcome", "bundle")
     paid = o.get("paid_claim_gbp")
     if paid is not None:

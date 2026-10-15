@@ -17,12 +17,18 @@ Decision support only; all demo data is synthetic. Keep this file short: it is l
 ```
 pytest -q                                   # all tests (add -x, or a single file, while iterating)
 python -m insurance insurance/examples/01_av_late_detection.json [--price --legal-cost 2000,5000]
-scripts/sync.ps1   (or scripts/sync.sh)     # fetch, rebase, test, list your issues
+python -m insurance.portfolio --n 20 --seed 7   # price 20 synthetic UK crashes, ranked in GBP
+python -m insurance.gaps [--mine --json]        # what is still missing (free, deterministic)
+python scripts/make_examples.py                 # regenerate insurance/examples (edit the script, not the JSON)
+python scripts/sensitivity.py                   # how far human-model assumptions move the verdict
+scripts/sync.ps1   (or scripts/sync.sh)         # fetch, rebase, test, list your issues
 ```
+To fill gaps iteratively use the `gap-closer` agent (`.claude/agents/gap-closer.md`): audit, fix the top gap, test, repeat (max 5).
 
 ## Read on demand (do NOT preload)
 - Crash data checklist, competent-driver test, liability table and decision flow: `docs/liability-spec.md`
 - What has been fact-checked and what hasn't: `docs/verification.md`
+- Whether the formulae and assumptions hold, and how sensitive verdicts are: `docs/validation.md`
 - Finance assumptions and open TODOs: `docs/assumptions.md`
 
 ## Rules

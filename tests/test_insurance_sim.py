@@ -19,7 +19,8 @@ def bundle(name):
 
 
 @pytest.mark.parametrize("name", ["01_av_late_detection", "05_unavoidable_close_cutin",
-                                  "06_borderline_needs_review"])
+                                  "06_borderline_needs_review", "15_lead_braking_avoidable",
+                                  "16_lead_braking_unavoidable", "17_cut_in_avoidable", "18_cut_in_unavoidable"])
 def test_sim_agrees_with_closed_form(name):
     c = bundle(name).conflict
     a, b = SimEstimator(n=300).estimate(c), KinematicEstimator(n=300).estimate(c)

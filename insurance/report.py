@@ -46,7 +46,8 @@ def render(v: Verdict) -> str:
                 f"  fast / median / slow reaction avoids: {c.avoids_at_p5} / {c.avoids_at_p50} / {c.avoids_at_p95}",
                 f"  median human impact speed if not avoided: {c.median_impact_speed_mps:.1f} m/s"]
         out += [f"  note: {n}" for n in c.notes]
-    for title, items in (("Findings", v.findings), ("Needs human review", v.review_items),
+    for title, items in (("Findings", v.findings), ("Exclusions that may apply", v.exclusions),
+                         ("Needs human review", v.review_items),
                          ("Evidence missing", v.evidence_missing)):
         if items:
             out += ["", f"{title}:"] + [f"  - {x}" for x in items]

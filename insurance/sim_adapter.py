@@ -17,7 +17,7 @@ from insurance.counterfactual import G, CounterfactualResult, _tri_quantile
 try:
     from sim.policies import careful_a, careful_b
     from sim.policies.careful_base import DriverParams, ParamsMissing, ReactiveBrakingDriver
-    from sim.scenario import ScriptedActor, SimScenario
+    from sim.scenario import LateralManoeuvre, ScriptedActor, SimScenario
     from sim.vehicle import Geometry, VehicleState
     from sim.world import run
 except ImportError as e:  # pragma: no cover
@@ -27,13 +27,29 @@ EGO = Geometry(length=4.6, width=1.9, wheelbase=2.8)
 HAZARD = Geometry(length=4.5, width=1.8, wheelbase=2.7)
 
 
+CUT_IN_LANE_OFFSET = 3.5  # m: cutting vehicle starts one lane to the side
+
+
 def scenario_from_conflict(c: Conflict, duration: float = 15.0) -> SimScenario:
-    """Ego drives at constant speed toward a hazard `gap_m` ahead (bumper to bumper)."""
+    """Ego drives at constant speed toward a hazard `gap_m` ahead (bumper to bumper).
+
+    constant_hazard: hazard keeps its speed. lead_braking: hazard brakes at `hazard_decel_mps2` from t=0 until it
+    stops. cut_in: hazard starts one lane over and moves into the ego lane over `t_in_path_s` (cosine lane change).
+    """
     centre_gap = c.gap_m + (EGO.length + HAZARD.length) / 2
+    accel_profile: list[tuple[float, float]] = []
+    lateral = None
+    y0 = 0.0
+    if c.kind == "lead_braking":
+        accel_profile = [(0.0, -c.hazard_decel_mps2)]
+    elif c.kind == "cut_in":
+        y0 = CUT_IN_LANE_OFFSET
+        lateral = LateralManoeuvre(t_start=0.0, duration=max(c.t_in_path_s, 0.1), y_from=y0, y_to=0.0)
     return SimScenario(
         ego_geometry=EGO,
         ego_initial=VehicleState(0.0, 0.0, 0.0, c.ego_speed_mps),
-        actors=[ScriptedActor("hazard", HAZARD, VehicleState(centre_gap, 0.0, 0.0, c.hazard_speed_mps))],
+        actors=[ScriptedActor("hazard", HAZARD, VehicleState(centre_gap, y0, 0.0, c.hazard_speed_mps),
+                              accel_profile=accel_profile, lateral=lateral)],
         duration=duration,
     )
 
@@ -41,8 +57,11 @@ def scenario_from_conflict(c: Conflict, duration: float = 15.0) -> SimScenario:
 def placeholder_params(c: Conflict, reaction_s: float) -> DriverParams:
     """PLACEHOLDER (not R157). Hazard is treated as perceived at t=0 (conflict start is defined
     as the earliest human-perceivable moment), so only reaction time delays braking."""
+    # For a cut-in the vehicle is one lane over at conflict start: a wide lateral margin makes the driver see it
+    # from t=0 (the conflict start is already defined as when a human could perceive the cut-in beginning).
+    margin = CUT_IN_LANE_OFFSET + 0.5 if c.kind == "cut_in" else 0.0
     return DriverParams(reaction_time=reaction_s, max_decel=min(c.friction_mu * G, 9.0), jerk=1000.0,
-                        ttc_threshold=1e6, lateral_margin=0.0, lead_decel_threshold=99.0)
+                        ttc_threshold=1e6, lateral_margin=margin, lead_decel_threshold=99.0)
 
 
 class SimEstimator:

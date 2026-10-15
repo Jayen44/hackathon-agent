@@ -1,4 +1,4 @@
-"""Liability decision engine. Implements the flow in CLAUDE.md section 3.2.
+﻿"""Liability decision engine. Implements the flow in CLAUDE.md section 3.2.
 
 Deterministic: same bundle + policy + estimator -> same verdict. No LLM, no I/O.
 Output is triage evidence for a human claims handler, not a legal ruling.
@@ -35,6 +35,7 @@ class Step:
     name: str
     outcome: str   # "continue" | "decided" | "review"
     detail: str
+    code: str = ""  # stable id of the decision path (see insurance/gaps.py EXPECTED_PATHS)
 
 
 @dataclass
@@ -48,6 +49,7 @@ class Verdict:
     findings: list[str] = field(default_factory=list)
     evidence_missing: list[str] = field(default_factory=list)
     review_items: list[str] = field(default_factory=list)
+    exclusions: list[str] = field(default_factory=list)  # statutory/policy exclusions that may apply (AEVA s.3(2), s.4)
     counterfactual: CounterfactualResult | None = None
     disclaimer: str = DISCLAIMER
 
@@ -90,23 +92,23 @@ def decide(b: CrashBundle, policy: Policy = Policy(), estimator: Estimator | Non
     v = Verdict(b.case_id, "NEEDS_REVIEW", "LOW", False, "")
     v.evidence_missing = missing_evidence(b)
 
-    def done(liable: Liable, conf: Confidence, summary: str, why: str, name: str) -> Verdict:
+    def done(liable: Liable, conf: Confidence, summary: str, why: str, name: str, code: str = "") -> Verdict:
         v.liable, v.confidence, v.summary = liable, conf, summary
         v.recovery_case = liable == "TECH_COMPANY"
-        v.steps.append(Step(name, "decided", why))
+        v.steps.append(Step(name, "decided", why, code or name))
         return v
 
     # 0. Was there a collision at all?
     if not b.outcome.collided:
         return done("NO_FAULT_DRIVING", "HIGH", "No collision recorded; nothing to allocate.",
-                    "outcome.collided is false", "outcome")
+                    "outcome.collided is false", "outcome", "outcome.no_collision")
 
     # 1. Evidence integrity
     integ = check_integrity(b)
     v.findings += [f"Integrity warning: {w}" for w in integ.warnings]
     if not integ.ok:
         v.review_items += integ.blocking
-        v.steps.append(Step("integrity", "review", "; ".join(integ.blocking)))
+        v.steps.append(Step("integrity", "review", "; ".join(integ.blocking), "integrity.blocked"))
         v.summary = "Evidence failed integrity checks, so no liability decision is made."
         return v
     v.steps.append(Step("integrity", "continue", "hashes present, clocks within tolerance, no log gap at the crash"))
@@ -115,25 +117,46 @@ def decide(b: CrashBundle, policy: Policy = Policy(), estimator: Estimator | Non
     state, detail = control_state(b, policy)
     if state in ("manual", "assisted"):
         return done("HUMAN_DRIVER", "HIGH", f"Human was driving ({state}); a normal motor claim applies.",
-                    f"{state}: {detail}", "control_state")
+                    f"{state}: {detail}", "control_state", "control.human_driving")
     if state == "human_override":
         v.review_items.append("Check whether the human override was a reasonable reaction to the system's behaviour.")
         return done("HUMAN_DRIVER", "MEDIUM", "Human overrode the automated system just before the crash.",
-                    detail, "control_state")
+                    detail, "control_state", "control.human_override")
     v.steps.append(Step("control_state", "continue", f"automated driving engaged ({detail})"))
 
-    # 3. Software approved?
     sw = b.vehicle
+    # 2a. AEVA s.3(2): no liability TO THE PERSON IN CHARGE if the accident was wholly due to their negligence in
+    # letting the vehicle drive itself when that was inappropriate. Third-party victims are unaffected.
+    if sw.engaged_when_inappropriate:
+        v.exclusions.append("Person in charge's own claim excluded if the accident was WHOLLY due to their negligence "
+                            "in engaging self-driving when inappropriate (AEVA 2018 s.3(2)). Third parties unaffected.")
+        v.review_items.append("Confirm the accident was *wholly* due to that negligence; s.3(2) does not apply to partial causes.")
+        v.steps.append(Step("law", "continue", "s.3(2) exclusion flagged for the person in charge", "law.s3_2_person_in_charge_negligence"))
+
+    # 2b. AEVA s.4: unauthorised software change or missed safety-critical update. The insurer still pays third
+    # parties, but may limit/exclude cover for the insured and recover from them (s.4(4)); the tech company is not
+    # the target of recovery.
+    if sw.unauthorised_software_change or sw.safety_update_missed:
+        why = ("unauthorised software alteration" if sw.unauthorised_software_change
+               else "failure to install a safety-critical update")
+        v.exclusions.append(f"Policy may exclude/limit cover for the insured because of {why} (AEVA 2018 s.4); "
+                            "the insurer can recover from the insured if the policy provides (s.4(4)).")
+        v.review_items.append("Check the policy wording, that the update was safety-critical (unsafe to drive without it) "
+                              "and that the insured knew or ought to have known (s.4(6)).")
+        return done("HUMAN_DRIVER", "MEDIUM", f"The accident followed {why}: recovery lies against the insured, not the tech company.",
+                    why, "law", "law.s4_software_exclusion")
+
+    # 3. Software approved?
     if sw.approved_software and sw.software_version not in sw.approved_software:
         return done("TECH_COMPANY", "MEDIUM",
                     f"Software {sw.software_version} was not an approved version.",
-                    f"{sw.software_version} not in approved list {sw.approved_software}", "software")
+                    f"{sw.software_version} not in approved list {sw.approved_software}", "software", "software.unapproved")
     v.steps.append(Step("software", "continue", f"version {sw.software_version} is approved or no list supplied"))
 
     # 4. Inside the operational design domain?
     if sw.odd_inside is False:
         return done("TECH_COMPANY", "MEDIUM", "The system was operating outside its approved conditions (ODD).",
-                    "odd_inside is false", "odd")
+                    "odd_inside is false", "odd", "odd.outside")
     v.steps.append(Step("odd", "continue", "inside ODD" if sw.odd_inside else "ODD status unknown (flagged as missing)"))
 
     # 5. Critical fault shortly before the crash?
@@ -143,7 +166,7 @@ def decide(b: CrashBundle, policy: Policy = Policy(), estimator: Estimator | Non
         codes = ", ".join(f.code for f in crit)
         v.findings.append("Critical fault logged before the crash: subrogation against the manufacturer is worth checking.")
         return done("TECH_COMPANY", "MEDIUM", f"A critical system fault ({codes}) preceded the crash.",
-                    f"critical faults within {policy.critical_fault_lookback_s:.0f}s: {codes}", "faults")
+                    f"critical faults within {policy.critical_fault_lookback_s:.0f}s: {codes}", "faults", "faults.critical")
     v.steps.append(Step("faults", "continue", "no critical fault in the lookback window"))
 
     # 6. Handover
@@ -154,7 +177,7 @@ def decide(b: CrashBundle, policy: Policy = Policy(), estimator: Estimator | Non
         if responded and b.t_crash - h.human_response_t >= policy.override_window_s:
             return done("HUMAN_DRIVER", "MEDIUM", "The human took control before the crash.",
                         f"response at t={h.human_response_t:.1f}s, {b.t_crash - h.human_response_t:.1f}s before the crash",
-                        "handover")
+                        "handover", "handover.human_took_control")
         if not responded:
             if lead >= policy.min_handover_s:
                 off = [d for d in sw.driver_monitoring if h.demand_t <= d.t <= b.t_crash and not d.eyes_on_road]
@@ -164,16 +187,16 @@ def decide(b: CrashBundle, policy: Policy = Policy(), estimator: Estimator | Non
                                       "may still apply if it was not (see CLAUDE.md 3.1).")
                 return done("HUMAN_DRIVER", "MEDIUM",
                             f"Handover was requested {lead:.0f}s before the crash and the human did not respond.",
-                            f"lead {lead:.1f}s >= minimum {policy.min_handover_s}s, no response", "handover")
+                            f"lead {lead:.1f}s >= minimum {policy.min_handover_s}s, no response", "handover", "handover.human_ignored")
             return done("TECH_COMPANY", "MEDIUM",
                         f"Handover warning was only {lead:.1f}s, shorter than the {policy.min_handover_s:.0f}s we treat as adequate.",
-                        f"lead {lead:.1f}s < minimum {policy.min_handover_s}s", "handover")
+                        f"lead {lead:.1f}s < minimum {policy.min_handover_s}s", "handover", "handover.short_warning")
     v.steps.append(Step("handover", "continue", "no handover before the crash, or the human responded too late to matter"))
 
     # 7. Competent-driver counterfactual
     if b.conflict is None:
         v.review_items.append("No reconstructed conflict: the competent-driver test can't be run.")
-        v.steps.append(Step("counterfactual", "review", "conflict missing"))
+        v.steps.append(Step("counterfactual", "review", "conflict missing", "cf.no_conflict"))
         v.summary = "Cannot decide: the crash has not been reconstructed."
         return v
 
@@ -193,13 +216,13 @@ def decide(b: CrashBundle, policy: Policy = Policy(), estimator: Estimator | Non
            f"P(avoid)={cf.p_avoid:.0%} via {cf.model}")
     if cf.p_avoid >= policy.p_system_fell_short:
         conf = "HIGH" if cf.avoids_at_p95 else "MEDIUM"
-        return done("TECH_COMPANY", conf, "A competent human would very likely have avoided this crash.", pct, "counterfactual")
+        return done("TECH_COMPANY", conf, "A competent human would very likely have avoided this crash.", pct, "counterfactual", "cf.system_fell_short")
     if cf.p_avoid <= policy.p_unavoidable:
         conf = "HIGH" if not cf.avoids_at_p5 else "MEDIUM"
         return done("NO_FAULT_DRIVING", conf,
                     "A competent human would very likely not have avoided this crash either; no driving fault.",
-                    pct, "counterfactual")
+                    pct, "counterfactual", "cf.unavoidable")
     v.review_items.append(f"Counterfactual is borderline (P(avoid)={cf.p_avoid:.0%}); needs human review.")
-    v.steps.append(Step("counterfactual", "review", pct))
+    v.steps.append(Step("counterfactual", "review", pct, "cf.borderline"))
     v.summary = "Borderline: the competent-driver test does not clearly favour either side."
     return v

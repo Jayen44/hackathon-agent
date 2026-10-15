@@ -44,6 +44,8 @@ Checked against the official [SGO-2021-01 Data Element Definitions](https://stat
 | Human reaction time 0.7 to 1.5 s, mode 1.0 s (`HumanParams`) | **Plausible but on the optimistic side** | Green: about 0.7 s when braking is expected, about 1.5 s for a surprise. Olson and Sivak (1986): unexpected object, mean about 1.1 s, 85th percentile 1.35 to 1.5 s. Field studies of unaware drivers: mean 1.2 to 1.3 s, 85th percentile 1.8 to 1.9 s. Our 95th percentile is about 1.4 s, below the field 85th percentile. A wider range would make "slow human" more common and push borderline cases from "tech company" toward "no fault". Sources: [Green summary via ISDA](https://isdacenter.org/reaction-time/), [SWOV](https://swov.nl/en/publicatie/drivers-brake-reaction-times). Secondary summaries of the original papers. |
 | Waymo NIEON as a "competent driver" benchmark | **Confirmed** (it exists) | Waymo's own model; always attentive, so more demanding than a typical human. [Waymo](https://waymo.com/blog/2022/09/benchmarking-av-safety/) |
 
+See `docs/validation.md` for the maths checks and the sensitivity of verdicts to these assumptions. Friction coefficients (dry 0.7, wet 0.4, snow/ice 0.2) and the 9 m/s^2 limit are **Knowledge** (standard physics); a search did not return a citable source.
+
 ## Open items
 1. Decide whether to widen the human reaction-time range (see above). Not changed yet, because it shifts verdicts.
 2. Antonio: JCG brackets and the legal-cost basis (and whether FRC is the right proxy).
