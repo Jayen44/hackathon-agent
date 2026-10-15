@@ -38,7 +38,8 @@ class Resolution:
 
 
 # Codes that need no action of their own (decision-context or handled by the outcome itself).
-INFORMATIONAL_CODES = {"NOT_ENGAGED", "S4_SOFTWARE_BREACH", "NO_SOURCED_VALUE", "NO_SOURCED_LEGAL_COST"}
+INFORMATIONAL_CODES = {"NOT_ENGAGED", "S4_SOFTWARE_BREACH", "NO_SOURCED_VALUE", "NO_SOURCED_LEGAL_COST",
+                       "SCOPE_EXCLUDED", "PROPERTY_CAP", "CPA_PROPERTY_EXCLUDED"}  # claim-value scope (#23): already applied
 
 _STEP_FOR_CODE = {
     "MODELS_DISAGREE": Step("engineer", "The careful-driver models fall either side of 50%: check the reconstruction inputs (gap, speed, "
@@ -63,6 +64,9 @@ _STEP_FOR_CODE = {
                                  "Confirm no unauthorised software change or missed safety-critical update (AEVA s.4)", "PURSUE"),
     "NEAR_TRACK_LIMIT": Step("counsel", "Value is near a court-track limit: get counsel's costs estimate before deciding",
                              "PURSUE or SETTLE_NO_RECOVERY"),
+    "CPA_PRIVATE_UNKNOWN": Step("claims handler", "Confirm whether the damaged property was ordinarily and mainly for "
+                                "private use (CPA 1987 s.5(3)); if not, it is not recoverable on the CPA route",
+                                "PURSUE"),
 }
 
 
