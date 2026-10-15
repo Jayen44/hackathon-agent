@@ -58,7 +58,8 @@ if modal.is_local():
 app = modal.App("accel-claims-api", image=image)
 store = modal.Dict.from_name("accel-claims-store", create_if_missing=True)
 
-CORS_ORIGIN_REGEX = r"https://accel-claims-dashboard[a-z0-9-]*\.vercel\.app|http://localhost:\d+|http://127\.0\.0\.1:\d+"
+CORS_ORIGIN_REGEX = (r"https://accel-claims-dashboard[a-z0-9-]*\.vercel\.app|https://termvato--accel-simlab-web\.us-east\.modal\.run|"
+                     r"http://localhost:\d+|http://127\.0\.0\.1:\d+")
 MAX_BODY_BYTES = 512_000
 
 
@@ -233,7 +234,7 @@ def web():
     from fastapi.middleware.cors import CORSMiddleware
     from fastapi.responses import JSONResponse
 
-    from viz.api.claims import form_to_bundle, insurance_available
+    from viz.api.claims import cctv_meta, form_to_bundle, insurance_available
 
     api = FastAPI(title="Accel claims API")
     api.add_middleware(CORSMiddleware, allow_origin_regex=CORS_ORIGIN_REGEX, allow_methods=["GET", "POST"],
@@ -352,6 +353,8 @@ def web():
                 raise HTTPException(400, "bundle must be a schema 0.1 crash bundle")
             if not bundle.get("case_id"):
                 raise HTTPException(400, "bundle needs a case_id")
+            if isinstance(bundle.get("cctv_evidence"), dict):   # Sim Lab CCTV run + insurer claim file (tier 1)
+                meta = cctv_meta(bundle)
         else:
             raise HTTPException(400, "send {'bundle': {...}} or {'form': {...}}")
         if not re.fullmatch(r"[A-Za-z0-9_.\-]{1,64}", str(bundle["case_id"])):

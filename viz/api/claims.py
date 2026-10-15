@@ -16,6 +16,7 @@ import copy
 import hashlib
 import json
 import math
+import re
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, is_dataclass, replace
 from typing import Any
@@ -160,7 +161,7 @@ def assess_gbp(bundle: dict, sim: dict | None, engagement_override: str | None =
         facts = replace(claim_facts(b, reproduced), engagement_status=engagement_override)
         avoid = [to_avoidance_result(n, e.estimate(b.conflict)) for n, e in est.items()]
         rec = assess(facts, avoid)
-        notes.append(f"Engagement status set to '{engagement_override}' from the intake form "
+        notes.append(f"Engagement status set to '{engagement_override}' from the claim file "
                      "(not verified from vehicle data).")
     out = {"available": True, "verdict": _plain(br.verdict), "notes": notes,
            "recovery": None if rec is None else _plain(rec)}
@@ -433,6 +434,74 @@ def form_to_bundle(form: dict) -> tuple[dict, dict]:
     return bundle, meta
 
 
+# ------------------------------------------------------------------ CCTV bundles (from the Sim Lab)
+
+_HEX32, _HEX12 = re.compile(r"^[0-9a-f]{32}$"), re.compile(r"^[0-9a-f]{12}$")
+
+
+def cctv_meta(bundle: dict) -> dict:
+    """meta for a bundle the Sim Lab built from CCTV + the insurer's claim file (viz/lab/cctv_claim.py).
+
+    Tier 1 (video). Engagement from the claim file is at most 'engaged_alleged': only AV logs verify it.
+    """
+    ce = bundle.get("cctv_evidence") or {}
+    cf = ce.get("claim_file") or {}
+    eng = _tri(cf.get("av_engaged"))
+    logs = bool((bundle.get("perception") or {}).get("decision_log_present"))
+    code = {"yes": "engaged_verified" if logs else "engaged_alleged", "no": "not_engaged", "unknown": "unknown"}[eng]
+    unknowns = [k for k in ("av_engaged", "within_odd", "software_verified") if _tri(cf.get(k)) == "unknown"]
+    if (cf.get("injury_severity") or "Unknown") == "Unknown":
+        unknowns.append("injury_severity")
+    if cf.get("paid_gbp") is None:
+        unknowns.append("claim_paid_gbp")
+    if cf.get("cn_pct") is None:
+        unknowns.append("contributory_negligence")
+    return {"tier": evidence_tier(bundle), "engagement_override": None if code == "engaged_verified" else code,
+            "unknowns": unknowns, "has_crash_time": True,
+            "evidence": {"cctv": True, "dashcam": False, "av_logs": logs, "police_report": False, "witnesses": False}}
+
+
+def cctv_summary(bundle: dict) -> dict | None:
+    """Display-only CCTV provenance for the dashboard. Untrusted input: whitelisted keys, checked ids, numbers only."""
+    ce = bundle.get("cctv_evidence")
+    if not isinstance(ce, dict):
+        return None
+    vid, rid = str(ce.get("video_id", "")), str(ce.get("run_id", ""))
+    if not _HEX32.match(vid) or not _HEX12.match(rid):
+        return None
+
+    def num(x):
+        return float(x) if isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x) else None
+
+    def vs(x):
+        return {"value": num(x.get("value")), "sd": num(x.get("sd"))} if isinstance(x, dict) else None
+
+    def pts(xs, n):
+        out = []
+        for p in (xs or [])[:n]:
+            if isinstance(p, (list, tuple)) and len(p) == 2 and num(p[0]) is not None and num(p[1]) is not None:
+                out.append([num(p[0]), num(p[1])])
+        return out
+
+    m = ce.get("measured") or {}
+    fr = ce.get("frame") or {}
+    cal = ce.get("calibration") or {}
+    sha = str(ce.get("sha256") or "")
+    return {
+        "video_id": vid, "run_id": rid, "tier": 1,
+        "sha256": sha if re.fullmatch(r"[0-9a-f]{64}", sha) else None,
+        "measured": {k: vs(m.get(k)) for k in ("ego_speed_mps", "other_speed_mps", "gap_m",
+                                                "ego_speed_before_impact_mps") if isinstance(m.get(k), dict)},
+        "min_gap_m": num(m.get("min_gap_m")),
+        "ego_ids": [int(i) for i in (ce.get("ego_ids") or []) if isinstance(i, int)][:20],
+        "other_ids": [int(i) for i in (ce.get("other_ids") or []) if isinstance(i, int)][:20],
+        "frame": {"width": num(fr.get("width")), "height": num(fr.get("height"))},
+        "calibration": {"mode": cal.get("mode") if cal.get("mode") in ("rectangle", "points") else None,
+                        "img_pts": pts(cal.get("img_pts"), 50), "reprojection_rms_m": num(cal.get("reprojection_rms_m"))},
+        "paths": {k: pts((ce.get("paths") or {}).get(k), 200) for k in ("av", "other")},
+    }
+
+
 # ------------------------------------------------------------------ sim
 
 def bracket(sim: dict) -> tuple[float, float] | None:
@@ -697,7 +766,8 @@ def assess_claim(bundle: dict, meta: dict | None = None, map_fn=None, seed: int 
     return _plain({
         "claim_id": cid,
         "synthetic": bundle.get("synthetic"),
-        "source": "form" if bundle.get("intake") else "bundle",
+        "source": "form" if bundle.get("intake") else "cctv" if bundle.get("cctv_evidence") else "bundle",
+        "cctv": cctv_summary(bundle),
         "crash_type": (bundle.get("conflict") or {}).get("crash_type")
                       or KIND_TO_CRASH_TYPE.get((bundle.get("conflict") or {}).get("kind", "constant_hazard")) if bundle.get("conflict") else None,
         "evidence_tier": tier_used,

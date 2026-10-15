@@ -109,8 +109,19 @@ svg text{fill:var(--muted);font:11px Inter,sans-serif}
   <div class="row"><label>Crash type</label><select id="ctype"><option value="">auto (from lateral motion)</option><option value="cut_in">cut-in</option><option value="lead_vehicle_decel">lead vehicle brakes</option></select></div>
   <div class="row"><label>Contact in video?</label><select id="col"><option value="auto">auto (boxes meet)</option><option value="1">yes</option><option value="0">no</option></select></div>
   <div class="row"><label>Monte Carlo samples</label><input id="n" type="number" value="4000" min="100" max="20000" step="500"></div>
+  <h2 id="h5" style="margin-top:14px"><span class="n">5</span>Claim file (what the insurer knows)</h2>
+  <p class="note">Each field is optional; leave it <b>unknown</b> if your file does not say. Unknowns become information requests, never guesses.</p>
+  <div class="row"><label>Claim reference (optional)</label><input id="cref" type="text" maxlength="64" placeholder="auto"></div>
+  <div class="row"><label>AV engaged at the crash</label><select id="ceng"><option value="unknown">unknown</option><option value="yes">yes</option><option value="no">no</option></select></div>
+  <div class="row"><label>Within its ODD</label><select id="codd"><option value="unknown">unknown</option><option value="yes">yes</option><option value="no">no</option></select></div>
+  <div class="row"><label>Injury severity</label><select id="csev"><option>Unknown</option><option>Fatal</option><option>Serious</option><option>Slight</option><option>Damage only</option></select></div>
+  <div class="row"><label>Amount paid (GBP)</label><input id="cpaid" type="number" min="0" step="100" placeholder="unknown"></div>
+  <div class="row"><label>Injured party contributory negligence (%)</label><span style="display:flex;gap:4px;align-items:center"><input id="cnlo" type="number" min="0" max="100" placeholder="low">–<input id="cnhi" type="number" min="0" max="100" placeholder="high"></span></div>
+  <div class="row"><label>Software version verified (AEVA s.4)</label><select id="csw"><option value="unknown">unknown</option><option value="yes">yes</option></select></div>
   <button class="primary" id="run" disabled>Measure &amp; run on Modal</button>
   <p class="note" id="runStatus"></p>
+  <button class="primary" id="send" hidden style="background:var(--good);border-color:var(--good);color:#04110a">Send to claims desk →</button>
+  <p class="note" id="sendStatus"></p>
 </aside>
 <section class="out">
   <div class="card"><div class="k" id="frameTitle">First frame (privacy-blurred). Click to place calibration points.</div>
@@ -121,6 +132,7 @@ svg text{fill:var(--muted);font:11px Inter,sans-serif}
 </main>
 <script>
 const $=s=>document.querySelector(s);
+const RETURN=new URLSearchParams(location.search).get('return')||'';
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let vid=null, info=null, img=null, mode='rectangle', clicks=[], ego=[], other=[], last=null, wAssumed=false;
 $('#theme').onclick=()=>{const r=document.documentElement;r.dataset.theme=r.dataset.theme==='light'?'dark':'light';draw();if(last)renderOut(last);};
@@ -198,7 +210,7 @@ $('#upload').onclick=async()=>{
 };
 async function openVideo(id){
   vid=id;info=null;ego=[];other=[];clicks=[];img=null;last=null;$('#out').innerHTML='';renderPts();draw();
-  history.replaceState(null,'','?v='+id);check();
+  history.replaceState(null,'','?v='+id+(RETURN?'&return='+encodeURIComponent(RETURN):''));$('#send').hidden=true;$('#sendStatus').textContent='';check();
   const t0=performance.now();
   for(;;){
     const r=await fetch(`api/video/${id}/status`);if(!r.ok){$('#upStatus').textContent='Unknown video id.';return;}
@@ -233,8 +245,22 @@ $('#run').onclick=async()=>{
   try{const r=await fetch(`api/video/${vid}/analyze`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
     if(!r.ok){let m=await r.text();try{m=JSON.parse(m).detail}catch(e){}throw new Error(m);}
     last=await r.json();other=last.other_ids;renderThumbs();draw();renderOut(last);
-    $('#runStatus').textContent=`Done in ${((performance.now()-t0)/1000).toFixed(1)} s.`;}
+    $('#runStatus').textContent=`Done in ${((performance.now()-t0)/1000).toFixed(1)} s.`;$('#send').hidden=false;$('#sendStatus').textContent='';}
   catch(e){$('#runStatus').innerHTML='<span class="warn">'+esc(e.message)+'</span>';}finally{const keep=$('#runStatus').innerHTML;check();if(!$('#runStatus').textContent)$('#runStatus').innerHTML=keep;}
+};
+
+// ---------- send to claims desk: Sim Lab builds the full schema 0.1 bundle server-side and posts it to the claims API
+function claimFile(){const v=s=>$(s).value.trim();
+  return {claim_ref:v('#cref')||null,av_engaged:v('#ceng'),within_odd:v('#codd'),injury_severity:v('#csev'),
+    paid_gbp:v('#cpaid')||null,cn_low_pct:v('#cnlo')||null,cn_high_pct:v('#cnhi')||null,software_verified:v('#csw')};}
+$('#send').onclick=async()=>{
+  if(!last)return;$('#send').disabled=true;$('#sendStatus').textContent='Building the claim bundle and sending it to the claims desk…';
+  try{const r=await fetch(`api/video/${vid}/claim`,{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({run_id:last.run_id,claim_file:claimFile(),return_url:RETURN||null})});
+    if(!r.ok){let m=await r.text();try{m=JSON.parse(m).detail}catch(e){}throw new Error(m);}
+    const j=await r.json();$('#sendStatus').innerHTML=`Claim <b class="mono">${esc(j.claim_id)}</b> created. Opening the claims desk…`;
+    location.href=j.claim_url;}
+  catch(e){$('#sendStatus').innerHTML='<span class="warn">'+esc(e.message)+'</span>';$('#send').disabled=false;}
 };
 
 const pct=x=>(100*x).toFixed(1)+'%';
@@ -288,7 +314,7 @@ function renderOut(res){
    ${e.top_sensitivity?` · most decisive fact: <b>${esc(e.top_sensitivity.param)}</b>`:''}. Supporting evidence only; the GBP figure comes from the insurance model.</p>
   ${m.notes.length?`<div class="card" style="border-color:var(--warn);margin-top:10px"><div class="k warn">Measurement notes</div><ul class="as">${m.notes.map(n=>`<li>${esc(n)}</li>`).join('')}</ul>
    <div class="note">Contact used: <b>${b.outcome.collided?'yes':'no'}</b> (${$('#col').value==='auto'?'auto':'set by you'}).</div></div>`:''}
-  <div class="actions"><a class="go" href="${res.viewer_url}" target="_blank" rel="noopener">Open 3D replay (AV vs careful A vs B) ↗</a>
+  <div class="actions"><button class="go" id="send2" style="background:var(--good);border-color:var(--good);color:#04110a;font-weight:600">Send to claims desk →</button><a class="go" href="${res.viewer_url}" target="_blank" rel="noopener">Open 3D replay (AV vs careful A vs B) ↗</a>
    <a href="api/bundle/${vid}/${res.run_id}" download>Download measured bundle JSON</a>
    <button id="del">Delete this video</button></div>
   <div class="grid2">
@@ -308,6 +334,7 @@ function renderOut(res){
     <li>Sim-to-real gap: 2D kinematic sim, constant speed plus one braking step per vehicle.</li></ul>
     <p class="note"><b>${esc(e.disclaimer)}</b></p></div>
   </div>`;
+  $('#send2').onclick=()=>$('#send').click();
   $('#del').onclick=async()=>{if(!confirm('Delete the uploaded video and all its results from the volume?'))return;
     const r=await fetch(`api/video/${vid}`,{method:'DELETE'});if(r.ok){vid=null;info=null;img=null;last=null;$('#out').innerHTML='<p class="note">Deleted.</p>';$('#thumbs').innerHTML='';history.replaceState(null,'','cctv');draw();check();}};
 }

@@ -1,6 +1,22 @@
 // Client for the Modal claims API (viz/api/app.py). The dashboard never computes a result itself.
 export const API_BASE = (process.env.NEXT_PUBLIC_API_BASE ?? "https://termvato--accel-claims-api-web.us-east.modal.run").replace(/\/$/, "");
 
+// Sim Lab (viz/lab on Modal): CCTV upload -> measured speeds -> "Send to claims desk" -> /claims/<id> here.
+export const SIMLAB_BASE = (process.env.NEXT_PUBLIC_SIMLAB_BASE ?? "https://termvato--accel-simlab-web.us-east.modal.run").replace(/\/$/, "");
+/** Sim Lab CCTV page; `returnOrigin` is where "Send to claims desk" redirects (validated by the Sim Lab). */
+export const cctvUploadUrl = (returnOrigin?: string) =>
+  `${SIMLAB_BASE}/cctv${returnOrigin ? `?return=${encodeURIComponent(returnOrigin)}` : ""}`;
+
+export type Measured = { value: number | null; sd: number | null };
+export type CctvEvidence = {
+  video_id: string; run_id: string; tier: number; sha256: string | null;
+  measured: Partial<Record<"ego_speed_mps" | "other_speed_mps" | "gap_m" | "ego_speed_before_impact_mps", Measured>>;
+  min_gap_m: number | null; ego_ids: number[]; other_ids: number[];
+  frame: { width: number | null; height: number | null };
+  calibration: { mode: string | null; img_pts: [number, number][]; reprojection_rms_m: number | null };
+  paths: { av: [number, number][]; other: [number, number][] };
+};
+
 export type Interval = { low: number; mid: number; high: number };
 export type DriverResult = {
   p_avoid: number;
@@ -32,8 +48,9 @@ export type Verdict = {
 export type Claim = {
   claim_id: string;
   synthetic: boolean | null;
-  source: "form" | "bundle";
+  source: "form" | "bundle" | "cctv";
   origin?: string;
+  cctv?: CctvEvidence | null;
   crash_type: string | null;
   evidence_tier: number;
   sim: null | {

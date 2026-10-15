@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { CctvEvidencePanel, cctvViewerSrc } from "@/components/cctv";
 import { DebatePanel } from "@/components/debate";
 import { DecisionBadge, Dl, GbpRange, Meter, Panel, PBar } from "@/components/ui";
 import { getClaim, replayUrl, type Claim, type Interval } from "@/lib/api";
@@ -70,6 +71,7 @@ export default function ClaimPage() {
   const cid = decodeURIComponent(id);
   const { claim, state } = useClaim(cid);
   const [done, setDone] = useState<Record<string, boolean>>({});
+  const [replaySrc, setReplaySrc] = useState<"cctv" | "sim">("cctv");
 
   if (!claim) {
     return (
@@ -89,6 +91,8 @@ export default function ClaimPage() {
   const v = claim.gbp.verdict;
   const viewerSrc = `/viewer/index.html?data=${encodeURIComponent(replayUrl(claim.claim_id))}&cam=chase`;
   const band = s?.evidence_band ?? null;
+  const cctv = claim.cctv ?? null;
+  const showCctvReplay = !!cctv && replaySrc === "cctv";
 
   return (
     <div className="space-y-5">
@@ -101,7 +105,7 @@ export default function ClaimPage() {
             <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
               <span className="font-mono text-sm text-fg">{claim.claim_id}</span>
               <span>·</span><span>{claim.crash_type ? CRASH_LABEL[claim.crash_type] ?? claim.crash_type : "crash type unknown"}</span>
-              <span>·</span><span>{TIER_LABEL[claim.evidence_tier] ?? `Tier ${claim.evidence_tier}`}</span>
+              <span>·</span><span>{cctv ? `CCTV (tier 1), video ${cctv.video_id.slice(0, 8)}` : TIER_LABEL[claim.evidence_tier] ?? `Tier ${claim.evidence_tier}`}</span>
               {claim.synthetic && <><span>·</span><span className="rounded bg-sunk px-1.5 py-0.5">synthetic example</span></>}
             </div>
             <div className="mt-3 flex flex-wrap items-center gap-3">
@@ -129,10 +133,22 @@ export default function ClaimPage() {
 
       {/* Middle: replay + evidence */}
       <div className="space-y-5">
-        <Panel title="Replay: reported AV vs careful drivers A and B" aside={<span className="text-[11px] text-muted">median sample, same scenario</span>} className="overflow-hidden">
-          {claim.has_replay ? (
+        {cctv && <CctvEvidencePanel c={cctv} />}
+        <Panel title="Replay: reported AV vs careful drivers A and B" className="overflow-hidden" aside={cctv ? (
+          <div className="flex gap-1 text-[11px]" role="tablist" aria-label="Replay source">
+            {([["cctv", "CCTV reconstruction"], ["sim", "claims sim median"]] as const).map(([k, l]) => (
+              <button key={k} role="tab" aria-selected={replaySrc === k} onClick={() => setReplaySrc(k)}
+                className={`rounded border px-2 py-0.5 ${replaySrc === k ? "border-accent text-accent" : "border-line text-muted hover:text-fg"}`}>{l}</button>
+            ))}
+          </div>
+        ) : <span className="text-[11px] text-muted">median sample, same scenario</span>}>
+          {showCctvReplay ? (
             <div className="-m-4">
-              <iframe title="3D replay" src={viewerSrc} className="block h-[520px] w-full border-0 lg:h-[460px]" allow="fullscreen" />
+              <iframe key="cctv" title="3D replay of the CCTV reconstruction" src={cctvViewerSrc(cctv)} className="block h-[520px] w-full border-0 lg:h-[460px]" allow="fullscreen" />
+            </div>
+          ) : claim.has_replay ? (
+            <div className="-m-4">
+              <iframe key="sim" title="3D replay" src={viewerSrc} className="block h-[520px] w-full border-0 lg:h-[460px]" allow="fullscreen" />
             </div>
           ) : (
             <p className="text-sm text-muted">No replay: {claim.sim_error ?? "no reconstructed conflict in this claim."}</p>

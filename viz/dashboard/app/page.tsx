@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { UploadCctvButton } from "@/components/cctv";
 import { DecisionBadge, GbpRange } from "@/components/ui";
 import { assessExample, listClaims, type InboxRow } from "@/lib/api";
 import { CRASH_LABEL, decisionTone, pct } from "@/lib/format";
@@ -47,9 +48,12 @@ export default function Inbox() {
             competent driver have avoided the crash, and what can be recovered from the AV company under s.5.
           </p>
         </div>
-        <Link href="/new" className="rounded-md bg-accent px-3 py-2 text-sm font-medium text-on-accent hover:opacity-90">
-          New claim
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <UploadCctvButton className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-on-accent hover:opacity-90" />
+          <Link href="/new" className="rounded-md border border-line px-3 py-2 text-sm font-medium hover:border-accent hover:text-accent">
+            New claim (form)
+          </Link>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filter by decision">
@@ -95,7 +99,7 @@ export default function Inbox() {
                       ) : (
                         <span className="font-mono text-[13px]">{r.claim_id}</span>
                       )}
-                      <div className="text-xs text-muted">{r.origin === "example" || r.synthetic ? "synthetic example" : "submitted"}</div>
+                      <div className="text-xs text-muted">{r.origin === "example" ? "synthetic example" : `submitted${r.source === "cctv" ? " · CCTV" : ""}${r.synthetic ? " · synthetic" : ""}`}</div>
                     </td>
                     <td className="px-4 py-2.5">{r.crash_type ? CRASH_LABEL[r.crash_type] ?? r.crash_type : "–"}</td>
                     <td className="px-4 py-2.5 num">{r.evidence_tier != null ? `Tier ${r.evidence_tier}` : "–"}</td>

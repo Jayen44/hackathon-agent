@@ -23,6 +23,7 @@ image = (
     .add_local_python_source("sim", "montecarlo")
     .add_local_file(ROOT / "viz" / "export.py", "/root/viz/export.py")
     .add_local_file(HERE / "cctv.py", "/root/viz/lab/cctv.py")
+    .add_local_file(HERE / "cctv_claim.py", "/root/viz/lab/cctv_claim.py")
     .add_local_dir(ROOT / "viz" / "web", "/viewer")
     .add_local_dir(HERE / "static", "/static")
 )

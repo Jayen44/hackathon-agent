@@ -15,11 +15,25 @@ from pathlib import Path
 
 VID_RE = re.compile(r"^[0-9a-f]{32}$")
 RID_RE = re.compile(r"^[0-9a-f]{12}$")
+CLAIMS_API = "https://termvato--accel-claims-api-web.us-east.modal.run"
+LAB_BASE = "https://termvato--accel-simlab-web.us-east.modal.run"
 
 
-def add_cctv_routes(api, vol, vol_root: str, detect_fn, map_fn, max_bytes, video_ext):
+def pixel_paths(tj: dict, ids: list[int]) -> list[list[float]]:
+    """Bottom-centre pixel path of one vehicle (all its track fragments, in frame order)."""
+    pts = []
+    for tid in ids:
+        t = (tj.get("tracks") or {}).get(str(int(tid)))
+        if t:
+            pts += [(f, (b[0] + b[2]) / 2, b[3]) for f, b in zip(t["frames"], t["boxes"])]
+    pts.sort()
+    step = max(1, len(pts) // 150)
+    return [[round(u, 1), round(v, 1)] for _, u, v in pts[::step]]
+
+
+def add_cctv_routes(api, vol, vol_root: str, detect_fn, map_fn, max_bytes, video_ext, claims_api: str = CLAIMS_API):
     import modal
-    from fastapi import File, Form, HTTPException, UploadFile
+    from fastapi import File, Form, HTTPException, Request, UploadFile
     from fastapi.responses import FileResponse, JSONResponse
 
     root = Path(vol_root) / "uploads"
@@ -151,8 +165,15 @@ def add_cctv_routes(api, vol, vol_root: str, detect_fn, map_fn, max_bytes, video
         rid = uuid.uuid4().hex[:12]
         (d / f"replay_{rid}.json").write_text(json.dumps(out["replay"], separators=(",", ":")))
         (d / f"bundle_{rid}.json").write_text(json.dumps(out["analysis"]["bundle"], indent=1))
-        vol.commit()
         a = out["analysis"]
+        cal = req.get("calibration") or {}
+        run_info = {"measured": a["measured"], "calibration": a["calibration"],
+                    "calibration_input": {"mode": cal.get("mode"), "img_pts": cal.get("img_pts")},
+                    "ego_ids": a["ego_ids"], "other_ids": a["other_ids"],
+                    "frame": {"width": tj.get("width"), "height": tj.get("height")},
+                    "paths": {"av": pixel_paths(tj, a["ego_ids"]), "other": pixel_paths(tj, a["other_ids"])}}
+        (d / f"run_{rid}.json").write_text(json.dumps(run_info, separators=(",", ":"), default=float))
+        vol.commit()
         return {"run_id": rid, "replay_url": f"/api/replay/{vid}/{rid}",
                 "viewer_url": f"/viewer/?data=/api/replay/{vid}/{rid}&cam=chase",
                 "bundle": a["bundle"], "measured": a["measured"], "calibration": a["calibration"],
@@ -181,6 +202,54 @@ def add_cctv_routes(api, vol, vol_root: str, detect_fn, map_fn, max_bytes, video
         if not p.exists():
             raise HTTPException(404, "unknown run")
         return FileResponse(p, media_type="application/json", filename=f"bundle_{vid[:8]}_{rid}.json")
+
+    @api.post("/api/video/{vid}/claim")
+    async def send_claim(vid: str, request: Request):
+        """CCTV run + insurer claim file -> full schema 0.1 bundle -> claims API /api/assess (server to server).
+        Returns the claim id and the dashboard URL to open (only our dashboards are allowed as return URL)."""
+        import asyncio
+        import urllib.error
+        import urllib.request
+
+        from viz.lab.cctv_claim import ClaimFileError, build_claim_bundle, safe_return_url
+
+        try:
+            body = await request.json()
+        except ValueError:
+            raise HTTPException(400, "body must be JSON")
+        if not isinstance(body, dict):
+            raise HTTPException(400, "body must be a JSON object")
+        rid = str(body.get("run_id") or "")
+        if not RID_RE.match(rid):
+            raise HTTPException(400, "unknown run")
+        d = vdir(vid)
+        cb, run_info, meta = (read_json(d / f"bundle_{rid}.json"), read_json(d / f"run_{rid}.json"),
+                              read_json(d / "meta.json"))
+        if cb is None or meta is None:
+            raise HTTPException(404, "unknown run")
+        if run_info is None:
+            raise HTTPException(409, "this run predates claim export; press 'Measure & run' again")
+        try:
+            bundle = build_claim_bundle(cb, run_info, meta, body.get("claim_file") or {}, vid, rid, LAB_BASE)
+        except (ClaimFileError, KeyError, TypeError, ValueError) as e:
+            raise HTTPException(400, str(e))
+        data = json.dumps({"bundle": bundle}).encode()
+
+        def post():
+            rq = urllib.request.Request(f"{claims_api}/api/assess", data=data, method="POST",
+                                        headers={"content-type": "application/json"})
+            with urllib.request.urlopen(rq, timeout=60) as r:
+                return json.loads(r.read())
+        try:
+            res = await asyncio.to_thread(post)
+        except urllib.error.HTTPError as e:
+            raise HTTPException(502, f"claims API refused the bundle: HTTP {e.code} {e.read()[:300].decode(errors='replace')}")
+        except (urllib.error.URLError, TimeoutError) as e:
+            raise HTTPException(502, f"claims API unreachable: {e}")
+        cid = res["claim_id"]
+        base = safe_return_url(body.get("return_url"))
+        return {"claim_id": cid, "status": res.get("status"), "claim_url": f"{base}/claims/{cid}",
+                "bundle_bytes": len(data)}
 
     @api.delete("/api/video/{vid}")
     def delete(vid: str):
