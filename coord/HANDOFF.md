@@ -1,40 +1,40 @@
 # Handoff: current state (update this, don't re-explain history)
 
-**Branch** `insurance` · tests: `pytest -q` (~200 pass, 1 skipped until `sim/` is merged) · repo is private (Jayen44, antoniohede-ai, termvato).
+**Branch** `insurance` · tests: `pytest -q` (~207 pass, 1 skipped until `sim/` is merged) · repo is private (Jayen44, antoniohede-ai, termvato).
 
 ## What exists
-- `insurance/`: crash-bundle JSON (`bundle.py`), integrity checks, liability engine (`engine.py`, decision paths have `Step.code`), counterfactual estimators (`counterfactual.py`: closed form + numeric for lead-braking/cut-in), AEVA s.3(2)/s.4 rules, `bridge.py` -> `finance.recovery.assess` (sends UK codes), `legal.py` (regime, recovery route, limitation deadlines, `p_liable_to_victim`; bundle `legal` block), `resolution.py` (every crash -> one of 8 outcomes + next steps; reads `assess().codes`, not prose), `synth_bundles.py`, `portfolio.py`, `gaps.py`.
-- 22 example bundles in `insurance/examples` (timelines self-consistent via `settle()`; 21 and 22 are clean Pursue demos) (regenerate with `scripts/make_examples.py`).
-- Verified/validated: `docs/verification.md`, `docs/validation.md`.
+- `insurance/`: crash-bundle JSON (`bundle.py`, incl. optional `legal` block), integrity checks, liability engine (`engine.py`, decision paths have `Step.code`), counterfactual estimators (`counterfactual.py`), AEVA s.3(2)/s.4 rules, `bridge.py` -> `finance.recovery.assess` (UK codes), `legal.py` (regime, recovery route, limitation deadlines, `p_liable_to_victim`), `resolution.py` (every crash -> one of 8 outcomes + next steps, reads `assess().codes` not prose), `synth_bundles.py`, `portfolio.py`, `gaps.py`.
+- 22 example bundles in `insurance/examples` (regenerate with `scripts/make_examples.py`; timelines and impact speeds computed by `settle()`; 21 and 22 are clean Pursue demos; legal block is a synthetic post-commencement scenario).
+- Verified/validated: `docs/verification.md`, `docs/validation.md`. Pitch dos/don'ts and legal to-do: `docs/legal-basis.md` (summary of Vakhtang's `sim/LEGAL_BASIS.md`).
 
 ## Commands
 ```
 pytest -q                                      python -m insurance.gaps [--mine]
-python -m insurance <bundle.json> [--price]  (prints outcome + steps)    python -m insurance.portfolio --n 20 --seed 7
+python -m insurance <bundle.json> [--price]    python -m insurance.portfolio --n 20 --seed 7   (or --dir insurance/examples)
 scripts/sync.ps1 | scripts/sync.sh             python scripts/sensitivity.py
 ```
+`--price` on one bundle uses one estimator and `reproduced=False`, so it stops at `pull_logs_first`; the portfolio run uses two estimators and reaches `pursue`.
 
 ## Open work (GitHub issues are the inbox)
 | # | Owner | What |
 |---|---|---|
-| 4 | Antonio | finish claim-value gaps (JCG) |
-| 5 | Antonio | `eval/labels.csv`, 20 labelled crashes |
+| 22 | **Jayen** | Antonio changed the pursue rule (7486354): OK the updated seam test (`test_small_clean_claim_is_pursued_pre_issue_with_downside_stated`) and map new codes `LITIGATION_DOWNSIDE`, `MODELS_DISAGREE` in `resolution.py` (unknown codes are ignored today) |
 | 6 / 8 | Antonio / Jayen | seam: two estimators + real `reproduced` flag (needs OK in #6) |
-| 17 | Vakhtang | sim is source of truth: answer 4 questions (bundle decel/cut-in fields, mu in braking, perception trigger, None p5/p95). After `sim/` merge, Jayen deletes duplicated physics in `sim_adapter.py` |
-| 14 | Vakhtang | R157 Annex 3 parameters (blocks real driver models) |
-| 15 | Antonio | drop legacy SGO tables now that the bridge sends UK codes |
+| 17 | Vakhtang | sim is source of truth. After `sim/` merge, Jayen deletes duplicated physics in `sim_adapter.py` |
+| 14 | Vakhtang | R157 Annex 3 parameters (said done on `sim`; confirm and close) |
+| 24 | Vakhtang | R157 scope tags + typical-driver sensitivity; Jayen reads the tags in the bridge once `estimate()` returns them |
+| 23 | Antonio | claim-value scope (AEVA s.2(3), CPA exclusions) |
+| 4 / 5 / 15 | Antonio | JCG gaps; `eval/labels.csv` (pursue agreement 11 to 15/20, who_pays 16/20); drop legacy SGO tables |
+| 20 / 21 | Jayen | answered (examples fixed, resolution uses codes); close once Vakhtang / Antonio confirm |
 
 ## Recent
-- Cost edge-case sweep (#18, Antonio informed): `finance/recovery.py` now validates inputs (paid > 0, legal cost 0<low<=high, CN 0..1), warns within 10% of the £25k/£100k track limits (legal cost is a step function), has opt-in `cost_shift_risk` (CPR 44.2(2), defendant costs ASSUMED = our high cost), flags Serious/Fatal table values as general damages only, and exposes `RecoveryAssessment.codes` (add a code when you add a gate). Bridge returns "unpriced" on bad inputs instead of raising.
-- Still open there: multi-track (> £100k) cost is TODO, so table-priced Serious claims are `cannot_price` unless `paid_claim_gbp`/`legal_cost_gbp` is given; no settlement/delay model; small claims (< ~£10k) can't reach `pursue`.
-- Antonio changed the central legal cost to band 2 issued-and-settled (d52e4c4).
-- #11 closed: reaction range stays 0.7/1.0/1.5 s (evidence in `docs/validation.md`). Engine accepts `avoids_at_p5/p95 = None`.
-- Antonio added `agents/` (adjuster/defence/rebuttal debate over finance tools; reads the seam). `coord/drafts/labels_synthetic_draft.csv` offered for #5.
-- Waiting on Antonio's approve on #6 (nudged twice). No insurer UI exists yet on any branch (Streamlit scaffold on main; Sim Lab on sim).
+- Legal regime built (see `docs/legal-basis.md` section 3): `regime` / `recovery_route`, limitation clocks (first resolution step, URGENT under 90 days), `p_liable_to_victim` scaling in the bridge (unset = flagged "not assessed"), updated `engine.DISCLAIMER`, preservation-letter / CPR 31.16 wording.
+- Finance (Antonio): input validation, track-limit warning, opt-in `cost_shift_risk`, `RecoveryAssessment.codes` (add a code when you add a gate), central legal cost = band 2 issued-and-settled, pursue now decided on the central case with a stated litigation downside (#22). Bridge returns "unpriced" on bad inputs instead of raising.
+- Process: `finance/` is Antonio's. Open a `for:antonio` issue before editing it.
+- Antonio's `agents/` debate and dashboard page exist; no insurer UI beyond that on any branch.
 
 ## Known limits
-Legal regime: AEVA s.2/s.5 does not cover today's supervised pilots (no listed vehicles); the engine models the s.5 route. Pitch dos/don'ts and the to-do list are in `docs/legal-basis.md`; regime, limitation clocks, P(liable), disclaimer and disclosure wording are built. Still open: claim-value scope (s.2(3), CPA exclusions: finance), R157 scope tags and typical-driver sensitivity (sim).
-Human-driver model is a placeholder (optimistic reaction times, no swerving); friction values are unsourced physics; all crashes synthetic; recovery maths ignores cost-shifting and delay (see `docs/validation.md`).
+Legal regime: AEVA s.2/s.5 does not cover today's supervised pilots (no listed vehicles); the engine prices the s.5 route as a proxy. `p_liable_to_victim` has no sourced value yet, so avoidance is treated as the whole liability case unless set. Multi-track (> £100k) legal cost is unsourced, so table-priced Serious claims are `cannot_price` unless `paid_claim_gbp` or `legal_cost_gbp` is given. Human-driver model is a placeholder (optimistic reaction times, no swerving); friction values are unsourced physics; all crashes synthetic; example timelines use a simple brake x mu x g model, not the `sim` physics; recovery maths ignores settlement and delay (see `docs/validation.md`).
 
 ## Token tips
 Start a fresh session per chunk (`/clear`), use this file instead of history, run only the tests you need, avoid extended web searches, don't read `docs/*.png` or `insurance/examples/*.json`.
