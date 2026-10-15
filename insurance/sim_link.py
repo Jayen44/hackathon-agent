@@ -25,12 +25,25 @@ class SimUnavailable(RuntimeError):
     """The sim package could not be imported. The message says how to fix it."""
 
 
+def _git(*args: str) -> subprocess.CompletedProcess:
+    return subprocess.run(["git", *args], cwd=ROOT, capture_output=True)
+
+
 def vendor(ref: str = "origin/sim") -> Path:
-    subprocess.run(["git", "fetch", "origin"], cwd=ROOT, check=False, capture_output=True)
-    sha = subprocess.run(["git", "rev-parse", ref], cwd=ROOT, check=True, capture_output=True, text=True).stdout.strip()
-    tar = subprocess.run(["git", "archive", ref, *PATHS], cwd=ROOT, check=True, capture_output=True).stdout
+    """Copy sim/ and montecarlo/ from `ref` (default origin/sim) into SRC. Fetches the branch explicitly first, because a
+    clone may not have refs/remotes/origin/sim yet; errors say which git command failed and what it printed."""
+    branch = ref.split("/", 1)[1] if "/" in ref else ref
+    _git("fetch", "origin", f"{branch}:refs/remotes/origin/{branch}")
+    rev = _git("rev-parse", "--verify", f"{ref}^{{commit}}")
+    if rev.returncode != 0:
+        raise SimUnavailable(f"cannot resolve {ref} in {ROOT}: {rev.stderr.decode(errors='replace').strip()}. "
+                             f"Check `git remote -v` and `git fetch origin {branch}`, or set SIM_SRC to a local checkout.")
+    sha = rev.stdout.decode().strip()
+    tar = _git("archive", ref, *PATHS)
+    if tar.returncode != 0:
+        raise SimUnavailable(f"git archive {ref} failed: {tar.stderr.decode(errors='replace').strip()}")
     SRC.mkdir(parents=True, exist_ok=True)
-    with tarfile.open(fileobj=io.BytesIO(tar)) as t:
+    with tarfile.open(fileobj=io.BytesIO(tar.stdout)) as t:
         t.extractall(SRC, filter="data")
     (SRC / "SOURCE.json").write_text(json.dumps({"ref": ref, "sha": sha}))
     return SRC

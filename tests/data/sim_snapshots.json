@@ -1,0 +1,725 @@
+{
+ "_meta": {
+  "n": 300,
+  "sim": {
+   "ref": null,
+   "sha": null
+  }
+ },
+ "cases": {
+  "01_av_late_detection": {
+   "reproduced": true,
+   "tier": 2,
+   "timeline": {
+    "consistent": true,
+    "time_to_close_at_constant_speed_s": 2.99,
+    "reported_time_to_crash_s": 3.14,
+    "reason": null
+   },
+   "drivers": {
+    "careful_a": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    },
+    "careful_b": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    }
+   }
+  },
+  "02_human_driving_manual": {
+   "reproduced": true,
+   "tier": 2,
+   "timeline": {
+    "consistent": true,
+    "time_to_close_at_constant_speed_s": 2.99,
+    "reported_time_to_crash_s": 3.02,
+    "reason": null
+   },
+   "drivers": {
+    "careful_a": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    },
+    "careful_b": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    }
+   }
+  },
+  "03_handover_ignored_by_human": {
+   "reproduced": true,
+   "tier": 2,
+   "timeline": {
+    "consistent": true,
+    "time_to_close_at_constant_speed_s": 2.99,
+    "reported_time_to_crash_s": 3.14,
+    "reason": null
+   },
+   "drivers": {
+    "careful_a": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    },
+    "careful_b": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    }
+   }
+  },
+  "04_handover_too_short": {
+   "reproduced": true,
+   "tier": 2,
+   "timeline": {
+    "consistent": true,
+    "time_to_close_at_constant_speed_s": 2.99,
+    "reported_time_to_crash_s": 3.14,
+    "reason": null
+   },
+   "drivers": {
+    "careful_a": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    },
+    "careful_b": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    }
+   }
+  },
+  "05_unavoidable_close_cutin": {
+   "reproduced": true,
+   "tier": 2,
+   "timeline": {
+    "consistent": true,
+    "time_to_close_at_constant_speed_s": 0.75,
+    "reported_time_to_crash_s": 0.88,
+    "reason": null
+   },
+   "drivers": {
+    "careful_a": {
+     "p_avoid": 0.0,
+     "avoids_at_p50": false,
+     "median_impact_speed_mps": 13.39258032677919,
+     "n_samples": 300,
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    },
+    "careful_b": {
+     "p_avoid": 0.0,
+     "avoids_at_p50": false,
+     "median_impact_speed_mps": 13.39258032677919,
+     "n_samples": 300,
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    }
+   }
+  },
+  "06_borderline_needs_review": {
+   "reproduced": true,
+   "tier": 2,
+   "timeline": {
+    "consistent": true,
+    "time_to_close_at_constant_speed_s": 2.09,
+    "reported_time_to_crash_s": 2.12,
+    "reason": null
+   },
+   "drivers": {
+    "careful_a": {
+     "p_avoid": 0.0,
+     "avoids_at_p50": false,
+     "median_impact_speed_mps": 7.277750149999981,
+     "n_samples": 300,
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    },
+    "careful_b": {
+     "p_avoid": 0.5866666666666667,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    }
+   }
+  },
+  "07_outside_odd": {
+   "reproduced": true,
+   "tier": 2,
+   "timeline": {
+    "consistent": true,
+    "time_to_close_at_constant_speed_s": 2.99,
+    "reported_time_to_crash_s": 3.14,
+    "reason": null
+   },
+   "drivers": {
+    "careful_a": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    },
+    "careful_b": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    }
+   }
+  },
+  "08_integrity_failure": {
+   "reproduced": true,
+   "tier": 2,
+   "timeline": {
+    "consistent": true,
+    "time_to_close_at_constant_speed_s": 2.99,
+    "reported_time_to_crash_s": 3.14,
+    "reason": null
+   },
+   "drivers": {
+    "careful_a": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    },
+    "careful_b": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    }
+   }
+  },
+  "09_human_override": {
+   "reproduced": true,
+   "tier": 2,
+   "timeline": {
+    "consistent": true,
+    "time_to_close_at_constant_speed_s": 2.99,
+    "reported_time_to_crash_s": 3.14,
+    "reason": null
+   },
+   "drivers": {
+    "careful_a": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    },
+    "careful_b": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    }
+   }
+  },
+  "10_critical_fault": {
+   "reproduced": true,
+   "tier": 2,
+   "timeline": {
+    "consistent": true,
+    "time_to_close_at_constant_speed_s": 2.99,
+    "reported_time_to_crash_s": 3.14,
+    "reason": null
+   },
+   "drivers": {
+    "careful_a": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    },
+    "careful_b": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    }
+   }
+  },
+  "13_unapproved_software": {
+   "reproduced": true,
+   "tier": 2,
+   "timeline": {
+    "consistent": true,
+    "time_to_close_at_constant_speed_s": 2.99,
+    "reported_time_to_crash_s": 3.14,
+    "reason": null
+   },
+   "drivers": {
+    "careful_a": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    },
+    "careful_b": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    }
+   }
+  },
+  "14_human_took_control_in_time": {
+   "reproduced": true,
+   "tier": 2,
+   "timeline": {
+    "consistent": true,
+    "time_to_close_at_constant_speed_s": 2.99,
+    "reported_time_to_crash_s": 3.14,
+    "reason": null
+   },
+   "drivers": {
+    "careful_a": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    },
+    "careful_b": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    }
+   }
+  },
+  "15_lead_braking_avoidable": {
+   "reproduced": true,
+   "tier": 2,
+   "timeline": {
+    "consistent": null,
+    "reason": "no crash time or not closing"
+   },
+   "drivers": {
+    "careful_a": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    },
+    "careful_b": {
+     "p_avoid": 0.8933333333333333,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    }
+   }
+  },
+  "16_lead_braking_unavoidable": {
+   "reproduced": true,
+   "tier": 2,
+   "timeline": {
+    "consistent": null,
+    "reason": "no crash time or not closing"
+   },
+   "drivers": {
+    "careful_a": {
+     "p_avoid": 0.0,
+     "avoids_at_p50": false,
+     "median_impact_speed_mps": 12.26985355,
+     "n_samples": 300,
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    },
+    "careful_b": {
+     "p_avoid": 0.0,
+     "avoids_at_p50": false,
+     "median_impact_speed_mps": 10.474289549202517,
+     "n_samples": 300,
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    }
+   }
+  },
+  "17_cut_in_avoidable": {
+   "reproduced": true,
+   "tier": 2,
+   "timeline": {
+    "consistent": true,
+    "time_to_close_at_constant_speed_s": 5.0,
+    "reported_time_to_crash_s": 5.22,
+    "reason": null
+   },
+   "drivers": {
+    "careful_a": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    },
+    "careful_b": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    }
+   }
+  },
+  "18_cut_in_unavoidable": {
+   "reproduced": true,
+   "tier": 2,
+   "timeline": {
+    "consistent": true,
+    "time_to_close_at_constant_speed_s": 1.2,
+    "reported_time_to_crash_s": 1.28,
+    "reason": null
+   },
+   "drivers": {
+    "careful_a": {
+     "p_avoid": 0.0,
+     "avoids_at_p50": false,
+     "median_impact_speed_mps": 10.584426484862183,
+     "n_samples": 300,
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    },
+    "careful_b": {
+     "p_avoid": 0.0,
+     "avoids_at_p50": false,
+     "median_impact_speed_mps": 9.994475599189963,
+     "n_samples": 300,
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    }
+   }
+  },
+  "19_s4_unauthorised_software_change": {
+   "reproduced": true,
+   "tier": 2,
+   "timeline": {
+    "consistent": true,
+    "time_to_close_at_constant_speed_s": 2.99,
+    "reported_time_to_crash_s": 3.14,
+    "reason": null
+   },
+   "drivers": {
+    "careful_a": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    },
+    "careful_b": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    }
+   }
+  },
+  "20_s3_2_engaged_when_inappropriate": {
+   "reproduced": true,
+   "tier": 2,
+   "timeline": {
+    "consistent": true,
+    "time_to_close_at_constant_speed_s": 2.99,
+    "reported_time_to_crash_s": 3.14,
+    "reason": null
+   },
+   "drivers": {
+    "careful_a": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    },
+    "careful_b": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    }
+   }
+  },
+  "21_pursue_cut_in": {
+   "reproduced": true,
+   "tier": 2,
+   "timeline": {
+    "consistent": true,
+    "time_to_close_at_constant_speed_s": 5.0,
+    "reported_time_to_crash_s": 5.22,
+    "reason": null
+   },
+   "drivers": {
+    "careful_a": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    },
+    "careful_b": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    }
+   }
+  },
+  "22_pursue_lead_braking": {
+   "reproduced": true,
+   "tier": 2,
+   "timeline": {
+    "consistent": null,
+    "reason": "no crash time or not closing"
+   },
+   "drivers": {
+    "careful_a": {
+     "p_avoid": 1.0,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    },
+    "careful_b": {
+     "p_avoid": 0.8933333333333333,
+     "avoids_at_p50": true,
+     "median_impact_speed_mps": 0.0,
+     "n_samples": 300,
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "notes": [
+      "evidence tier 2",
+      "avoids_at_p50 = all ranges at their median",
+      "runs ending still closing on the hazard count as not avoided"
+     ]
+    }
+   }
+  }
+ }
+}

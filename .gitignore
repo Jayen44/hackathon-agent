@@ -9,6 +9,7 @@ __pycache__/
 .vscode/
 .pytest_cache/
 data/
+!tests/data/
 queue.html
 *.jsonl
 .sim_src/
