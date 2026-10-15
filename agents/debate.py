@@ -130,13 +130,14 @@ READER = (
 )
 ADJUSTER = COMMON + READER + (
     "\n\nYou are the insurer's recovery adjuster. Call assess_claim, then return:"
-    "\n- recommendation (max 60 words): what to do and what money is at stake, quoting the decision and the "
-    "expected recovery range from the tool, in words a handler can act on."
+    "\n- recommendation (max 60 words): start 'I recommend pursuing the claim because ...' (or 'getting the "
+    "vehicle logs before deciding because ...' / 'not pursuing the claim because ...'), give the two strongest "
+    "reasons from the evidence, then the money: 'Expected recovery £X to £Y, most likely £Z, after legal costs.'"
     "\n- what_happened (max 40 words): the crash in plain words, from the case file."
     "\n- why (2-4 items, max 25 words each): why the AV company is, or is not, likely to be liable, each tied to "
     "a piece of evidence."
-    "\n- key_assumptions (2-4 items, max 20 words each): what the result depends on, each naming its source or "
-    "saying it is a modelling assumption."
+    "\n- key_assumptions (2-4 items, max 20 words each): what the result depends on, in plain words, each "
+    "naming its source or saying it is a modelling assumption (e.g. 'The £5,110 paid comes from the claim file.')."
     "\n- what_would_change_this (1-3 items, max 20 words each): the evidence that would most move the decision."
 )
 DEFENCE = COMMON + READER + (
@@ -146,8 +147,9 @@ DEFENCE = COMMON + READER + (
     "The challenge must rest on something in the case file or a tool result (a placeholder model, missing "
     "evidence, an unassessed input), not on a stated intention such as 'we would fight to trial'. Return:"
     "\n- assumption (max 12 words): the point you attack, in plain words."
-    "\n- argument (max 80 words): 'We say ... because ... . If that is right, ...', citing the numbers what_if "
-    "returned."
+    "\n- argument (max 80 words): start with your conclusion for the insurer, e.g. 'The insurer should not pursue "
+    "this claim yet because ...' or 'The claim is worth less than the adjuster says because ...', give the "
+    "evidence, then 'If we are right, ...' with the numbers what_if returned."
     "\n- evidence_cited (1-3 items, max 20 words each): the facts in the case file your argument rests on."
     "\n- change: exactly as you tested it."
 )
@@ -158,7 +160,8 @@ REBUTTAL = COMMON + READER + (
     "assumption (a statutory source, both careful-driver models agreeing, the claim file). Never reject just "
     "to keep a better number. Return:"
     "\n- verdict and accepted_change (all null/false if you reject)."
-    "\n- reasoning (max 80 words): your answer in plain English."
+    "\n- reasoning (max 80 words): start 'I accept this because ...', 'I partly accept this: ... but ...' or "
+    "'I reject this because ...', then what the insurer should now do."
     "\n- conceded (max 40 words): what defence counsel got right ('nothing' if nothing)."
     "\n- maintained (max 40 words): what still stands, and the evidence it rests on."
     "\n- handler_checks (1-3 items, max 20 words each): concrete things the claims handler should check or "
@@ -209,38 +212,98 @@ class Debate:
         return asdict(self)
 
 
-def _offline_adjuster(c: Claim, a: RecoveryAssessment) -> dict:
+ACTION = {   # how each side phrases a decision in a sentence
+    "pursue": "pursuing the claim",
+    "pull_logs_first": "getting the vehicle logs before deciding",
+    "dont_pursue": "not pursuing the claim",
+    "not_av_recovery": "not pursuing the AV company",
+    "cannot_price": "not deciding until the missing figures are in",
+}
+
+
+def _money(a: RecoveryAssessment) -> str:
     ev = a.expected_recovery
+    return (f"Expected recovery {fmt_gbp(ev.low)} to {fmt_gbp(ev.high)}, most likely {fmt_gbp(ev.mid)}, "
+            "after legal costs.") if ev else "The claim cannot be priced yet."
+
+
+def _plain_basis(c: Claim, a: RecoveryAssessment) -> list[str]:
+    """What the price rests on, in words a claims handler reads (scripted mode)."""
+    out = [f"The chance a careful driver would have avoided the crash is {a.p_avoid.mid:.0%} "
+           f"({a.p_avoid.low:.0%} to {a.p_avoid.high:.0%}), from the careful-driver simulations."]
+    if c.facts.paid_claim_gbp is not None:
+        out.append(f"The {fmt_gbp(c.facts.paid_claim_gbp)} paid comes from the insurer's claim file.")
+    elif a.claim_value:
+        out.append(f"The claim value ({fmt_gbp(a.claim_value.low)} to {fmt_gbp(a.claim_value.high)}) is an "
+                   "estimate from UK compensation guidelines.")
+    if a.legal_cost:
+        out.append(f"Legal costs ({fmt_gbp(a.legal_cost.low)} to {fmt_gbp(a.legal_cost.high)}) come from the "
+                   "court's fixed-cost tables.")
+    dm = c.case_file.get("provenance", {}).get("driver_models", "")
+    if "placeholder" in dm:
+        out.append("The careful-driver models are placeholders, not the official UK reference drivers.")
+    elif dm:
+        out.append("The careful-driver models follow UN R157 as interpreted by the team; parameters still being "
+                   "confirmed.")
+    return out
+
+
+def _offline_adjuster(c: Claim, a: RecoveryAssessment) -> dict:
     v = c.case_file.get("liability_verdict", {})
-    return {"recommendation": f"{DECISION_TEXT[a.decision]}. Expected recovery {fmt_gbp(ev.low)} to "
-                              f"{fmt_gbp(ev.high)}, most likely {fmt_gbp(ev.mid)}, after our legal costs.",
+    findings = v.get("findings", [])
+    because = (findings[0].rstrip(".").replace("System ", "the system ").replace("P(avoid)", "chance of avoiding")
+               if findings else (
+        f"a careful driver would have avoided the crash {a.p_avoid.mid:.0%} of the time"))
+    return {"recommendation": f"I recommend {ACTION[a.decision]} because {because[0].lower() + because[1:]}. "
+                              f"{_money(a)}",
             "what_happened": v.get("summary", "See the case file."),
-            "why": v.get("findings", []) or [f"Chance a careful driver would have avoided it: {a.p_avoid.mid:.0%}"],
-            "key_assumptions": a.reasons + a.sources,
+            "why": findings or [f"A careful driver would have avoided the crash {a.p_avoid.mid:.0%} of the time."],
+            "key_assumptions": _plain_basis(c, a),
             "what_would_change_this": v.get("evidence_missing", [])[:3]}
+
+
+def _attack_reason(c: Claim, a: RecoveryAssessment, change: dict) -> str:
+    """Why the attack matters, in plain words, for the scripted defence counsel."""
+    if change.get("keep_model"):
+        parts = [f"{r.model.split('_r157')[0].replace('_', ' ')} avoids it {r.p_avoid:.0%} of the time"
+                 for r in c.avoidance]
+        return ("the two careful-driver models do not agree (" + ", ".join(parts) + "), so the case rests on "
+                "the weaker one")
+    if change.get("p_avoid_at_low_bound"):
+        return (f"the careful-driver result is uncertain: at the low end a careful driver avoids the crash only "
+                f"{a.p_avoid.low:.0%} of the time")
+    if change.get("cn_high") is not None:
+        return f"the injured person may share the blame (up to {change['cn_high']:.0%}), which cuts what we can claim back"
+    if change.get("claim_value_gbp") is not None:
+        return f"the loss may be at the low end of its range ({fmt_gbp(change['claim_value_gbp'])})"
+    if change.get("legal_cost_high") is not None:
+        return (f"the AV company can defend it to trial, pushing legal costs to {fmt_gbp(change['legal_cost_high'])}")
+    return "the evidence does not support the adjuster's figure"
 
 
 def _offline_defence(c: Claim, a: RecoveryAssessment) -> dict:
     top = weakest_assumption(c.facts, c.avoidance, c.min_net_gbp)[0]
-    return {"assumption": top.assumption,
-            "argument": f"We say the recovery rests on {top.assumption}. If that is right, the most likely recovery "
-                        f"falls to {fmt_gbp(top.expected_recovery_mid)}"
-                        + (" and the decision changes." if top.flips_decision else "."),
-            "evidence_cited": [c.case_file.get("provenance", {}).get("driver_models", "")] if c.case_file else [],
+    b = c.assess(top.change)
+    lead = (f"The insurer should prefer {ACTION[b.decision]}, not {ACTION[a.decision]},"
+            if b.decision != a.decision else "The claim is worth less than the adjuster says")
+    return {"assumption": top.assumption[0].upper() + top.assumption[1:],
+            "argument": f"{lead} because {_attack_reason(c, a, top.change)}. If we are right, the most likely "
+                        f"recovery falls to {fmt_gbp(top.expected_recovery_mid)}.",
+            "evidence_cited": [_attack_reason(c, a, top.change)],
             "change": top.change}
 
 
 def _offline_rebuttal(c: Claim, a: RecoveryAssessment, ch: dict, b: RecoveryAssessment) -> dict:
     if b.decision != a.decision:
         return {"verdict": "accept", "accepted_change": ch["change"],
-                "reasoning": f"The challenge changes the decision to '{DECISION_TEXT[b.decision]}', so it is accepted "
-                             "until evidence settles the point.",
-                "conceded": ch["assumption"], "maintained": "nothing beyond the original evidence",
-                "handler_checks": ["Obtain the evidence that settles: " + ch["assumption"]]}
+                "reasoning": f"I accept this because it changes what we should do: the insurer should now prefer "
+                             f"{ACTION[b.decision]} until evidence settles the point. {_money(b)}",
+                "conceded": ch["assumption"], "maintained": "the evidence already in the case file",
+                "handler_checks": [f"Get the evidence that settles this point: {ch['assumption'].lower()}."]}
     return {"verdict": "reject", "accepted_change": blank_change(),
-            "reasoning": f"The decision ('{DECISION_TEXT[a.decision]}') holds even under this challenge.",
-            "conceded": "nothing", "maintained": "the original decision",
-            "handler_checks": []}
+            "reasoning": f"I reject this because even if defence counsel is right, the insurer should still prefer "
+                         f"{ACTION[a.decision]}. {_money(a)}",
+            "conceded": "nothing", "maintained": "the original decision", "handler_checks": []}
 
 
 def handler_summary(d_original: dict, adj: dict, ch: dict, d_challenged: dict, reb: dict, d_final: dict,
@@ -263,6 +326,8 @@ def handler_summary(d_original: dict, adj: dict, ch: dict, d_challenged: dict, r
         caveats.append("Synthetic demo claim, not a real crash.")
     if "placeholder" in prov.get("driver_models", ""):
         caveats.append("Careful-driver models are placeholders, not the UN R157 reference drivers.")
+    elif "being confirmed" in prov.get("driver_models", ""):
+        caveats.append("Careful-driver models follow UN R157 as interpreted by the team; parameters are being confirmed.")
     checks, seen = [], set()
     for x in (reb.get("handler_checks") or []) + (adj.get("what_would_change_this") or []):
         if x and x.lower() not in seen:
@@ -352,17 +417,19 @@ PRICE_IN_PER_TOKEN, PRICE_OUT_PER_TOKEN = 4 / 1e6, 20 / 1e6   # claude-opus-5-5 
 def _cost(d: "Debate") -> float:
     u = [t["detail"] for t in d.trace if t["step"] == "usage"]
     return sum(x["input_tokens"] for x in u) * PRICE_IN_PER_TOKEN + sum(x["output_tokens"] for x in u) * PRICE_OUT_PER_TOKEN
-def case_file(case, ba, est: dict) -> dict:
+def case_file(case, ba, est: dict, reproduced_by_sim: bool = True) -> dict:
     """Everything the agents should weigh beyond the finance inputs, from the bundle and the liability engine."""
     b, v = case.bundle, ba.verdict
     cfs = {name: e.estimate(b.conflict) for name, e in est.items()}
     src = getattr(case, "source", None)
+    models = [getattr(getattr(e, "result", None), "model", name) for name, e in est.items()]
     return {
         "provenance": {
             "synthetic": b.synthetic, "jurisdiction": b.jurisdiction,
-            "reproduced_source": "synthetic generator flag, not a simulator check" if b.synthetic
-                                 else "simulator reproduction check",
-            "driver_models": "placeholder human-driver models, not UN R157 Annex 3 (issue #14)",
+            "reproduced_source": "simulator reproduction check (sim branch)" if reproduced_by_sim
+                                 else "synthetic generator flag, not a simulator check",
+            "driver_models": ("UN R157 Annex 3 careful-driver models as interpreted by the sim team "
+                              f"({', '.join(models)}); parameters still being confirmed (issue #14)"),
         },
         "liability_verdict": {"liable": v.liable, "confidence": v.confidence, "summary": v.summary,
                               "findings": v.findings, "evidence_missing": v.evidence_missing,
@@ -387,21 +454,33 @@ def case_file(case, ba, est: dict) -> dict:
     }
 
 
-def claims_from_synthetic(n: int, seed: int) -> list[Claim]:
-    """Priced claims from the synthetic UK crash bundles (same pipeline as insurance.portfolio)."""
+def claims_from_synthetic(n: int, seed: int, want: int | None = None) -> list[Claim]:
+    """Priced claims from the synthetic UK crash bundles, priced with the sim's careful-driver models A and B and
+    the sim's own reproduction check (same path as insurance.bridge.assess_bundle).
+
+    The sim takes ~2 s a claim, so candidates are tried highest paid amount first and the loop stops once it has
+    2 x `want` priced claims (all of them when `want` is None).
+    """
     from insurance.bridge import assess_bundle, claim_facts, to_avoidance_result
-    from insurance.portfolio import default_estimators
+    from insurance.sim_estimator import run_sim
     from insurance.synth_bundles import generate_cases
 
+    cases = sorted(generate_cases(n, seed), key=lambda c: -(c.bundle.outcome.paid_claim_gbp or 0))
     out = []
-    for case in generate_cases(n, seed):
-        est = default_estimators()
-        ba = assess_bundle(case.bundle, estimators=est, reproduced=case.reproduced)
+    for case in cases:
+        b = case.bundle
+        if b.conflict is None or not b.outcome.collided:
+            continue
+        run = run_sim(b)
+        reproduced = bool(run.reproduced)
+        ba = assess_bundle(b, estimators=run.estimators, reproduced=reproduced)
         if ba.recovery is None or ba.recovery.expected_recovery is None:
             continue
-        avoidance = [to_avoidance_result(name, e.estimate(case.bundle.conflict)) for name, e in est.items()]
-        out.append(Claim(claim_facts(case.bundle, case.reproduced), avoidance,
-                         case_file=case_file(case, ba, est)))
+        avoidance = [to_avoidance_result(name, e.estimate(b.conflict), b.legal.p_liable_to_victim)
+                     for name, e in run.estimators.items()]
+        out.append(Claim(claim_facts(b, reproduced), avoidance, case_file=case_file(case, ba, run.estimators)))
+        if want is not None and len(out) >= 2 * want:
+            break
     return out
 
 
@@ -442,7 +521,7 @@ def main(argv: list[str] | None = None) -> None:
         log = lambda row: store.log_event(conn, next(seq), "agent_step", row)  # noqa: E731
 
     # Highest central expected recovery first: spend agent time where the money is.
-    claims = sorted(claims_from_synthetic(a.n, a.seed),
+    claims = sorted(claims_from_synthetic(a.n, a.seed, a.max_claims),
                     key=lambda c: -c.assess().expected_recovery.mid)[:a.max_claims]
     debates = []
     for c in claims:
