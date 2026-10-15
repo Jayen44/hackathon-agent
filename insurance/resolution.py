@@ -94,18 +94,26 @@ def resolve(r: BridgedAssessment, b: CrashBundle) -> Resolution:
                     Step("insurer finance", "Reserve the legal-cost high end from the assessment", "PURSUE"),
                     *gate)
     if d == "not_av_recovery":
-        return done("RECOVER_FROM_INSURED", a.reasons[0],
-                    Step("claims handler", "Check the policy wording for recovery from the insured (AEVA s.4(4)) or settle as a motor claim",
-                         "CLOSE_NO_CLAIM"))
+        if "S4_SOFTWARE_BREACH" in a.codes:
+            act = "Check the policy wording for recovery from the insured (AEVA s.4(4)); do not pursue the manufacturer"
+        else:   # NOT_ENGAGED
+            act = "Settle as an ordinary motor claim: self-driving was not engaged, so there is no AEVA s.5 recovery"
+        return done("RECOVER_FROM_INSURED", a.reasons[0], Step("claims handler", act, "CLOSE_NO_CLAIM"))
     if d == "dont_pursue":
         return done("SETTLE_NO_RECOVERY", "Not worth pursuing: " + a.reasons[0],
                     Step("claims handler", "Settle and close without pursuing the tech company", "CLOSE_NO_CLAIM"),
                     Step("insurer finance", "Consider bundling with similar small claims against the same manufacturer",
                          "PURSUE (as a batch)"))
     if d == "cannot_price":
-        return done("NEEDS_INPUTS", a.reasons[0],
-                    Step("insurer finance", "Supply the amount actually paid (paid_claim_gbp)", "re-run"),
-                    Step("counsel", "Supply a legal-cost budget for this claim (legal_cost_gbp)", "re-run"))
+        steps = []
+        if "NO_SOURCED_VALUE" in a.codes:
+            steps.append(Step("insurer finance", "Supply the amount actually paid (paid_claim_gbp): severity has no sourced value",
+                              "re-run"))
+        if "NO_SOURCED_LEGAL_COST" in a.codes:
+            steps.append(Step("counsel", "Supply a legal-cost budget for this claim (legal_cost_gbp): above GBP 100k has no fixed costs",
+                              "re-run"))
+            steps.append(Step("insurer finance", "Or supply the amount actually paid (paid_claim_gbp) to narrow the value", "re-run"))
+        return done("NEEDS_INPUTS", a.reasons[0], *steps)
     steps = gate or [Step("insurer finance", "Replace the table value with the actual paid amount",
                           "PURSUE or SETTLE_NO_RECOVERY")]
     return done("PULL_LOGS", "Promising but gated: close the gaps below, then re-run.", *steps)

@@ -1,4 +1,4 @@
-﻿"""Regenerate insurance/examples/*.json (synthetic crash bundles, one per decision path).
+"""Regenerate insurance/examples/*.json (synthetic crash bundles, one per decision path).
 
     python scripts/make_examples.py            # writes into insurance/examples
 Edit the cases here, never the JSON by hand. `python -m insurance.gaps` lists decision paths with no example.
@@ -47,7 +47,73 @@ base = {
     "outcome": {"collided": True, "impact_speed_mps": 9.0, "injury_severity": "Slight"},
 }
 
+
+G = 9.81
+
+
+def _simulate(d):
+    """Ego braking from the logged control inputs vs the hazard. Returns (t_impact, impact_speed) or None.
+    Brake -> deceleration = brake * mu * g (a synthetic simplification, same spirit as the engine's own kinematics)."""
+    c = d["conflict"]
+    mu, kind = c.get("friction_mu", 0.7), c.get("kind", "constant_hazard")
+    ins = sorted((i for i in d["vehicle"]["control_inputs"] if i.get("brake") is not None), key=lambda i: i["t"])
+    t, v, gap, vh = c["t_start"], c["ego_speed_mps"], c["gap_m"], c["hazard_speed_mps"]
+    a_h = c.get("hazard_decel_mps2", 0.0) if kind == "lead_braking" else 0.0
+    t_in = c["t_start"] + (c.get("t_in_path_s", 0.0) if kind == "cut_in" else 0.0)
+    dt = 0.001
+    while t < c["t_start"] + 30:
+        b = 0.0
+        for i in ins:
+            if i["t"] <= t:
+                b = i["brake"]
+        v = max(0.0, v - b * mu * G * dt)
+        vh = max(0.0, vh - a_h * dt)
+        gap += (vh - v) * dt
+        t += dt
+        if t >= t_in and gap <= 0:
+            return t, v
+        if v == 0.0 and t > t_in:
+            return None
+    return None
+
+
+def settle(d, det_off=1.8):
+    """Make the bundle's timeline self-consistent: the hazard is detected det_off s after t_start, braking follows,
+    the simulated impact lands exactly on t_crash, and outcome.impact_speed_mps is the simulated impact speed.
+    (Hand-typed values used to contradict each other: see issue #20.)"""
+    if not d["outcome"].get("collided") or not d.get("conflict"):
+        return
+    c = d["conflict"]
+    det = c["t_start"] + det_off
+    for o in d["perception"]["objects"]:
+        if o["id"] == c["hazard_id"]:
+            o["first_detected_t"] = det
+    new = []
+    for i in d["vehicle"]["control_inputs"]:
+        i = dict(i)
+        if i["source"] == "system":
+            continue
+        i["t"] = c["t_start"] + 2.3 if i.get("brake", 0) else det + 0.5   # late human brake / human steer override
+        new.append(i)
+    if any(i["source"] == "system" for i in d["vehicle"]["control_inputs"]):
+        new += [{"t": det + 0.3, "source": "system", "brake": 0.4, "throttle": 0.0, "steer": 0.0},
+                {"t": det + 0.8, "source": "system", "brake": 0.9, "throttle": 0.0, "steer": 0.0}]
+    d["vehicle"]["control_inputs"] = sorted(new, key=lambda i: i["t"])
+    r = _simulate(d)
+    if r is None:
+        raise SystemExit(f"{d['case_id']}: no collision in the settled timeline; adjust the case")
+    shift = d["t_crash"] - r[0]
+    c["t_start"] = round(c["t_start"] + shift, 3)
+    for o in d["perception"]["objects"]:
+        if o["id"] == c["hazard_id"]:
+            o["first_detected_t"] = round(o["first_detected_t"] + shift, 3)
+    for i in d["vehicle"]["control_inputs"]:
+        i["t"] = round(i["t"] + shift, 3)
+    d["outcome"]["impact_speed_mps"] = round(r[1], 2)
+
+
 CASES = {}
+DET_OFF = {"17_cut_in_avoidable": 3.8, "21_pursue_cut_in": 3.8, "05_unavoidable_close_cutin": 0.2, "16_lead_braking_unavoidable": 0.1, "18_cut_in_unavoidable": 0.2}
 
 
 def case(name):
@@ -159,6 +225,19 @@ def _(b):
     b["perception"]["objects"] = [{"id": "cutter1", "cls": "car", "first_detected_t": 99.5, "confidence": 0.9}]
 
 
+@case("21_pursue_cut_in")
+def _(b):
+    """Clean demo 'Pursue': AV-at-fault cut-in, reproducible timeline, paid amount known, injured party's share assessed."""
+    CASES["17_cut_in_avoidable"](b)
+    b["outcome"].update(injury_severity="Serious", paid_claim_gbp=60000, third_party_share=[0.0, 0.1])
+
+
+@case("22_pursue_lead_braking")
+def _(b):
+    CASES["15_lead_braking_avoidable"](b)
+    b["outcome"].update(injury_severity="Serious", paid_claim_gbp=80000, third_party_share=[0.0, 0.1])
+
+
 @case("19_s4_unauthorised_software_change")
 def _(b):
     b["vehicle"]["unauthorised_software_change"] = True
@@ -174,5 +253,6 @@ if __name__ == "__main__":
         d = copy.deepcopy(base)
         d["case_id"] = name
         mutate(d)
+        settle(d, DET_OFF.get(name, 1.8))
         (out / f"{name}.json").write_text(json.dumps(d, indent=2) + "\n", encoding="utf-8")
     print(f"wrote {len(CASES)} bundles to {out}")

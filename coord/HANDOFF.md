@@ -4,7 +4,7 @@
 
 ## What exists
 - `insurance/`: crash-bundle JSON (`bundle.py`), integrity checks, liability engine (`engine.py`, decision paths have `Step.code`), counterfactual estimators (`counterfactual.py`: closed form + numeric for lead-braking/cut-in), AEVA s.3(2)/s.4 rules, `bridge.py` -> `finance.recovery.assess` (sends UK codes), `resolution.py` (every crash -> one of 8 outcomes + next steps; reads `assess().codes`, not prose), `synth_bundles.py`, `portfolio.py`, `gaps.py`.
-- 20 example bundles in `insurance/examples` (regenerate with `scripts/make_examples.py`).
+- 22 example bundles in `insurance/examples` (timelines self-consistent via `settle()`; 21 and 22 are clean Pursue demos) (regenerate with `scripts/make_examples.py`).
 - Verified/validated: `docs/verification.md`, `docs/validation.md`.
 
 ## Commands

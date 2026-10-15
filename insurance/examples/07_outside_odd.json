@@ -38,14 +38,14 @@
     ],
     "control_inputs": [
       {
-        "t": 98.5,
+        "t": 98.97,
         "source": "system",
         "brake": 0.4,
         "throttle": 0.0,
         "steer": 0.0
       },
       {
-        "t": 99.5,
+        "t": 99.47,
         "source": "system",
         "brake": 0.9,
         "throttle": 0.0,
@@ -66,7 +66,7 @@
       {
         "id": "obstacle1",
         "cls": "stationary_vehicle",
-        "first_detected_t": 97.0,
+        "first_detected_t": 98.67,
         "confidence": 0.9
       }
     ],
@@ -95,7 +95,7 @@
   },
   "conflict": {
     "hazard_id": "obstacle1",
-    "t_start": 94.0,
+    "t_start": 96.87,
     "ego_speed_mps": 13.4,
     "gap_m": 40.0,
     "hazard_speed_mps": 0.0,
@@ -103,7 +103,7 @@
   },
   "outcome": {
     "collided": true,
-    "impact_speed_mps": 9.0,
+    "impact_speed_mps": 8.75,
     "injury_severity": "Slight"
   }
 }

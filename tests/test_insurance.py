@@ -50,7 +50,7 @@ def test_integrity_failure_stops_before_any_liability_step():
 
 def test_late_detection_is_reported():
     v = verdict("01_av_late_detection")
-    assert any("3.0s after" in f for f in v.findings)
+    assert any("1.8s after" in f for f in v.findings)
 
 
 def test_driver_eyes_off_reported_for_ignored_handover():

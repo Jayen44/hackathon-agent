@@ -38,14 +38,14 @@
     ],
     "control_inputs": [
       {
-        "t": 98.5,
+        "t": 99.194,
         "source": "system",
         "brake": 0.4,
         "throttle": 0.0,
         "steer": 0.0
       },
       {
-        "t": 99.5,
+        "t": 99.694,
         "source": "system",
         "brake": 0.9,
         "throttle": 0.0,
@@ -66,7 +66,7 @@
       {
         "id": "cutter1",
         "cls": "car",
-        "first_detected_t": 99.5,
+        "first_detected_t": 98.894,
         "confidence": 0.9
       }
     ],
@@ -96,7 +96,7 @@
   "conflict": {
     "hazard_id": "cutter1",
     "kind": "cut_in",
-    "t_start": 99.3,
+    "t_start": 98.694,
     "ego_speed_mps": 20.0,
     "gap_m": 12.0,
     "hazard_speed_mps": 10.0,
@@ -105,7 +105,7 @@
   },
   "outcome": {
     "collided": true,
-    "impact_speed_mps": 9.0,
+    "impact_speed_mps": 16.74,
     "injury_severity": "Slight"
   }
 }
