@@ -11,7 +11,7 @@ import { gbp, pct } from "@/lib/format";
 
 const KEY = "accel-tour-step", CLAIM_KEY = "accel-tour-claim", VIDEO_KEY = "accel-tour-video";
 const PREFERRED = "22_pursue_lead_braking", FALLBACK = "DEMO-1_queue_late_brake";
-export const DEMO_VIDEO_ID = "ce5730a6facc4e34885a1a4f5c405fbc";
+export const DEMO_VIDEO_ID = "d741ae8d0d8c4bc482ae242222eaa610"; // Blender CCTV render (was ce5730a6…, the cartoon clip)
 
 type Step = { path: (cid: string) => string; target: string; text: (c: Claim | null) => string };
 

@@ -14,6 +14,16 @@ export type DemoEntry = {
 };
 
 export const DEMO_CCTV: Record<string, DemoEntry> = {
+  // Blender render (viz/render) of the cut-in -> rear-end trace from a fixed CCTV pole; ground truth in
+  // viz/isaac/samples/cctv_cut_in_truth.json. Track 3 = AV (white), track 1 = cutter (blue).
+  d741ae8d0d8c4bc482ae242222eaa610: {
+    clicks: [[1047.2, 589.09], [740.86, 259.97], [848.81, 251.63], [1245.4, 555.34]],
+    L: 24, W: 3.5, contact: "yes", avTracks: [3], otherTracks: [1],
+    claim: {
+      av_engaged: "yes", within_odd: "yes", injury_severity: "Serious", claim_paid_gbp: "60000",
+      injured_party_share_low_pct: "0", injured_party_share_high_pct: "10", software_verified: "unknown",
+    },
+  },
   ce5730a6facc4e34885a1a4f5c405fbc: {
     clicks: [[623.8, 570.4], [632.4, 288.5], [526.6, 288.5], [397.4, 570.4]],
     L: 27, W: 3.5, contact: "yes", avTracks: [4], otherTracks: [],
