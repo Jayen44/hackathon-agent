@@ -37,8 +37,13 @@ image = (
         "NVIDIA_VISIBLE_DEVICES": "all",
         # Deliberately NOT setting ACCEPT_EULA / OMNI_KIT_ACCEPT_EULA here: see render().
     })
+    .add_local_file(HERE / "assets.py", f"{REMOTE_DIR}/assets.py")
     .add_local_file(HERE / "render_trace.py", f"{REMOTE_DIR}/render_trace.py")
 )
+
+CAPTION = ("ILLUSTRATION of a 2D kinematic sim trace - not video evidence. "
+           "Triage aid for a human claims handler, not a liability finding.")
+FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 
 app = modal.App("accel-isaac-render", image=image)
 volume = modal.Volume.from_name("accel-isaac", create_if_missing=True)
@@ -62,6 +67,8 @@ def gpu_check() -> str:
         f"ls {ISAAC_ROOT} | head -50",
         "ffmpeg -version | head -1",
         "id; cat /etc/os-release | head -2",
+        # licence text shipped in the image (read-only, for ASSETS.md)
+        f"head -c 1500 {ISAAC_ROOT}/LICENSE.txt; echo; grep -n -i -E 'asset|content|materials|sample' {ISAAC_ROOT}/LICENSE.txt | head -40",
     ]
     out = "\n".join(_sh(c) for c in cmds)
     print(out)
@@ -70,7 +77,9 @@ def gpu_check() -> str:
 
 @app.function(gpu="L40S", timeout=3600, volumes={VOLUME_PATH: volume})
 def render(trace: dict, name: str, accept_eula: bool = False, fps: int = 25,
-           width: int = 1280, height: int = 720, camera: str = "chase") -> bytes:
+           width: int = 1920, height: int = 1080, camera: str = "chase",
+           renderer: str = "RayTracedLighting", assets: str = "isaac", sky: str = "kloofendal",
+           caption: bool = True) -> bytes:
     """Render one trace JSON (see export_trace.py) to mp4 bytes."""
     import os
     import shutil
@@ -79,7 +88,7 @@ def render(trace: dict, name: str, accept_eula: bool = False, fps: int = 25,
     if not accept_eula:
         raise RuntimeError(
             "Starting Isaac Sim requires accepting the NVIDIA Isaac Sim EULA "
-            "(https://docs.isaacsim.omniverse.nvidia.com/latest/common/NVIDIA_Omniverse_License_Agreement.html). "
+            "(https://docs.omniverse.nvidia.com/dev-guide/latest/common/NVIDIA_Omniverse_License_Agreement.html). "
             "A human must read it and pass --accept-eula."
         )
 
@@ -92,7 +101,8 @@ def render(trace: dict, name: str, accept_eula: bool = False, fps: int = 25,
 
     env = dict(os.environ, ACCEPT_EULA="Y", OMNI_KIT_ACCEPT_EULA="YES", PRIVACY_CONSENT="N")
     cmd = [f"{ISAAC_ROOT}/python.sh", f"{REMOTE_DIR}/render_trace.py", str(trace_path), str(frames),
-           "--fps", str(fps), "--width", str(width), "--height", str(height), "--camera", camera]
+           "--fps", str(fps), "--width", str(width), "--height", str(height), "--camera", camera,
+           "--renderer", renderer, "--assets", assets, "--sky", sky]
     print("$", " ".join(cmd), flush=True)
     p = subprocess.run(cmd, env=env, cwd=ISAAC_ROOT)
     pngs = sorted(frames.glob("frame_*.png"))
@@ -101,10 +111,16 @@ def render(trace: dict, name: str, accept_eula: bool = False, fps: int = 25,
     print(f"{len(pngs)} frames (isaac exit {p.returncode})", flush=True)
 
     mp4 = work / f"{name}.mp4"
+    vf = "pad=ceil(iw/2)*2:ceil(ih/2)*2"
+    if caption and pathlib.Path(FONT).exists():
+        label = trace.get("meta", {}).get("label") or ""
+        (work / "caption.txt").write_text(CAPTION + ("\n" + label if label else ""))
+        vf += (f",drawtext=fontfile={FONT}:textfile={work / 'caption.txt'}:fontsize=h/40:fontcolor=white"
+               ":box=1:boxcolor=black@0.55:boxborderw=12:x=24:y=h-th-24")
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-framerate", str(fps),
                     "-i", str(frames / "frame_%05d.png"),
                     "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "18",
-                    "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2", str(mp4)], check=True)
+                    "-vf", vf, str(mp4)], check=True)
 
     dest = pathlib.Path(VOLUME_PATH) / "renders" / name
     shutil.rmtree(dest, ignore_errors=True)
@@ -118,11 +134,13 @@ def render(trace: dict, name: str, accept_eula: bool = False, fps: int = 25,
 
 
 @app.local_entrypoint()
-def main(trace: str, accept_eula: bool = False, camera: str = "chase", fps: int = 25):
+def main(trace: str, accept_eula: bool = False, camera: str = "chase", fps: int = 25,
+         renderer: str = "RayTracedLighting", assets: str = "isaac", sky: str = "kloofendal"):
     src = pathlib.Path(trace)
     data = json.loads(src.read_text())
     name = data.get("name") or src.stem
-    out = render.remote(data, name, accept_eula=accept_eula, fps=fps, camera=camera)
+    out = render.remote(data, name, accept_eula=accept_eula, fps=fps, camera=camera,
+                        renderer=renderer, assets=assets, sky=sky)
     dst = src.with_suffix(".mp4")
     dst.write_bytes(out)
     print(f"wrote {dst} ({len(out) / 1e6:.1f} MB)")
