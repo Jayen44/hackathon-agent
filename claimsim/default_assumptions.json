@@ -1,0 +1,44 @@
+{
+  "version": "synthetic-2026-10-15",
+  "synthetic": true,
+  "note": "ILLUSTRATIVE ONLY. Every parameter below is a synthetic placeholder chosen to make the prototype run. None is calibrated to real UK insurance claims; results are not forecasts.",
+  "repair": {
+    "median_to_estimate": 1.0,
+    "sigma": 0.25,
+    "_why": "Lognormal around the repair estimate: median = estimate x median_to_estimate, log-sd sigma. Synthetic."
+  },
+  "common_shock": {
+    "repair_loading": 0.5,
+    "injury_logit_loading": 0.8,
+    "_why": "One latent collision-severity factor Z ~ N(0,1) links repair costs (Gaussian loading) and injury probability (logit shift). Synthetic strength."
+  },
+  "injury": {
+    "probability_by_severity": {"low": 0.08, "medium": 0.25, "high": 0.55, "unknown": 0.25},
+    "tiers": [
+      {"name": "minor", "weight": 0.85, "median": 3000, "sigma": 0.6},
+      {"name": "serious", "weight": 0.13, "median": 40000, "sigma": 0.8},
+      {"name": "catastrophic", "weight": 0.02, "median": 500000, "sigma": 0.7}
+    ],
+    "known_sigma": 0.3,
+    "_why": "Two-stage frequency-severity: P(any third-party injury claim) by collision severity, then a tiered lognormal severity. Synthetic."
+  },
+  "third_party_property": {
+    "probability": 0.1,
+    "median": 1500,
+    "sigma": 0.8,
+    "known_sigma": 0.3,
+    "_why": "Other third-party property (walls, street furniture) when not reported. Synthetic."
+  },
+  "legal_and_handling": {
+    "handling_fixed": 350,
+    "property_legal_share": 0.05,
+    "injury_legal_share": 0.25,
+    "sigma": 0.5,
+    "_why": "Fixed handling cost plus legal cost as a lognormal share of property and injury payments. Synthetic."
+  },
+  "recovery": {
+    "third_party_insurer": {"probability": 0.85, "fraction_beta": [9, 1]},
+    "manufacturer": {"probability": 0.3, "fraction_beta": [6, 4]},
+    "_why": "Bernoulli success, then a Beta-distributed fraction of the recoverable amount. Synthetic."
+  }
+}

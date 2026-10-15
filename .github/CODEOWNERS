@@ -1,0 +1,6 @@
+/insurance/ @Jayen44
+/finance/ @antoniohede-ai
+# The seam: both must review
+/insurance/bridge.py @Jayen44 @antoniohede-ai
+/tests/test_bridge.py @Jayen44 @antoniohede-ai
+/coord/ @Jayen44 @antoniohede-ai

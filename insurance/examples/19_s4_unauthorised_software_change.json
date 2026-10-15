@@ -1,0 +1,115 @@
+{
+  "schema_version": "0.1",
+  "case_id": "19_s4_unauthorised_software_change",
+  "synthetic": true,
+  "t_crash": 100.0,
+  "jurisdiction": "UK",
+  "vehicle": {
+    "software_version": "2.4.1",
+    "approved_software": [
+      "2.4.1"
+    ],
+    "occupant": "user_in_charge",
+    "mode_events": [
+      {
+        "t": 0.0,
+        "mode": "manual"
+      },
+      {
+        "t": 40.0,
+        "mode": "automated"
+      }
+    ],
+    "handover": {
+      "demand_t": null,
+      "human_response_t": null
+    },
+    "driver_monitoring": [
+      {
+        "t": 90.0,
+        "eyes_on_road": true,
+        "hands_on_wheel": false
+      },
+      {
+        "t": 98.0,
+        "eyes_on_road": true,
+        "hands_on_wheel": false
+      }
+    ],
+    "control_inputs": [
+      {
+        "t": 98.96,
+        "source": "system",
+        "brake": 0.4,
+        "throttle": 0.0,
+        "steer": 0.0
+      },
+      {
+        "t": 99.46,
+        "source": "system",
+        "brake": 0.9,
+        "throttle": 0.0,
+        "steer": 0.0
+      }
+    ],
+    "faults": [],
+    "odd_inside": true,
+    "software_verified": true,
+    "unauthorised_software_change": true
+  },
+  "perception": {
+    "sensors": [
+      "camera",
+      "lidar",
+      "radar"
+    ],
+    "objects": [
+      {
+        "id": "obstacle1",
+        "cls": "stationary_vehicle",
+        "first_detected_t": 98.66,
+        "confidence": 0.9
+      }
+    ],
+    "decision_log_present": true
+  },
+  "external": {
+    "cctv": [
+      "street_cam_12"
+    ],
+    "witnesses": 2,
+    "police_report": true,
+    "medical_records": false,
+    "weather": "dry",
+    "lighting": "daylight"
+  },
+  "integrity": {
+    "hashes_present": true,
+    "chain_of_custody": true,
+    "clock_offsets_s": {
+      "vehicle_log": 0.0,
+      "camera": 0.02,
+      "cctv": 0.12
+    },
+    "log_gaps": [],
+    "tamper_flag": false
+  },
+  "conflict": {
+    "hazard_id": "obstacle1",
+    "t_start": 96.86,
+    "ego_speed_mps": 13.4,
+    "gap_m": 40.0,
+    "hazard_speed_mps": 0.0,
+    "friction_mu": 0.7
+  },
+  "outcome": {
+    "collided": true,
+    "impact_speed_mps": 10.54,
+    "injury_severity": "Slight"
+  },
+  "legal": {
+    "regime": "AEVA_authorised",
+    "recovery_route": "AEVA_s5",
+    "settlement_date": "2027-03-01"
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "source": "DfT STATS19 Road Safety Data (OGL v3.0), police-reported injury collisions",
+  "year": 2024,
+  "universe": "two-vehicle collisions with a car or taxi as one vehicle",
+  "n_collisions_total": 100927,
+  "crash_types": {
+    "cut_in": {
+      "n": 541,
+      "severity": {
+        "Fatal": 0.0296,
+        "Serious": 0.2514,
+        "Slight": 0.719
+      },
+      "speed_limit_mph": {
+        "20": 0.0721,
+        "30": 0.3142,
+        "40": 0.1386,
+        "50": 0.098,
+        "60": 0.2089,
+        "70": 0.1682
+      },
+      "light": {
+        "dark_lit": 0.1848,
+        "dark_unlit": 0.1349,
+        "daylight": 0.6802
+      },
+      "surface": {
+        "dry": 0.7039,
+        "snow_ice": 0.0093,
+        "wet": 0.2868
+      },
+      "area": {
+        "rural": 0.536,
+        "urban": 0.464
+      }
+    },
+    "lead_vehicle_decel": {
+      "n": 5204,
+      "severity": {
+        "Fatal": 0.0037,
+        "Serious": 0.1076,
+        "Slight": 0.8887
+      },
+      "speed_limit_mph": {
+        "20": 0.0715,
+        "30": 0.4487,
+        "40": 0.1347,
+        "50": 0.0801,
+        "60": 0.1159,
+        "70": 0.1491
+      },
+      "light": {
+        "dark_lit": 0.1824,
+        "dark_unlit": 0.0778,
+        "daylight": 0.7398
+      },
+      "surface": {
+        "dry": 0.748,
+        "snow_ice": 0.0087,
+        "wet": 0.2433
+      },
+      "area": {
+        "rural": 0.4378,
+        "urban": 0.5622
+      }
+    },
+    "other": {
+      "n": 56479,
+      "severity": {
+        "Fatal": 0.0102,
+        "Serious": 0.2093,
+        "Slight": 0.7805
+      },
+      "speed_limit_mph": {
+        "20": 0.1972,
+        "30": 0.5152,
+        "40": 0.0926,
+        "50": 0.045,
+        "60": 0.1129,
+        "70": 0.0371
+      },
+      "light": {
+        "dark_lit": 0.206,
+        "dark_unlit": 0.0575,
+        "daylight": 0.7365
+      },
+      "surface": {
+        "dry": 0.7504,
+        "snow_ice": 0.0091,
+        "wet": 0.2405
+      },
+      "area": {
+        "rural": 0.3072,
+        "urban": 0.6928
+      }
+    }
+  }
+}
