@@ -24,7 +24,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Any, Callable
 
 from agents.llm import ToolInputError, make_client, run_agent
-from finance.recovery import (AvoidanceResult, ChangeError, ClaimFacts, RecoveryAssessment, apply_change,
+from finance.recovery import (AvoidanceResult, ClaimFacts, RecoveryAssessment, apply_change,
                               assess, blank_change, fmt_gbp, weakest_assumption)
 
 
@@ -89,7 +89,7 @@ class Claim:
         if tool == "what_if":
             try:
                 return summary(self.assess(args))
-            except ChangeError as e:
+            except ValueError as e:   # ChangeError, or finance.validate_facts rejecting the changed claim
                 raise ToolInputError(str(e)) from e
         raise ToolInputError(f"unknown tool {tool!r}")
 
@@ -232,7 +232,7 @@ def run_debate(c: Claim, client: Any = None, log: Callable[[dict], None] | None 
                    "Challenge the adjuster's result.", [TOOL_ASSESS, TOOL_WEAK, TOOL_WHAT_IF], DEFENCE_OUT, "high")
         try:
             challenged = c.assess(ch["change"])
-        except ChangeError as e:   # schema-valid but outside the evidence: the challenge fails on its own terms
+        except ValueError as e:    # schema-valid but outside the evidence: the challenge fails on its own terms
             record("defence_counsel", "invalid_change", {"error": str(e)})
             ch["change"], challenged = blank_change(), original
         reb = agent("adjuster_rebuttal", REBUTTAL,
@@ -244,7 +244,7 @@ def run_debate(c: Claim, client: Any = None, log: Callable[[dict], None] | None 
     accepted = blank_change() if reb["verdict"] == "reject" else reb["accepted_change"]
     try:
         final = c.assess(accepted)
-    except ChangeError as e:
+    except ValueError as e:
         record("adjuster_rebuttal", "invalid_change", {"error": str(e)})
         final = original
     contested = reb["verdict"] == "reject" and challenged.decision != original.decision

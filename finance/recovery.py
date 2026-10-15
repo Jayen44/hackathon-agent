@@ -126,7 +126,8 @@ class RecoveryAssessment:
     disclaimer: str = DISCLAIMER
     # Machine-readable twins of the gate/caveat reasons, so callers never parse prose. Stable names:
     # ENGAGEMENT_UNVERIFIED, ODD_OUTSIDE, ODD_UNKNOWN, NOT_REPRODUCED, CN_NOT_ASSESSED, ONE_MODEL,
-    # RANGE_STRADDLES, SOFTWARE_UNCONFIRMED, NEAR_TRACK_LIMIT
+    # RANGE_STRADDLES, SOFTWARE_UNCONFIRMED, NEAR_TRACK_LIMIT; on early returns NOT_ENGAGED, S4_SOFTWARE_BREACH,
+    # NO_SOURCED_VALUE, NO_SOURCED_LEGAL_COST
     codes: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict:
@@ -191,7 +192,8 @@ def validate_facts(f: ClaimFacts) -> None:
 
 def _special_damages_note(f: ClaimFacts) -> list[str]:
     """Table values for Serious/Fatal are general damages only; flag that real claims run higher."""
-    if f.paid_claim_gbp is None and f.injury_severity in ("Serious", "Fatal"):
+    if f.paid_claim_gbp is None and f.injury_severity in ("Serious", "Fatal", "Serious With Hospitalization",
+                                                          "Serious Without Hospitalization", "Fatality"):
         return [f"{f.injury_severity} claim value is general damages only (care, lost earnings, dependency excluded): "
                 "the real claim is likely higher; use the insurer's paid amount if known"]
     return []
@@ -279,12 +281,13 @@ def assess(f: ClaimFacts, avoidance: list[AvoidanceResult], min_net_gbp: float =
     if engagement_code(f.engagement_status) == "not_engaged":
         return RecoveryAssessment(**base, decision="not_av_recovery",
                                   reasons=["self-driving verified not engaged: ordinary motor claim, no s.5 recovery"],
-                                  claim_value=None, legal_cost=None, expected_recovery=None)
+                                  claim_value=None, legal_cost=None, expected_recovery=None, codes=["NOT_ENGAGED"])
     if f.software_status in ("unauthorised_alteration", "safety_update_missing"):
         return RecoveryAssessment(**base, decision="not_av_recovery",
                                   reasons=[f"AEVA s.4 ({f.software_status}): recover from the insured person to the "
                                            "extent the policy provides (s.4(4)), not from the manufacturer"],
-                                  claim_value=None, legal_cost=None, expected_recovery=None)
+                                  claim_value=None, legal_cost=None, expected_recovery=None,
+                                  codes=["S4_SOFTWARE_BREACH"])
 
     value, value_src = _claim_value(f)
     cost, cost_src = (None, "") if value is None else _legal_cost(f, value)
@@ -294,11 +297,14 @@ def assess(f: ClaimFacts, avoidance: list[AvoidanceResult], min_net_gbp: float =
                                            "supply paid_claim_gbp and/or legal_cost_gbp (a counsel budget) to price this claim",
                                            *_special_damages_note(f)],
                                   claim_value=value, legal_cost=cost, expected_recovery=None,
-                                  sources=[s for s in (value_src, cost_src) if s])
+                                  sources=[s for s in (value_src, cost_src) if s],
+                                  codes=["NO_SOURCED_VALUE" if value is None else "NO_SOURCED_LEGAL_COST"])
 
     ev = expected_recovery(share, value, cost)
     if f.cost_shift_risk:
-        ev = Interval(ev.low - cost.high, ev.mid, ev.high)
+        # Adverse costs arise only if the claim FAILS, and then nothing is recovered: the worst case is losing
+        # outright (our high cost + the defendant's), not a partial recovery minus adverse costs.
+        ev = Interval(min(ev.low, -2 * cost.high), ev.mid, ev.high)
     gates = _gates(f) + ([cn_gate] if cn_gate else [])
     if len(avoidance) < 2:
         gates.append("only one careful-driver model: bracket incomplete")
@@ -387,8 +393,8 @@ def apply_change(f: ClaimFacts, avoidance: list[AvoidanceResult],
     if (c["legal_cost_low"] is None) != (c["legal_cost_high"] is None):
         raise ChangeError("give both legal_cost_low and legal_cost_high, or neither")
     if c["legal_cost_low"] is not None:
-        if not 0 <= c["legal_cost_low"] <= c["legal_cost_high"]:
-            raise ChangeError("legal cost must satisfy 0 <= low <= high")
+        if not 0 < c["legal_cost_low"] <= c["legal_cost_high"]:
+            raise ChangeError("legal cost must satisfy 0 < low <= high")
         repl["legal_cost_gbp"] = (float(c["legal_cost_low"]), float(c["legal_cost_high"]))
     return replace(f, **repl), av
 

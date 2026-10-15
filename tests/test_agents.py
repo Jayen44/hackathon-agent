@@ -117,3 +117,16 @@ def test_attacks_carry_a_change_that_reproduces_them():
 def test_unpriced_claim_is_not_debated():
     with pytest.raises(ValueError):
         d.run_debate(claim(injury_severity="Unknown", paid_claim_gbp=None), None)
+
+
+def test_invalid_what_if_is_a_tool_error_not_a_crash():
+    from agents.llm import ToolInputError
+    with pytest.raises(ToolInputError):
+        claim().execute("what_if", change(legal_cost_low=0, legal_cost_high=0))
+    zero = change(legal_cost_low=0, legal_cost_high=0)
+    client = FakeClient([answer({"recommendation": "r", "key_assumptions": []}),
+                         answer({"assumption": "a", "argument": "b", "change": zero}),
+                         answer({"verdict": "accept", "reasoning": "c", "accepted_change": zero})])
+    deb = d.run_debate(claim(), client)          # completes; both bad changes are logged, not applied
+    assert [t["step"] for t in deb.trace].count("invalid_change") == 2
+    assert deb.final["decision"] == deb.original["decision"]

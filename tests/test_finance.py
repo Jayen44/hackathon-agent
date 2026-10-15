@@ -168,3 +168,42 @@ def test_legal_cost_centre_is_issued_and_settled_not_the_average():
     assert i.mid == pytest.approx(9_704 + 0.14 * 65_000)          # PD 45 Table 14 S4, band 2
     a = r.assess(facts(legal_cost_gbp=None, paid_claim_gbp=5_000), BOTH_HIGH)
     assert a.legal_cost.mid == pytest.approx(3_374)
+
+
+# ---------------------------------------------------------------- review fixes (Jayen's finance changes)
+def test_loser_pays_worst_case_is_losing_outright():
+    a = r.assess(facts(cost_shift_risk=True), BOTH_HIGH)
+    assert a.expected_recovery.low == pytest.approx(-2 * 6_000)   # our high cost + theirs, nothing recovered
+    assert a.expected_recovery.mid == r.assess(facts(), BOTH_HIGH).expected_recovery.mid
+
+
+def test_early_returns_carry_codes():
+    assert r.assess(facts(engagement_status="not_engaged"), BOTH_HIGH).codes == ["NOT_ENGAGED"]
+    assert r.assess(facts(software_status="safety_update_missing"), BOTH_HIGH).codes == ["S4_SOFTWARE_BREACH"]
+    assert r.assess(facts(paid_claim_gbp=None, injury_severity="Unknown"), BOTH_HIGH).codes == ["NO_SOURCED_VALUE"]
+    assert r.assess(facts(paid_claim_gbp=250_000, legal_cost_gbp=None), BOTH_HIGH).codes == ["NO_SOURCED_LEGAL_COST"]
+
+
+@pytest.mark.parametrize("kw,code", [
+    (dict(engagement_status="engaged_alleged"), "ENGAGEMENT_UNVERIFIED"),
+    (dict(within_odd="outside"), "ODD_OUTSIDE"),
+    (dict(within_odd="unknown"), "ODD_UNKNOWN"),
+    (dict(reproduced=False), "NOT_REPRODUCED"),
+    (dict(paid_claim_gbp=None, injury_severity="Fatal"), "CN_NOT_ASSESSED"),
+])
+def test_every_gate_has_a_code(kw, code):
+    a = r.assess(facts(**kw), BOTH_HIGH)
+    assert a.decision == "pull_logs_first" and code in a.codes
+    gate_codes = {"ENGAGEMENT_UNVERIFIED", "ODD_OUTSIDE", "ODD_UNKNOWN", "NOT_REPRODUCED", "CN_NOT_ASSESSED", "ONE_MODEL"}
+    gate_reasons = [x for x in a.reasons if x in r._gates(facts(**kw)) or "not assessed" in x]
+    assert len(gate_reasons) == len(gate_codes & set(a.codes))
+
+
+def test_legacy_severity_gets_general_damages_note():
+    a = r.assess(facts(paid_claim_gbp=None, injury_severity="Fatality", third_party_share=(0, 0)), BOTH_HIGH)
+    assert any("general damages only" in x for x in a.reasons)
+
+
+def test_what_if_bounds_match_validate_facts():
+    with pytest.raises(r.ChangeError):
+        r.apply_change(facts(), BOTH_HIGH, {"legal_cost_low": 0, "legal_cost_high": 0})
