@@ -149,6 +149,24 @@ The practical model: pay the victim fast, then run subrogation against the tech 
 - Always state the limits: synthetic data, simplified physics, UK assumptions, not legal advice.
 - Keep deterministic code for the decision and numbers. An LLM may only explain results.
 
+## 4b. Code that implements this (built on this branch)
+```
+insurance/
+  bundle.py          crash-bundle format (JSON schema v0.1) + validating loader
+  integrity.py       evidence integrity checks (1.4)
+  counterfactual.py  Estimator interface + KinematicEstimator (PLACEHOLDER human driver)
+  engine.py          decision flow (3.2): decide(bundle, policy, estimator) -> Verdict
+  report.py          plain-English report
+  sim_adapter.py     SimEstimator: runs the sim branch's simulator as the estimator
+  examples/          10 synthetic bundles, one per decision path
+tests/test_insurance.py, tests/test_insurance_sim.py (the latter skips until `sim/` is present)
+```
+Run a case: `python -m insurance insurance/examples/01_av_late_detection.json` (add `--json` for machine output).
+
+How it relates to the `sim` branch: the engine never imports `sim`. It only needs something with `estimate(conflict) -> CounterfactualResult`. The default is a closed-form placeholder. After merging `sim`, pass `SimEstimator()` to `decide()`. Both use PLACEHOLDER driver parameters until Vakhtang fills in the UN R157 Annex 3 values in `sim/policies/careful_a.py` / `careful_b.py`. Never put guessed numbers in those files.
+
+Thresholds (`engine.Policy`) are illustrative, not from law: 10 s minimum handover warning, 2 s override window, P(human avoids) >= 0.8 means the system fell short, <= 0.2 means unavoidable.
+
 ## 5. Working rules
 - Work **only on the `insurance` branch**. Commit small, `git pull --rebase origin insurance` before pushing.
 - Never commit secrets or real personal data. Keep keys in `.env` (ignored).
