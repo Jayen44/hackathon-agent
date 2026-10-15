@@ -1,0 +1,33 @@
+{
+  "claim_id": "ILLUSTRATIVE-001",
+  "synthetic": true,
+  "insured_repair_estimate": 4500,
+  "third_party_repair_estimate": 7200,
+  "injury_outcome": "unknown",
+  "third_party_property_estimate": null,
+  "other_expenses_estimate": 0,
+  "collision_severity": null,
+  "policy": {
+    "own_damage_covered": true,
+    "own_damage_excess": 500,
+    "own_damage_limit": null,
+    "third_party_property_limit": 1000000,
+    "bodily_injury_limit": null,
+    "other_expenses_covered": false,
+    "excluded_categories": [],
+    "sublimits": {},
+    "jurisdiction": "UK"
+  },
+  "scenarios": [
+    {"name": "A_insured_not_liable", "insured_driver_share": 0.0, "av_system_share": 0.0, "third_party_share": 1.0,
+     "description": "Conditional: the other party is fully liable."},
+    {"name": "B_insured_50pct_liable", "insured_driver_share": 0.5, "av_system_share": 0.0, "third_party_share": 0.5,
+     "description": "Conditional: liability shared equally."},
+    {"name": "C_insured_fully_liable", "insured_driver_share": 1.0, "av_system_share": 0.0, "third_party_share": 0.0,
+     "description": "Conditional: the insured vehicle is fully liable, no recovery source."},
+    {"name": "D_av_system_fully_liable", "insured_driver_share": 0.0, "av_system_share": 1.0, "third_party_share": 0.0,
+     "description": "Conditional: the insured vehicle is liable and the fault lies with the automated driving system (AEVA 2018 s.2 pay, s.5 recovery from the manufacturer)."}
+  ],
+  "human_review_threshold": 25000,
+  "exceedance_thresholds": [5000, 10000, 25000, 50000, 100000]
+}
