@@ -16,6 +16,7 @@ from pathlib import Path
 from finance.recovery import fmt_gbp, rank, recoverability_map
 from insurance.bridge import BridgedAssessment, assess_bundle
 from insurance.bundle import load_bundle_file
+from insurance.resolution import resolve
 from insurance.counterfactual import HumanParams, KinematicEstimator
 
 PLACEHOLDER_QUICK = HumanParams()
@@ -33,7 +34,12 @@ def default_estimators(single: bool = False) -> dict:
 
 def run(cases: list[tuple], single: bool = False) -> list[BridgedAssessment]:
     """cases: (bundle, reproduced) pairs."""
-    return [assess_bundle(b, estimators=default_estimators(single), reproduced=rep) for b, rep in cases]
+    out = []
+    for b, rep in cases:
+        r = assess_bundle(b, estimators=default_estimators(single), reproduced=rep)
+        r.resolution = resolve(r, b)   # outcome + next steps, see insurance/resolution.py
+        out.append(r)
+    return out
 
 
 def render(results: list[BridgedAssessment]) -> str:
@@ -58,6 +64,12 @@ def render(results: list[BridgedAssessment]) -> str:
     counts: dict[str, int] = {}
     for a in priced:
         counts[a.decision] = counts.get(a.decision, 0) + 1
+    byo: dict[str, int] = {}
+    for r in results:
+        o = getattr(r, "resolution", None)
+        if o:
+            byo[o.outcome] = byo.get(o.outcome, 0) + 1
+    lines += ["", "Outcomes (every crash lands in one): " + ", ".join(f"{k}={v}" for k, v in sorted(byo.items()))]
     lines += ["", "Decisions: " + ", ".join(f"{k}={v}" for k, v in sorted(counts.items())),
               "Synthetic data; placeholder human models; decision support only. See docs/verification.md."]
     return "\n".join(lines)

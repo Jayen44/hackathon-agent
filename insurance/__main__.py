@@ -12,6 +12,7 @@ from insurance.bridge import assess_bundle
 from insurance.bundle import BundleError, load_bundle_file
 from insurance.engine import decide
 from insurance.report import render, render_recovery
+from insurance.resolution import render_resolution, resolve
 
 
 def main(argv: list[str]) -> int:
@@ -38,7 +39,8 @@ def main(argv: list[str]) -> int:
         if price:
             r = assess_bundle(bundle, legal_cost_gbp=legal)
             print(json.dumps(dataclasses.asdict(r), indent=2, default=str) if as_json
-                  else render(r.verdict) + "\n\n" + render_recovery(r))
+                  else render(r.verdict) + "\n\n" + render_recovery(r)
+                  + "\n\n" + render_resolution(resolve(r, bundle)))
         else:
             verdict = decide(bundle)
             print(json.dumps(dataclasses.asdict(verdict), indent=2) if as_json else render(verdict))
