@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #f6f6f4;
+  --panel: #ffffff;
+  --sunk: #efefec;
+  --line: #e2e1dc;
+  --fg: #1b1c1e;
+  --muted: #6b6d72;
+  --accent: #1f5f8b;
+  --accent-soft: #e5eef5;
+  --good: #2f6b4f;
+  --good-soft: #e6f0ea;
+  --warn: #8a5a14;
+  --warn-soft: #f6eddc;
+  --bad: #9b3434;
+  --bad-soft: #f5e4e2;
+  --neutral-soft: #ecebe7;
+  --on-accent: #ffffff;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121315;
+    --panel: #1a1b1e;
+    --sunk: #151619;
+    --line: #2b2d31;
+    --fg: #e8e8e6;
+    --muted: #9a9ca1;
+    --accent: #6aa7d3;
+    --accent-soft: #1b2a36;
+    --good: #7cbf9a;
+    --good-soft: #182a21;
+    --warn: #d8a75a;
+    --warn-soft: #2d2416;
+    --bad: #e08a84;
+    --bad-soft: #2f1c1b;
+    --neutral-soft: #24262a;
+    --on-accent: #0b1620;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121315;
+  --panel: #1a1b1e;
+  --sunk: #151619;
+  --line: #2b2d31;
+  --fg: #e8e8e6;
+  --muted: #9a9ca1;
+  --accent: #6aa7d3;
+  --accent-soft: #1b2a36;
+  --good: #7cbf9a;
+  --good-soft: #182a21;
+  --warn: #d8a75a;
+  --warn-soft: #2d2416;
+  --bad: #e08a84;
+  --bad-soft: #2f1c1b;
+  --neutral-soft: #24262a;
+  --on-accent: #0b1620;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-sunk: var(--sunk);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-good: var(--good);
+  --color-good-soft: var(--good-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+  --color-neutral-soft: var(--neutral-soft);
+  --color-on-accent: var(--on-accent);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-face), ui-monospace, monospace;
+}
+
+html { background: var(--bg); color-scheme: light dark; }
+body { background: var(--bg); color: var(--fg); }
+.num { font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

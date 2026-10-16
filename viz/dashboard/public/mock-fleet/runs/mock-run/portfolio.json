@@ -1,0 +1,251 @@
+{
+ "run_id": "mock-run",
+ "claims_total": 21,
+ "claims_processed": 21,
+ "recoverable_by_crash_type": {
+  "other": {
+   "low": 0.0,
+   "mid": 0.0,
+   "high": 27714.468168161555
+  },
+  "lead_vehicle_decel": {
+   "low": 0.0,
+   "mid": 0.0,
+   "high": 4417.4
+  },
+  "cut_in": {
+   "low": 0.0,
+   "mid": 0.0,
+   "high": 6509.249125269906
+  }
+ },
+ "decisions": {
+  "pull_logs_first": 10,
+  "not_av_recovery": 6,
+  "dont_pursue": 3,
+  "cannot_price": 2
+ },
+ "claims": [
+  {
+   "claim_id": "01_av_late_detection",
+   "crash_type": "other",
+   "decision": "pull_logs_first",
+   "decision_label": "Get more evidence",
+   "expected_recovery": {
+    "low": -11954.2,
+    "mid": -5264.775000000001,
+    "high": 4417.4
+   },
+   "counts_toward_map": true
+  },
+  {
+   "claim_id": "02_human_driving_manual",
+   "crash_type": "other",
+   "decision": "not_av_recovery",
+   "decision_label": "Don't pursue",
+   "expected_recovery": null,
+   "counts_toward_map": false
+  },
+  {
+   "claim_id": "03_handover_ignored_by_human",
+   "crash_type": "other",
+   "decision": "not_av_recovery",
+   "decision_label": "Don't pursue",
+   "expected_recovery": null,
+   "counts_toward_map": false
+  },
+  {
+   "claim_id": "04_handover_too_short",
+   "crash_type": "other",
+   "decision": "pull_logs_first",
+   "decision_label": "Get more evidence",
+   "expected_recovery": {
+    "low": -11954.2,
+    "mid": -5264.775000000001,
+    "high": 4417.4
+   },
+   "counts_toward_map": true
+  },
+  {
+   "claim_id": "05_unavoidable_close_cutin",
+   "crash_type": "cut_in",
+   "decision": "dont_pursue",
+   "decision_label": "Don't pursue",
+   "expected_recovery": {
+    "low": -11954.2,
+    "mid": -6452.400000000001,
+    "high": -936.1150157823228
+   },
+   "counts_toward_map": false
+  },
+  {
+   "claim_id": "06_borderline_needs_review",
+   "crash_type": "other",
+   "decision": "pull_logs_first",
+   "decision_label": "Get more evidence",
+   "expected_recovery": {
+    "low": -11954.2,
+    "mid": -6004.6653750000005,
+    "high": 1210.0681681615524
+   },
+   "counts_toward_map": true
+  },
+  {
+   "claim_id": "07_outside_odd",
+   "crash_type": "other",
+   "decision": "pull_logs_first",
+   "decision_label": "Get more evidence",
+   "expected_recovery": {
+    "low": -11954.2,
+    "mid": -5264.775000000001,
+    "high": 4417.4
+   },
+   "counts_toward_map": true
+  },
+  {
+   "claim_id": "08_integrity_failure",
+   "crash_type": "other",
+   "decision": "cannot_price",
+   "decision_label": "Cannot price",
+   "expected_recovery": null,
+   "counts_toward_map": false
+  },
+  {
+   "claim_id": "09_human_override",
+   "crash_type": "other",
+   "decision": "not_av_recovery",
+   "decision_label": "Don't pursue",
+   "expected_recovery": null,
+   "counts_toward_map": false
+  },
+  {
+   "claim_id": "10_critical_fault",
+   "crash_type": "other",
+   "decision": "pull_logs_first",
+   "decision_label": "Get more evidence",
+   "expected_recovery": {
+    "low": -11954.2,
+    "mid": -5264.775000000001,
+    "high": 4417.4
+   },
+   "counts_toward_map": true
+  },
+  {
+   "claim_id": "11_no_collision",
+   "crash_type": "other",
+   "decision": "not_av_recovery",
+   "decision_label": "Don't pursue",
+   "expected_recovery": null,
+   "counts_toward_map": false
+  },
+  {
+   "claim_id": "12_missing_conflict",
+   "crash_type": null,
+   "decision": "cannot_price",
+   "decision_label": "Cannot price",
+   "expected_recovery": null,
+   "counts_toward_map": false
+  },
+  {
+   "claim_id": "13_unapproved_software",
+   "crash_type": "other",
+   "decision": "pull_logs_first",
+   "decision_label": "Get more evidence",
+   "expected_recovery": {
+    "low": -11954.2,
+    "mid": -5264.775000000001,
+    "high": 4417.4
+   },
+   "counts_toward_map": true
+  },
+  {
+   "claim_id": "14_human_took_control_in_time",
+   "crash_type": "other",
+   "decision": "not_av_recovery",
+   "decision_label": "Don't pursue",
+   "expected_recovery": null,
+   "counts_toward_map": false
+  },
+  {
+   "claim_id": "15_lead_braking_avoidable",
+   "crash_type": "lead_vehicle_decel",
+   "decision": "pull_logs_first",
+   "decision_label": "Get more evidence",
+   "expected_recovery": {
+    "low": -11954.2,
+    "mid": -4862.170125000001,
+    "high": 4417.4
+   },
+   "counts_toward_map": true
+  },
+  {
+   "claim_id": "16_lead_braking_unavoidable",
+   "crash_type": "lead_vehicle_decel",
+   "decision": "dont_pursue",
+   "decision_label": "Don't pursue",
+   "expected_recovery": {
+    "low": -11954.2,
+    "mid": -6452.400000000001,
+    "high": -936.1150157823228
+   },
+   "counts_toward_map": false
+  },
+  {
+   "claim_id": "17_cut_in_avoidable",
+   "crash_type": "cut_in",
+   "decision": "pull_logs_first",
+   "decision_label": "Get more evidence",
+   "expected_recovery": {
+    "low": -11954.2,
+    "mid": -5264.775000000001,
+    "high": 4417.4
+   },
+   "counts_toward_map": true
+  },
+  {
+   "claim_id": "18_cut_in_unavoidable",
+   "crash_type": "cut_in",
+   "decision": "dont_pursue",
+   "decision_label": "Don't pursue",
+   "expected_recovery": {
+    "low": -11954.2,
+    "mid": -6452.400000000001,
+    "high": -936.1150157823228
+   },
+   "counts_toward_map": false
+  },
+  {
+   "claim_id": "19_s4_unauthorised_software_change",
+   "crash_type": "other",
+   "decision": "not_av_recovery",
+   "decision_label": "Don't pursue",
+   "expected_recovery": null,
+   "counts_toward_map": false
+  },
+  {
+   "claim_id": "20_s3_2_engaged_when_inappropriate",
+   "crash_type": "other",
+   "decision": "pull_logs_first",
+   "decision_label": "Get more evidence",
+   "expected_recovery": {
+    "low": -11954.2,
+    "mid": -5264.775000000001,
+    "high": 4417.4
+   },
+   "counts_toward_map": true
+  },
+  {
+   "claim_id": "DEMO-001",
+   "crash_type": "cut_in",
+   "decision": "pull_logs_first",
+   "decision_label": "Get more evidence",
+   "expected_recovery": {
+    "low": -10556.31102013149,
+    "mid": -4326.788775000001,
+    "high": 2091.8491252699064
+   },
+   "counts_toward_map": true
+  }
+ ],
+ "mock_note": "Mock fixture: numbers are real stored assessments of synthetic example claims; timing is simulated."
+}
