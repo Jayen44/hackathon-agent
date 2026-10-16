@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sim Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0d12;--panel:#12151d;--panel2:#181c26;--line:#262b38;--text:#e7e9ee;--muted:#8a91a3;--accent:#5b8cff;
+--a:#36c98e;--b:#f0b03c;--av:#ef5a5a;--good:#36c98e;--bad:#ef5a5a;--warn:#f0b03c}
+:root[data-theme="light"]{--bg:#f6f7f9;--panel:#fff;--panel2:#f0f2f5;--line:#dfe3ea;--text:#151821;--muted:#5d6577;--accent:#2d63e8}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 Inter,system-ui,sans-serif}
+header{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line)}
+header h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.2px}
+header .sub{color:var(--muted);font-size:13px}
+header .sp{flex:1}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:7px 12px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;padding:10px 16px;width:100%}
+button:disabled{opacity:.5;cursor:wait}
+main{display:grid;grid-template-columns:380px 1fr;min-height:calc(100vh - 55px)}
+aside{border-right:1px solid var(--line);padding:16px;overflow:auto;max-height:calc(100vh - 55px)}
+section.out{padding:16px 20px;overflow:auto;max-height:calc(100vh - 55px)}
+h2{font-size:12px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin:18px 0 8px;font-weight:600}
+.seg{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:3px}
+.seg button{flex:1;border:0;background:transparent;padding:7px}
+.seg button.on{background:var(--panel);box-shadow:0 1px 3px #0004;font-weight:600}
+.prow{display:grid;grid-template-columns:1fr 64px 64px 92px;gap:6px;align-items:center;margin:5px 0}
+.prow label{font-size:13px}
+.prow .u{color:var(--muted);font-size:11px}
+input,select{font:12px 'JetBrains Mono',monospace;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:5px 6px;width:100%}
+.hdr{display:grid;grid-template-columns:1fr 64px 64px 92px;gap:6px;color:var(--muted);font-size:11px}
+.drv{display:grid;grid-template-columns:1fr 70px 70px;gap:6px;align-items:center;margin:4px 0;font-size:13px}
+.ph{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.6px;color:#1a1300;background:var(--warn);border-radius:4px;padding:1px 6px;margin-left:6px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+.card .k{color:var(--muted);font-size:12px}
+.card .v{font-size:30px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums}
+.card .ci{font:12px 'JetBrains Mono',monospace;color:var(--muted)}
+.bar{position:relative;height:8px;background:var(--panel2);border-radius:4px;margin-top:10px}
+.bar i{position:absolute;top:0;bottom:0;border-radius:4px;opacity:.45}
+.bar b{position:absolute;top:-3px;width:3px;height:14px;border-radius:2px}
+.grid2{display:grid;grid-template-columns:1.3fr 1fr;gap:12px;margin-top:12px}
+canvas{width:100%;display:block;border-radius:10px;background:#1c2029}
+.replay-ctrl{display:flex;gap:8px;align-items:center;margin-top:8px}
+.replay-ctrl input[type=range]{flex:1}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl td{padding:4px 2px;border-bottom:1px solid var(--line)}
+.muted{color:var(--muted)}
+.note{font-size:12px;color:var(--muted);margin-top:10px}
+.empty{color:var(--muted);padding:60px 0;text-align:center}
+.pill{font:11px 'JetBrains Mono',monospace;border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+@media (max-width:900px){main{grid-template-columns:1fr}aside,section.out{max-height:none}.cards,.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Sim Lab</h1><span class="sub">Counterfactual careful-driver Monte Carlo · runs on Modal</span>
+  <span class="sp"></span>
+  <a href="cctv" style="color:var(--accent);font-weight:600;text-decoration:none">From CCTV →</a>
+  <span id="r157" class="pill"></span>
+  <button id="theme">Theme</button>
+</header>
+<main>
+<aside>
+  <h2>Scenario</h2>
+  <div class="seg" id="kind"><button data-k="cut_in" class="on">Cut-in</button><button data-k="lead_brake">Lead vehicle brakes</button></div>
+  <h2>Parameter ranges</h2>
+  <div class="hdr"><span>param</span><span>lo</span><span>hi</span><span>evidence</span></div>
+  <div id="params"></div>
+  <p class="note">Defaults are illustrative, not from a crash report. Evidence tag drives the data-sufficiency score.</p>
+  <h2>Careful drivers <span class="ph" id="phbadge">PLACEHOLDER, NOT R157</span></h2>
+  <div class="drv muted"><span></span><span style="color:var(--a)">A (PM1)</span><span style="color:var(--b)">B (PM2)</span></div>
+  <div id="drivers"></div>
+  <h2>Run</h2>
+  <div class="drv"><span>Samples (n)</span><input id="n" type="number" value="4000" min="100" max="50000" step="500"><span></span></div>
+  <div class="drv"><span>Seed</span><input id="seed" type="number" value="0"><span></span></div>
+  <div style="margin-top:12px"><button class="primary" id="run">Run on Modal</button></div>
+  <p class="note" id="status"></p>
+</aside>
+<section class="out" id="out"><div class="empty">Set the ranges and press <b>Run on Modal</b>.</div></section>
+</main>
+<script>
+const UNITS={ego_speed:'m/s',other_speed:'m/s',gap:'m',lateral_offset:'m',cut_in_start:'s',cut_in_duration:'s',other_decel:'m/s²',other_brake_time:'s'};
+const LABELS={ego_speed:'AV speed',other_speed:'Other vehicle speed',gap:'Gap at start',lateral_offset:'Lateral offset',cut_in_start:'Cut-in starts',cut_in_duration:'Cut-in duration',other_decel:'Other vehicle braking',other_brake_time:'Other brakes at'};
+const DEFAULTS={
+ cut_in:{ego_speed:[13,18,'reported'],other_speed:[8,12,'narrative'],gap:[6,15,'narrative'],lateral_offset:[3.5,3.5,'prior'],cut_in_start:[0.3,1.0,'prior'],cut_in_duration:[1.5,3.0,'prior']},
+ lead_brake:{ego_speed:[15,20,'reported'],other_speed:[15,20,'narrative'],gap:[10,25,'narrative'],other_decel:[4,8,'prior'],other_brake_time:[0.5,1.5,'prior']}};
+const DRV=[['reaction_time','Reaction time (s)',0.75,1.5],['max_decel','Max braking (m/s²)',7,7],['jerk','Brake ramp (m/s³)',20,20],
+ ['ttc_threshold','TTC trigger (s)',3,3],['lateral_margin','Lateral margin (m)',0.3,0.3],['lead_decel_threshold','Brake-light trigger (m/s²)',2,2]];
+let kind='cut_in', last=null;
+const $=s=>document.querySelector(s);
+function renderParams(){
+  const d=DEFAULTS[kind]; $('#params').innerHTML=Object.entries(d).map(([k,[lo,hi,src]])=>`
+  <div class="prow" data-p="${k}"><label>${LABELS[k]} <span class="u">${UNITS[k]}</span></label>
+  <input class="lo" type="number" step="0.1" value="${lo}"><input class="hi" type="number" step="0.1" value="${hi}">
+  <select class="src">${['reported','narrative','prior'].map(s=>`<option ${s===src?'selected':''}>${s}</option>`).join('')}</select></div>`).join('');
+}
+function renderDrivers(){
+  $('#drivers').innerHTML=DRV.map(([k,l,a,b])=>`<div class="drv"><span>${l}</span><input data-d="careful_a" data-k="${k}" type="number" step="0.05" value="${a}"><input data-d="careful_b" data-k="${k}" type="number" step="0.05" value="${b}"></div>`).join('');
+}
+document.querySelectorAll('#kind button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#kind button').forEach(x=>x.classList.remove('on'));b.classList.add('on');kind=b.dataset.k;renderParams();});
+$('#theme').onclick=()=>{const r=document.documentElement;r.dataset.theme=r.dataset.theme==='light'?'dark':'light';};
+renderParams();renderDrivers();
+fetch('api/meta').then(r=>r.json()).then(m=>{const ok=m.r157_filled.careful_a&&m.r157_filled.careful_b;$('#r157').textContent=ok?'R157 params loaded':'R157 params: TODO';$('#r157').style.color=ok?'var(--good)':'var(--warn)';}).catch(()=>{});
+
+function request(){
+  const ranges={};document.querySelectorAll('#params .prow').forEach(r=>{ranges[r.dataset.p]={lo:+r.querySelector('.lo').value,hi:+r.querySelector('.hi').value,source:r.querySelector('.src').value};});
+  const drivers={careful_a:{},careful_b:{}};document.querySelectorAll('#drivers input').forEach(i=>drivers[i.dataset.d][i.dataset.k]=+i.value);
+  return {kind,ranges,drivers,n:+$('#n').value,seed:+$('#seed').value,sensitivity:true};
+}
+$('#run').onclick=async()=>{
+  const btn=$('#run');btn.disabled=true;$('#status').textContent='Fanning out to Modal containers…';const t0=performance.now();
+  try{const r=await fetch('api/run',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(request())});
+    if(!r.ok)throw new Error(await r.text());last=await r.json();renderOut(last);
+    $('#status').textContent=`Done in ${((performance.now()-t0)/1000).toFixed(1)} s (Monte Carlo ${last.timing_s.montecarlo} s on Modal).`;}
+  catch(e){$('#status').textContent='Error: '+e.message;}finally{btn.disabled=false;}
+};
+const pct=x=>(100*x).toFixed(1)+'%';
+function card(name,color,d){const[lo,hi]=d.ci90;return `<div class="card"><div class="k">${name}</div><div class="v" style="color:${color}">${pct(d.p)}</div>
+ <div class="ci">90% CI ${pct(lo)} – ${pct(hi)} · n=${d.n}</div><div class="bar"><i style="left:${lo*100}%;width:${(hi-lo)*100}%;background:${color}"></i><b style="left:calc(${d.p*100}% - 1px);background:${color}"></b></div></div>`;}
+function renderOut(res){
+  const m=res.montecarlo.drivers, ds=res.data_sufficiency, p=res.montecarlo.paired, s=res.sensitivity;
+  const spread=Math.abs(m.careful_a.p-m.careful_b.p);
+  $('#out').innerHTML=`
+  <div class="cards">${card('P(avoid): careful driver A','var(--a)',m.careful_a)}${card('P(avoid): careful driver B','var(--b)',m.careful_b)}
+   <div class="card"><div class="k">Data sufficiency</div><div class="v">${(ds.score*100).toFixed(0)}%</div>
+   <div class="ci">reported ${ds.reported.length} · narrative ${ds.narrative.length} · prior ${ds.prior.length}</div>
+   <div class="bar"><i style="left:0;width:${ds.score*100}%;background:var(--accent);opacity:.8"></i></div></div></div>
+  <p class="note">A–B spread ${pct(spread)} ${spread>0.15?'<b style="color:var(--warn)">· model-dependent, flag for review</b>':''} · paired on identical samples: both avoid ${p.both_avoid}, only A ${p.only_careful_a_avoids}, only B ${p.only_careful_b_avoids}, neither ${p.neither_avoids}.
+   Supporting evidence only; the GBP figure comes from the insurance model.</p>
+  <div class="grid2">
+   <div class="card"><div class="k">Median-sample replay: what the AV did vs careful drivers (top-down)</div>
+     <canvas id="cv" height="300"></canvas>
+     <div class="replay-ctrl"><button id="play">▶</button><input type="range" id="scrub" min="0" value="0"><span id="tlabel" class="ci"></span></div></div>
+   <div class="card"><div class="k">What moves the answer (sensitivity)</div>${tornadoSvg(s)}
+     ${s&&s.go_get?`<p class="note">Fact worth getting next: <b>${LABELS[s.go_get]||s.go_get}</b></p>`:''}</div>
+  </div>`;
+  setupReplay(res);
+}
+function tornadoSvg(s){
+  if(!s||!s.rows.length)return '<p class="muted">No variable ranges.</p>';
+  const W=420,row=30,H=s.rows.length*row+24,x0=150,w=W-x0-10;
+  let out=`<svg viewBox="0 0 ${W} ${H}" width="100%"><line x1="${x0}" x2="${x0}" y1="0" y2="${H-20}" stroke="var(--line)"/>`;
+  s.rows.forEach((r,i)=>{const y=i*row+6;['careful_a','careful_b'].forEach((d,j)=>{const lo=r.p_at_lo[d],hi=r.p_at_hi[d],a=Math.min(lo,hi),b=Math.max(lo,hi);
+    out+=`<rect x="${x0+a*w}" y="${y+j*11}" width="${Math.max(2,(b-a)*w)}" height="9" rx="2" fill="var(--${j?'b':'a'})"/>`;});
+    out+=`<text x="${x0-8}" y="${y+14}" text-anchor="end" font-size="12" fill="var(--text)">${LABELS[r.param]||r.param}</text>`;});
+  out+=`<text x="${x0}" y="${H-4}" font-size="10" fill="var(--muted)">0%</text><text x="${x0+w}" y="${H-4}" text-anchor="end" font-size="10" fill="var(--muted)">100% P(avoid)</text></svg>`;
+  return out;
+}
+let raf=null;
+function setupReplay(res){
+  const cv=$('#cv'),ctx=cv.getContext('2d'),dpr=devicePixelRatio||1;cv.width=cv.clientWidth*dpr;cv.height=300*dpr;
+  const rows=[['What the AV did','av','var(--av)'],['Careful driver A','careful_a','var(--a)'],['Careful driver B','careful_b','var(--b)']];
+  const T=Math.max(...rows.map(r=>res.replays[r[1]].t.length));const scrub=$('#scrub');scrub.max=T-1;let f=0,playing=true;
+  const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v.slice(4,-1));
+  const L=res.geometry.length,Wd=res.geometry.width;
+  function draw(){
+    const W=cv.width,H=cv.height,lh=H/3;ctx.clearRect(0,0,W,H);
+    rows.forEach(([name,key,col],i)=>{const tr=res.replays[key],k=Math.min(f,tr.t.length-1),e=tr.ego[k],o=tr.other[k];
+      const cx=e[0],scale=W/60,ox=W*0.3,oy=i*lh+lh/2;
+      ctx.fillStyle='#232834';ctx.fillRect(0,i*lh+8*dpr,W,lh-16*dpr);
+      ctx.strokeStyle='#ffffff55';ctx.setLineDash([10*dpr,10*dpr]);ctx.lineWidth=1.5*dpr;
+      [1.75,-1.75,5.25].forEach(y=>{ctx.beginPath();const off=((-cx*scale)%(20*dpr));ctx.moveTo(off,oy-y*scale);ctx.lineTo(W,oy-y*scale);ctx.stroke();});
+      ctx.setLineDash([]);
+      const car=(s,c,brake)=>{ctx.save();ctx.translate(ox+(s[0]-cx)*scale,oy-s[1]*scale);ctx.rotate(-s[2]);ctx.fillStyle=c;
+        ctx.beginPath();ctx.roundRect(-L/2*scale,-Wd/2*scale,L*scale,Wd*scale,4*dpr);ctx.fill();
+        if(brake){ctx.fillStyle='#ff3030';ctx.fillRect(-L/2*scale-2*dpr,-Wd/2*scale,3*dpr,Wd*scale);}ctx.restore();};
+      const prev=tr.ego[Math.max(0,k-1)];car(o,'#9aa3b5',false);car(e,css(col),e[3]<prev[3]-0.01);
+      const r=tr.result,done=k>=tr.t.length-1;
+      ctx.fillStyle='#e7e9ee';ctx.font=`${12*dpr}px Inter`;ctx.fillText(`${name} · ${(e[3]*3.6).toFixed(0)} km/h`,10*dpr,i*lh+24*dpr);
+      if(done){const txt=r.collided?`COLLISION · ${(r.ego_speed_at_impact*3.6).toFixed(0)} km/h · ${r.impact_type}`:(r.ended_closing?'NOT PROVEN (still closing)':'AVOIDED');
+        ctx.fillStyle=r.collided?'#ef5a5a':(r.ended_closing?'#f0b03c':'#36c98e');ctx.font=`600 ${13*dpr}px Inter`;ctx.fillText(txt,W-ctx.measureText(txt).width-12*dpr,i*lh+24*dpr);}
+    });
+    scrub.value=f;$('#tlabel').textContent=`t=${(f*0.04).toFixed(2)} s`;
+  }
+  function tick(){if(playing){f=Math.min(f+1,T-1);if(f>=T-1)playing=false;}draw();raf=requestAnimationFrame(tick);}
+  cancelAnimationFrame(raf);tick();
+  $('#play').onclick=()=>{if(f>=T-1)f=0;playing=!playing;};scrub.oninput=()=>{f=+scrub.value;playing=false;};
+}
+</script>
+</body>
+</html>

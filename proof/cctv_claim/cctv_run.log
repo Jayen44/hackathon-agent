@@ -1,0 +1,26 @@
+[input         ] video d741ae8d0d8c4bc482ae242222eaa610 (617446 bytes, sha256 4bcc4bc1e2cbbf1393dde3bfc7bc5d91570423c1f70caad5300c30ba7b247db9), uploaded 1792068091.614631; synthetic Blender CCTV render
+[detection     ] PekingU/rtdetr_r50vd_coco_o365 (Apache-2.0) + ByteTrack (supervision, MIT), 241/241 frames, 3 vehicle tracks, plates blurred True
+[tracking      ] track 1: car, 241 frames
+[tracking      ] track 2: car, 55 frames
+[tracking      ] track 3: car, 241 frames
+[calibration   ] rectangle, 4 points, ensemble 64, click σ 2.0 px, flat road
+[selection     ] AV track [3], other track [1]
+[measure       ] conflict t=0.52 s, closest t=5.36 s, contact True, type cut_in
+[measure       ] AV 16.07±6.76 m/s at conflict; 14.86±0.64 m/s before impact
+[measure       ] other 9.03±1.82 m/s, gap 31.4±9.8 m, AV braking 2.02 m/s²
+[truth         ] true: other 9.0 m/s, AV before impact 14.85 m/s, AV at conflict 15.5 m/s, impact t=5.52 s (viz/isaac/samples/cctv_cut_in_truth.json)
+[counterfactual] careful_a [careful_a_r157_pm1_ccdm (decel capped at mu=0.7)] P(avoid) 0.909 CI90 0.893-0.923 n=1000
+[counterfactual] careful_b [careful_b_r157_pm2_fsm (decel capped at mu=0.7)] P(avoid) 0.947 CI90 0.934-0.957 n=1000
+[reproduction  ] rate 0.085 n=400 mismatches {'collision': 366}
+[decision      ] engine pull_logs_first -> final pull_logs_first; expected recovery GBP {"low": 3003.928993248075, "mid": 37575.99999999999, "high": 48687.62909415928}
+[reason        ] self-driving engagement not verified from the vehicle data (engaged_alleged)
+[reason        ] simulation did not reproduce the reported crash (low confidence)
+[reason        ] confirm no unauthorised software alteration or missed safety-critical update (AEVA s.4) before issuing proceedings
+[reason        ] paid amount is already net of the injured party's contributory negligence (AEVA s.3(1)); not applied again
+[info-request  ] Reconcile the reported crash with the reconstruction: The sim reproduces the reported outcome in 8% of runs (mismatches: collision). Finance holds 'pursue' until it does.
+[info-request  ] Verify self-driving engagement from the vehicle's data storage (DSSAD): Engagement is reported, not verified. Finance holds 'pursue' until verified.
+[info-request  ] Confirm no unauthorised software change or missed safety-critical update: Required before proceedings (AEVA s.4).
+[info-request  ] Obtain the police report: Independent account of the scene and parties.
+[info-request  ] Identify witnesses: Independent corroboration of the conflict.
+[debate        ] mode offline (scripted; live Claude debates ran in the agent run)
+[disclaimer    ] Triage evidence for a human claims handler. Not a liability ruling and not legal advice. Careful-driver results come from simulation and carry the stated uncertainty.

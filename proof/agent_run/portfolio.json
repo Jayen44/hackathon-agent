@@ -1,0 +1,3381 @@
+{
+ "claims_total": 84,
+ "claims_done": 58,
+ "claims_open": [
+  "SYN-7-011",
+  "SYN-7-012"
+ ],
+ "claims_left_in_run": 24,
+ "recoverable_gbp_by_crash_type": {
+  "cut_in": {
+   "low": 27862,
+   "mid": 67794,
+   "high": 153507
+  },
+  "lead_braking": {
+   "low": 13487,
+   "mid": 38150,
+   "high": 63513
+  },
+  "lead_vehicle_decel": {
+   "low": 10822,
+   "mid": 30635,
+   "high": 93082
+  },
+  "other": {
+   "low": 0,
+   "mid": 4164,
+   "high": 26504
+  }
+ },
+ "recoverable_gbp_total": {
+  "low": 52170,
+  "mid": 140743,
+  "high": 336607
+ },
+ "decisions": {
+  "pursue": 16,
+  "pull_logs_first": 16,
+  "dont_pursue": 18,
+  "not_priced": 4,
+  "get_more_evidence": 2,
+  "cannot_price": 2
+ },
+ "top_claims": [
+  {
+   "claim_id": "22_pursue_lead_braking",
+   "crash_type": "lead_braking",
+   "decision": "pull_logs_first",
+   "expected_recovery_gbp": {
+    "low": 13486.88442609532,
+    "mid": 37022.5,
+    "high": 59096.0
+   },
+   "source_label": "synthetic example bundle (insurance team)"
+  },
+  {
+   "claim_id": "DEMO-3_cut_in_ample_gap",
+   "crash_type": "cut_in",
+   "decision": "pursue",
+   "expected_recovery_gbp": {
+    "low": 18594.72648673723,
+    "mid": 35308.22648673723,
+    "high": 52216.0
+   },
+   "source_label": "synthetic demo claim (self-consistent; values illustrative)"
+  },
+  {
+   "claim_id": "DEMO-1_queue_late_brake",
+   "crash_type": "lead_vehicle_decel",
+   "decision": "pursue",
+   "expected_recovery_gbp": {
+    "low": 10821.708919134842,
+    "mid": 27302.5,
+    "high": 43616.0
+   },
+   "source_label": "synthetic demo claim (self-consistent; values illustrative)"
+  },
+  {
+   "claim_id": "21_pursue_cut_in",
+   "crash_type": "cut_in",
+   "decision": "pull_logs_first",
+   "expected_recovery_gbp": {
+    "low": 9267.105405614362,
+    "mid": 25662.5,
+    "high": 41896.0
+   },
+   "source_label": "synthetic example bundle (insurance team)"
+  },
+  {
+   "claim_id": "10_critical_fault",
+   "crash_type": null,
+   "decision": "pursue",
+   "expected_recovery_gbp": {
+    "low": -11954.2,
+    "mid": 1426.4,
+    "high": 4417.4
+   },
+   "source_label": "synthetic example bundle (insurance team)"
+  },
+  {
+   "claim_id": "13_unapproved_software",
+   "crash_type": null,
+   "decision": "pursue",
+   "expected_recovery_gbp": {
+    "low": -11954.2,
+    "mid": 1426.4,
+    "high": 4417.4
+   },
+   "source_label": "synthetic example bundle (insurance team)"
+  },
+  {
+   "claim_id": "tgsim_cut_in_9_1155",
+   "crash_type": "cut_in",
+   "decision": "pull_logs_first",
+   "expected_recovery_gbp": {
+    "low": -11954.2,
+    "mid": 1426.4,
+    "high": 4417.4
+   },
+   "source_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper"
+  },
+  {
+   "claim_id": "tgsim_cut_in_5_436",
+   "crash_type": "cut_in",
+   "decision": "pull_logs_first",
+   "expected_recovery_gbp": {
+    "low": -11954.2,
+    "mid": 1295.76125,
+    "high": 4368.717303717327
+   },
+   "source_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper"
+  },
+  {
+   "claim_id": "DEMO-2_lead_brake_late_response",
+   "crash_type": "lead_vehicle_decel",
+   "decision": "pull_logs_first",
+   "expected_recovery_gbp": {
+    "low": -35463.75142735106,
+    "mid": 1248.5,
+    "high": 36736.0
+   },
+   "source_label": "synthetic demo claim (self-consistent; values illustrative)"
+  },
+  {
+   "claim_id": "15_lead_braking_avoidable",
+   "crash_type": "lead_braking",
+   "decision": "pull_logs_first",
+   "expected_recovery_gbp": {
+    "low": -11954.2,
+    "mid": 1127.1185,
+    "high": 4417.4
+   },
+   "source_label": "synthetic example bundle (insurance team)"
+  }
+ ],
+ "lead_notes": [
+  "51 recorded. Pursue value remains in DEMO-3 and DEMO-1. SYN-7-000 is held because the careful-driver models split 0 vs 1 on reaction time. The high-value Serious claims are now in progress: SYN-7-001 (\u00a3229,880 paid) has a log gap over the crash and unverified software, and SYN-7-002 (\u00a3459,000) has started. Evidence quality, not liability, is the limiting factor.",
+  "52 recorded. Pursue value remains in DEMO-3 and DEMO-1. Neither high-value Serious claim can be priced yet. SYN-7-001 (\u00a3229,880) failed integrity checks: a log gap covers the crash. SYN-7-002 (\u00a3459,000) needs a multi-track counsel budget, and its own kinematics show no collision. Both need evidence before any recovery step.",
+  "54 recorded. Pursue value remains in DEMO-3 and DEMO-1. The high-value Serious claims are not yet priceable: SYN-7-001 failed integrity checks, and SYN-7-002 needs a counsel budget and shows no collision on its own kinematics. SYN-7-005 (\u00a3226,510) is in progress. Slight SYN-7 claims often contradict themselves or have disagreeing careful-driver models.",
+  "56 recorded. Pursue value remains in DEMO-3 and DEMO-1. None of the three high-value Serious claims (001, 002, 005) is priceable: they need integrity clearance or multi-track counsel budgets. SYN-7-005's break-even counsel budget is \u00a365.6k\u2013\u00a3148.7k. Generator bundles with 970\u20131005 log gaps (001, 007) fail integrity checks.",
+  "60 recorded. Pursue value remains in DEMO-3 and DEMO-1. The three high-value Serious claims are not priceable yet. Recurring SYN-7 patterns: no collision on the bundle's own kinematics (004, 006, 010, 026), log gaps over the crash (001, 007, 009), and models disagreeing on reaction time. Clean Slight claims are mostly unavoidable or not cost-effective."
+ ],
+ "label": "Recoverable GBP counts claims the engine rates pursue or pull_logs_first. Ranges sum each claim's low/mid/high expected recovery.",
+ "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+ "findings": [
+  {
+   "claim_id": "DEMO-3_cut_in_ample_gap",
+   "source": "demo",
+   "source_label": "synthetic demo claim (self-consistent; values illustrative)",
+   "synthetic": true,
+   "crash_type": "cut_in",
+   "injury_severity": "Serious",
+   "paid_claim_gbp": 72000,
+   "triage_value_gbp": 52216.0,
+   "triage_p_avoid_mid": 1.0,
+   "summary": "Synthetic demo cut-in. Crash reproduced. The AV started braking 3.2 s after detecting the cut-in. Careful-driver models A and B agree: P(avoid) 0.997\u20131.0. Engine assigns liability to the tech company (medium confidence). After the adjuster/defence debate, expected recovery is \u00a318.6k\u2013\u00a352.2k (mid \u00a335.3k) on \u00a372k paid. Handler should check the unapplied 0\u201310% third-party share and adverse costs. Cut-in timing comes from the narrative and priors.",
+   "team_decision": "pursue",
+   "engine_decision": "pursue",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": 18594.72648673723,
+    "mid": 35308.22648673723,
+    "high": 52216.0
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.8)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.8)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Dashcam/CCTV or AV lane-change log of cut-in",
+     "why": "Cut-in start and duration come from narrative/prior, not measurement; a timing dispute would push costs to trial band"
+    },
+    {
+     "item": "Full AV decision log contents",
+     "why": "Only one brake input logged; need to establish why braking began 3.2 s after detection"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "22_pursue_lead_braking",
+   "source": "insurance_example",
+   "source_label": "synthetic example bundle (insurance team)",
+   "synthetic": true,
+   "crash_type": "lead_braking",
+   "injury_severity": "Serious",
+   "paid_claim_gbp": 80000,
+   "triage_value_gbp": 53096.0,
+   "triage_p_avoid_mid": 0.925,
+   "summary": "Synthetic lead-braking claim. Lead vehicle detected 1.8 s after hazard onset. Simulator did NOT reproduce the crash: it caps AV decel at about 2.75 m/s\u00b2, while the log shows the brake rising to 0.9. P(avoid): A 0.997\u20131.0, B 0.856\u20130.89. Ego speed is the top sensitivity. Engine says pull_logs_first. Expected recovery \u00a313.5k\u2013\u00a359.1k (mid \u00a337.0k) on \u00a380k paid. Limitation deadline 2029-03-01.",
+   "team_decision": "pull_logs_first",
+   "engine_decision": "pull_logs_first",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": 13486.88442609532,
+    "mid": 37022.5,
+    "high": 59096.0
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 0.874,
+     "ci90": [
+      0.856,
+      0.89
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": false,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Full AV logs incl. decision log contents and ego speed trace",
+     "why": "Ego speed drives P(avoid) (0.594 swing) and fails reproduction; logs needed to confirm"
+    },
+    {
+     "item": "Brake command units/actual deceleration trace",
+     "why": "Brake 0.9 escalation not modelled by simulator; actual decel determines impact speed"
+    },
+    {
+     "item": "Perception log for detection latency",
+     "why": "Lead first detected 1.8 s after hazard onset at 30 m; explains late response"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "DEMO-1_queue_late_brake",
+   "source": "demo",
+   "source_label": "synthetic demo claim (self-consistent; values illustrative)",
+   "synthetic": true,
+   "crash_type": "lead_vehicle_decel",
+   "injury_severity": "Serious",
+   "paid_claim_gbp": 62000,
+   "triage_value_gbp": 43616.0,
+   "triage_p_avoid_mid": 1.0,
+   "summary": "Synthetic demo. AV approached a stationary hazard at 55 m and braked 2.6 s after detection. Crash reproduced (rate 1.0). Careful-driver models A and B agree: P(avoid) 0.997\u20131.0. Engine: tech company liable (medium confidence). After debate, expected recovery is \u00a310.8k\u2013\u00a343.6k (mid \u00a327.3k) on \u00a362k paid. Unapplied 0\u20135% third-party share and adverse costs need handler review. Lead-vehicle braking comes from a prior.",
+   "team_decision": "pursue",
+   "engine_decision": "pursue",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": 10821.708919134842,
+    "mid": 27302.5,
+    "high": 43616.0
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.8)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.8)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Lead/hazard vehicle braking data (dashcam or telematics)",
+     "why": "Lead decel and brake timing are priors, not measurements; the main point the defence could contest"
+    },
+    {
+     "item": "Full AV decision log and perception log",
+     "why": "Only one brake input logged; need to explain 2.6 s detection-to-brake delay and confirm 55 m sightline"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "21_pursue_cut_in",
+   "source": "insurance_example",
+   "source_label": "synthetic example bundle (insurance team)",
+   "synthetic": true,
+   "crash_type": "cut_in",
+   "injury_severity": "Serious",
+   "paid_claim_gbp": 60000,
+   "triage_value_gbp": 41896.0,
+   "triage_p_avoid_mid": 1.0,
+   "summary": "Synthetic cut-in. Detection came 3.8 s after cut-in start, and braking followed. Simulator did NOT reproduce the crash because AV brake escalation is not modelled. Careful-driver models A and B agree: P(avoid) 0.997\u20131.0. Engine says pull_logs_first. Expected recovery \u00a39.3k\u2013\u00a341.9k (mid \u00a325.7k) on \u00a360k paid. Red flag: relative impact speed near zero against a Serious injury; no medical records. Limitation deadline 2029-03-01.",
+   "team_decision": "pull_logs_first",
+   "engine_decision": "pull_logs_first",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": 9267.105405614362,
+    "mid": 25662.5,
+    "high": 41896.0
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": false,
+   "repro_attempts": 2,
+   "evidence_requests": [
+    {
+     "item": "Full AV logs incl. ego speed and actual deceleration trace",
+     "why": "Simulator did not reproduce the crash (brake 0.9 escalation not modelled)"
+    },
+    {
+     "item": "Medical records",
+     "why": "Near-zero relative impact speed (~0.25 m/s) appears inconsistent with Serious injury"
+    },
+    {
+     "item": "CCTV / witness statements on cut-in timing",
+     "why": "Cut-in start from narrative, duration from prior; detection was 3.8 s after cut-in start"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "DEMO-2_lead_brake_late_response",
+   "source": "demo",
+   "source_label": "synthetic demo claim (self-consistent; values illustrative)",
+   "synthetic": true,
+   "crash_type": "lead_vehicle_decel",
+   "injury_severity": "Serious",
+   "paid_claim_gbp": 54000,
+   "triage_value_gbp": 15136.0,
+   "triage_p_avoid_mid": 0.6,
+   "summary": "Synthetic demo lead-braking claim. Crash reproduced (rate 1.0). The AV braked 2.2 s after the lead started braking. Careful-driver models DISAGREE: A gives P(avoid) 0.997\u20131.0, B gives 0.255\u20130.302. The result depends on which careful-driver standard applies. Engine says pull_logs_first. Expected recovery \u00a3-35.5k to \u00a336.7k (mid \u00a31.2k) on \u00a354k paid, so the range straddles zero. Ego speed is the top sensitivity.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "pull_logs_first",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -35463.75142735106,
+    "mid": 1248.5,
+    "high": 36736.0
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.8)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.8)",
+     "p_avoid": 0.278,
+     "ci90": [
+      0.255,
+      0.302
+     ],
+     "n": 1000,
+     "median_driver_avoids": false
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Full AV logs incl. ego speed trace",
+     "why": "Ego speed swings P(avoid) by 0.774; needs a second source"
+    },
+    {
+     "item": "Telematics/dashcam speed corroboration",
+     "why": "Independent check on ego speed and lead decel"
+    },
+    {
+     "item": "AV decision log contents",
+     "why": "Explain 2.2 s detection-to-brake delay"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'pull_logs_first': human claims handler to review"
+  },
+  {
+   "claim_id": "SYN-7-006",
+   "source": "insurance_synthetic",
+   "source_label": "synthetic UK claim (insurance team generator)",
+   "synthetic": true,
+   "crash_type": "lead_vehicle_decel",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": 4990.0,
+   "triage_value_gbp": 1618.0,
+   "triage_p_avoid_mid": 1.0,
+   "summary": "Synthetic lead-braking claim, Slight injury, \u00a34,990 paid. Reproduction FAILED (0 of 400 runs crash): on the bundle's own numbers the AV stops about 5 m short, and the lead decel exceeds the mu limit. P(avoid) of 0.997\u20131.0 for both A and B is therefore not meaningful. Engine says pull_logs_first. Recovery after debate is \u00a3-6.8k to \u00a31.6k. Legal costs could exceed the claim value. Confirm a collision occurred before spending more.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "pull_logs_first",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -6826.464233766405,
+    "mid": -2597.5,
+    "high": 1618.0
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": false,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Impact speed and vehicle damage/contact evidence",
+     "why": "Bundle numbers imply no collision (AV stops ~5 m short); need confirmation a collision occurred"
+    },
+    {
+     "item": "Full AV logs (gap, timing, decel trace)",
+     "why": "Reported lead decel 7.0 exceeds mu 0.7 limit; inputs internally inconsistent"
+    },
+    {
+     "item": "CCTV / police report",
+     "why": "Engine lists both as missing evidence"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'pull_logs_first': human claims handler to review"
+  },
+  {
+   "claim_id": "01_av_late_detection",
+   "source": "insurance_example",
+   "source_label": "synthetic example bundle (insurance team)",
+   "synthetic": true,
+   "crash_type": null,
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 1426.0,
+   "triage_p_avoid_mid": 1.0,
+   "summary": "Synthetic claim. AV ran into a stationary vehicle at 13.4 m/s after detecting it 1.8 s late. Reproduction is moderate (rate about 0.66). Careful-driver models A and B agree: P(avoid) 0.997\u20131.0. Engine says pursue, but the margin is small. After debate, expected recovery is \u00a3-9.9k to \u00a34.4k (mid \u00a3239). Claim value comes from the tariff because no paid amount is given. Start with a pre-action letter only and avoid trial. Limitation deadline 2029-03-01.",
+   "team_decision": "pursue",
+   "engine_decision": "pursue",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -9893.275919654967,
+    "mid": 238.7750000000001,
+    "high": 4417.4
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Paid amount and medical records",
+     "why": "Claim value currently from whiplash tariff estimate, not claim file"
+    },
+    {
+     "item": "Injured party conduct evidence (CCTV, witnesses)",
+     "why": "Contributory negligence unassessed; 50% would push central case negative"
+    },
+    {
+     "item": "AV perception log and decel trace",
+     "why": "Explain 1.8 s detection delay; sim only partly reproduces AV braking"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "04_handover_too_short",
+   "source": "insurance_example",
+   "source_label": "synthetic example bundle (insurance team)",
+   "synthetic": true,
+   "crash_type": null,
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 1426.0,
+   "triage_p_avoid_mid": 1.0,
+   "summary": "Synthetic claim. Physical data is cloned from claim 01, so careful-driver models A and B agree: P(avoid) 0.997\u20131.0. Reproduction is moderate (about 0.66). A handover demand came only 3.0 s before the crash, and the system stayed in control. Engine: tech company liable (medium confidence) because the handover warning was too short. After debate, expected recovery is \u00a3-9.3k to \u00a34.4k (mid \u00a3595). The margin is thin. Pre-action letter only.",
+   "team_decision": "pursue",
+   "engine_decision": "pursue",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -9274.998695551456,
+    "mid": 595.0625,
+    "high": 4417.4
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Handover demand modality and HMI log",
+     "why": "Liability rests on 3.0 s demand being inadequate; need how it was presented"
+    },
+    {
+     "item": "Injured party conduct (position, seatbelt, warnings)",
+     "why": "Contributory negligence unassessed; 35% would push central case negative"
+    },
+    {
+     "item": "Paid amount and medical records",
+     "why": "Claim value is a tariff estimate"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "07_outside_odd",
+   "source": "insurance_example",
+   "source_label": "synthetic example bundle (insurance team)",
+   "synthetic": true,
+   "crash_type": null,
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 1426.0,
+   "triage_p_avoid_mid": 1.0,
+   "summary": "Synthetic claim. Physical data is cloned from claim 01, and careful-driver models A and B agree: P(avoid) 0.997\u20131.0. Reproduction is moderate (about 0.66). The AV stayed in automated mode outside its ODD with no handover. Engine says pull_logs_first, noting the recovery target may be the operator rather than the manufacturer. Recovery after debate is \u00a3-9.9k to \u00a34.4k (mid \u00a3239), so the range straddles zero.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "pull_logs_first",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -9893.275919654967,
+    "mid": 238.7750000000001,
+    "high": 4417.4
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "ODD breach details and system ODD-monitoring log",
+     "why": "Which condition was breached and why the system stayed engaged; determines whether operator or manufacturer is the recovery target"
+    },
+    {
+     "item": "Operator/authorisation records",
+     "why": "Engine flags recovery target may be the operator, not the manufacturer"
+    },
+    {
+     "item": "Paid amount and injured party conduct evidence",
+     "why": "Claim value is tariff-estimated; contributory negligence unassessed"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'pull_logs_first': human claims handler to review"
+  },
+  {
+   "claim_id": "10_critical_fault",
+   "source": "insurance_example",
+   "source_label": "synthetic example bundle (insurance team)",
+   "synthetic": true,
+   "crash_type": null,
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 1426.0,
+   "triage_p_avoid_mid": 1.0,
+   "summary": "Synthetic claim. Physical data is cloned from claim 01, and careful-driver models A and B agree: P(avoid) 0.997\u20131.0. A critical LIDAR_FRONT_DEGRADED fault came 4 s before the crash with no logged system response. Engine: tech company liable (medium confidence). Decision pursue, but CONTESTED: defence argued unassessed contributory negligence would flip it to pull_logs_first, so a human must review. Expected recovery \u00a3-12.0k to \u00a34.4k (mid \u00a31.4k). Pre-action letter only.",
+   "team_decision": "pursue",
+   "engine_decision": "pursue",
+   "contested": true,
+   "expected_recovery_gbp": {
+    "low": -11954.2,
+    "mid": 1426.4,
+    "high": 4417.4
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Fault-handling log and LIDAR diagnostic data",
+     "why": "Establish whether the critical fault caused the late detection and why no degraded-mode response was logged"
+    },
+    {
+     "item": "Injured party conduct (seatbelt, movements)",
+     "why": "Contributory negligence unassessed; 25\u201350% would flip central case negative (contested point)"
+    },
+    {
+     "item": "Paid amount and medical records",
+     "why": "Claim value is tariff-estimated"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "13_unapproved_software",
+   "source": "insurance_example",
+   "source_label": "synthetic example bundle (insurance team)",
+   "synthetic": true,
+   "crash_type": null,
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 1426.0,
+   "triage_p_avoid_mid": 1.0,
+   "summary": "Synthetic claim. Physical data is cloned from claim 01, and careful-driver models A and B agree: P(avoid) 0.997\u20131.0. The vehicle ran unapproved software 9.9.9-dev rather than approved 2.4.1. Engine: tech company liable (medium confidence). Decision pursue, CONTESTED on unassessed contributory negligence, so a human must review. Confirm who installed the software before issuing (AEVA s.4). Expected recovery \u00a3-12.0k to \u00a34.4k (mid \u00a31.4k). Pre-action letter only.",
+   "team_decision": "pursue",
+   "engine_decision": "pursue",
+   "contested": true,
+   "expected_recovery_gbp": {
+    "low": -11954.2,
+    "mid": 1426.4,
+    "high": 4417.4
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Software installation/update history",
+     "why": "Confirm who installed 9.9.9-dev; insured alteration could defeat recovery (AEVA s.4)"
+    },
+    {
+     "item": "Injured party conduct (account, seatbelt, position)",
+     "why": "Contributory negligence unassessed; contested point that could flip decision"
+    },
+    {
+     "item": "Paid amount and medical records",
+     "why": "Claim value is tariff-estimated"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "17_cut_in_avoidable",
+   "source": "insurance_example",
+   "source_label": "synthetic example bundle (insurance team)",
+   "synthetic": true,
+   "crash_type": "cut_in",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 1426.0,
+   "triage_p_avoid_mid": 1.0,
+   "summary": "Synthetic cut-in claim, cloned from claim 21 with Slight injury. Reproduction FAILED because AV brake escalation is not modelled. Careful-driver models A and B agree: P(avoid) 0.997\u20131.0, but confidence is low. Engine says pull_logs_first. Recovery after debate is \u00a3-9.9k to \u00a34.4k (mid \u00a3239), so the range straddles zero. The cut-in driver may share blame, and the injured party is not identified.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "pull_logs_first",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -9893.275919654967,
+    "mid": 238.7750000000001,
+    "high": 4417.4
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": false,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Full AV logs incl. deceleration trace",
+     "why": "Simulator did not reproduce crash (brake escalation not modelled)"
+    },
+    {
+     "item": "Identity of injured party and cut-in vehicle conduct",
+     "why": "Cut-in driver may bear contributory negligence"
+    },
+    {
+     "item": "CCTV/witness evidence on cut-in timing; paid amount",
+     "why": "Cut-in timing from narrative/prior; claim value tariff-estimated"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'pull_logs_first': human claims handler to review"
+  },
+  {
+   "claim_id": "20_s3_2_engaged_when_inappropriate",
+   "source": "insurance_example",
+   "source_label": "synthetic example bundle (insurance team)",
+   "synthetic": true,
+   "crash_type": null,
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 1426.0,
+   "triage_p_avoid_mid": 1.0,
+   "summary": "Synthetic claim. Physical data is cloned from claim 01, and careful-driver models A and B agree: P(avoid) 0.997\u20131.0. The bundle flags engaged_when_inappropriate=true but gives no actor, reason or timestamp. The engine's pricing does not account for AEVA s.3(2). Engine says pursue, with expected recovery \u00a3-9.9k to \u00a34.4k (mid \u00a3239). The team holds the claim pending engagement facts and the injured party's identity, which a handler should review.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "pursue",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -9893.275919654967,
+    "mid": 238.7750000000001,
+    "high": 4417.4
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Engagement log: who engaged automation at t=40 and why it was inappropriate",
+     "why": "engaged_when_inappropriate=true is a bare flag; AEVA s.3(2) may bear on the insurer's liability and the recovery, but the engine's pricing does not reflect it"
+    },
+    {
+     "item": "Identity of injured party (user-in-charge or third party)",
+     "why": "s.3(2) applies to the person in charge; determines whether the payment and recovery are affected"
+    },
+    {
+     "item": "Paid amount and injured party conduct evidence",
+     "why": "Claim value tariff-estimated; contributory negligence unassessed"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'pursue': human claims handler to review"
+  },
+  {
+   "claim_id": "tgsim_cut_in_9_1155",
+   "source": "tgsim_near_miss",
+   "source_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+   "synthetic": true,
+   "crash_type": "cut_in",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 1426.0,
+   "triage_p_avoid_mid": 1.0,
+   "summary": "Real FHWA TGSIM near miss in a synthetic claim wrapper. The source records no collision (min TTC 1.46 s, min gap 17.2 m). The collision, injury and AV data are hypothetical. Reproduction FAILED (0 crashes). P(avoid) of 0.997\u20131.0 for both A and B is trivially true. Engine says pull_logs_first, with recovery \u00a3-12.0k to \u00a34.4k (mid \u00a31.4k), but that pricing assumes a collision. This is not a viable recovery claim unless a real collision is evidenced.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "pull_logs_first",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -11954.2,
+    "mid": 1426.4,
+    "high": 4417.4
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": false,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Confirmation that a collision occurred (police report, damage evidence)",
+     "why": "Source FHWA data records a near miss with no collision; wrapper collision/injury are hypothetical"
+    },
+    {
+     "item": "AV planning/decision log and control inputs",
+     "why": "None in bundle; engine lists as missing"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'pull_logs_first': human claims handler to review"
+  },
+  {
+   "claim_id": "tgsim_cut_in_3_789",
+   "source": "tgsim_near_miss",
+   "source_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+   "synthetic": true,
+   "crash_type": "cut_in",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 1426.0,
+   "triage_p_avoid_mid": 1.0,
+   "summary": "Real FHWA TGSIM near miss in a synthetic wrapper. No collision was recorded (min TTC 1.99 s, min gap 13.5 m), and the gap was opening. The collision, injury and AV data are hypothetical. Reproduction FAILED (0 crashes). P(avoid) of 0.997\u20131.0 for both A and B is trivially true. Engine says pull_logs_first, with recovery \u00a3-9.9k to \u00a34.4k (mid \u00a3239), but that pricing assumes a crash. Not viable without collision evidence.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "pull_logs_first",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -9893.275919654967,
+    "mid": 238.7750000000001,
+    "high": 4417.4
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": false,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Confirmation that a collision occurred (police report, damage evidence)",
+     "why": "Source FHWA data records a near miss, no collision; gap was opening"
+    },
+    {
+     "item": "AV planning/decision log and control inputs",
+     "why": "None in bundle; engine lists as missing"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'pull_logs_first': human claims handler to review"
+  },
+  {
+   "claim_id": "tgsim_cut_in_2_4903",
+   "source": "tgsim_near_miss",
+   "source_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+   "synthetic": true,
+   "crash_type": "cut_in",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 1426.0,
+   "triage_p_avoid_mid": 1.0,
+   "summary": "Real FHWA TGSIM near miss in a synthetic wrapper. No collision was recorded (min TTC 1.38 s, min gap 4.7 m). The sim reproduced a crash (rate about 0.93\u20130.95), but only from assumed AV behaviour. P(avoid): A 0.974\u20130.988, B 0.997\u20131.0. Engine says pursue, with recovery \u00a3-9.9k to \u00a34.4k (mid \u00a3239), but the collision itself is unsupported, so the team holds the claim pending collision evidence and AV logs. A handler should review.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "pursue",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -9893.275919654967,
+    "mid": 238.7750000000001,
+    "high": 4417.4
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Confirmation that a collision occurred (police report, damage evidence)",
+     "why": "Source FHWA data records a near miss (min gap 4.7 m), no collision; wrapper crash is hypothetical"
+    },
+    {
+     "item": "AV planning/decision log and control inputs",
+     "why": "Sim crash relies on assumed AV behaviour; no logs exist in bundle"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'pursue': human claims handler to review"
+  },
+  {
+   "claim_id": "tgsim_cut_in_4_1052",
+   "source": "tgsim_near_miss",
+   "source_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+   "synthetic": true,
+   "crash_type": "cut_in",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 1387.0,
+   "triage_p_avoid_mid": 0.992,
+   "summary": "Real FHWA TGSIM near miss in a synthetic wrapper. No collision was recorded (min TTC 0.98 s, min gap 1.35 m), and the gap was opening. Reproduction FAILED (rate about 0.23). P(avoid): A 0.983\u20130.994, B 0.997\u20131.0. Engine says pull_logs_first, with recovery \u00a3-9.1k to \u00a34.4k (mid \u00a3714), but that pricing assumes a crash. Not viable without collision evidence.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "pull_logs_first",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -9068.906287516951,
+    "mid": 713.8249999999998,
+    "high": 4417.4
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": false,
+   "repro_attempts": 2,
+   "evidence_requests": [
+    {
+     "item": "Confirmation that a collision occurred (police report, damage evidence)",
+     "why": "Source FHWA data records a near miss (min gap 1.35 m), no collision; gap was opening"
+    },
+    {
+     "item": "AV planning/decision log; measured cut-in duration",
+     "why": "No AV logs in bundle; cut-in duration is a prior and the key fact per the analyst"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'pull_logs_first': human claims handler to review"
+  },
+  {
+   "claim_id": "tgsim_cut_in_4_4171",
+   "source": "tgsim_near_miss",
+   "source_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+   "synthetic": true,
+   "crash_type": "cut_in",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 1387.0,
+   "triage_p_avoid_mid": 0.992,
+   "summary": "Real FHWA TGSIM near miss in a synthetic wrapper, from the same run as 4_1052. No collision was recorded (min TTC 1.39 s, min gap 1.22 m), and the gap was opening. Reproduction FAILED (rate about 0.09). P(avoid): A 0.987\u20130.996, B 0.997\u20131.0. Engine says pull_logs_first, with recovery \u00a3-9.9k to \u00a34.4k (mid \u00a3226), but that pricing assumes a crash. Not viable without collision evidence.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "pull_logs_first",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -9914.276611030784,
+    "mid": 226.3049374999996,
+    "high": 4417.4
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 0.993,
+     "ci90": [
+      0.987,
+      0.996
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": false,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Confirmation that a collision occurred (police report, damage evidence)",
+     "why": "Source FHWA data records a near miss (min gap 1.22 m), no collision; gap was opening"
+    },
+    {
+     "item": "AV planning/decision log",
+     "why": "No AV logs in bundle; engine lists as missing"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'pull_logs_first': human claims handler to review"
+  },
+  {
+   "claim_id": "tgsim_cut_in_3_5800",
+   "source": "tgsim_near_miss",
+   "source_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+   "synthetic": true,
+   "crash_type": "cut_in",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 1347.0,
+   "triage_p_avoid_mid": 0.983,
+   "summary": "Real FHWA TGSIM near miss in a synthetic wrapper. No collision was recorded (min TTC 1.92 s, min gap 2.2 m). Reproduction is borderline: rate 0.42\u20130.50, flagged as failed by the analyst. P(avoid): A 0.921\u20130.989, but A's median driver does not avoid; B 0.997\u20131.0. Engine says pursue, with recovery \u00a3-10.1k to \u00a34.4k (mid \u00a3123), but the collision is unsupported. Held for a handler to review.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "pursue",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -10051.021912500024,
+    "mid": 122.98156250000011,
+    "high": 4417.4
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 0.935,
+     "ci90": [
+      0.921,
+      0.947
+     ],
+     "n": 1000,
+     "median_driver_avoids": false
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Confirmation that a collision occurred (police report, damage evidence)",
+     "why": "Source FHWA data records a near miss (min gap 2.2 m), no collision"
+    },
+    {
+     "item": "AV planning/decision log; measured gap and ego speed",
+     "why": "Reproduction borderline (~0.50); careful driver A's median driver does not avoid"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'pursue': human claims handler to review"
+  },
+  {
+   "claim_id": "tgsim_cut_in_6_2807",
+   "source": "tgsim_near_miss",
+   "source_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+   "synthetic": true,
+   "crash_type": "cut_in",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 1347.0,
+   "triage_p_avoid_mid": 0.983,
+   "summary": "Real FHWA TGSIM near miss in a synthetic wrapper. No collision was recorded (min TTC 2.35 s, min gap 3.7 m). The sim crash (rate about 0.81) relies on assumed AV behaviour. P(avoid): A 0.966\u20130.982, B 0.997\u20131.0. Engine says pursue, with recovery \u00a3-9.9k to \u00a34.4k (mid \u00a3239), but the collision is unsupported, so the team holds it pending collision evidence. A handler should review.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "pursue",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -9893.275919654967,
+    "mid": 238.7750000000001,
+    "high": 4417.4
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Confirmation that a collision occurred (police report, damage evidence)",
+     "why": "Source FHWA data records a near miss (min gap 3.7 m), no collision"
+    },
+    {
+     "item": "AV planning/decision log; measured cut-in duration",
+     "why": "Sim crash relies on assumed AV behaviour; cut-in duration is a prior"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'pursue': human claims handler to review"
+  },
+  {
+   "claim_id": "tgsim_cut_in_1_7009",
+   "source": "tgsim_near_miss",
+   "source_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+   "synthetic": true,
+   "crash_type": "cut_in",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 1308.0,
+   "triage_p_avoid_mid": 0.975,
+   "summary": "Real FHWA TGSIM near miss in a synthetic wrapper, in slow traffic. No collision was recorded (min TTC 1.35 s, min gap 1.36 m), and the gap was opening. Reproduction FAILED (rate about 0.13). P(avoid): A 0.97\u20130.985, B 0.986\u20130.995. Engine says pull_logs_first, with recovery \u00a3-12.0k to \u00a32.0k (mid \u00a3-3.0k) after debate raised the legal-cost floor. Not viable without collision evidence.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "pull_logs_first",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -11954.2,
+    "mid": -2957.53225,
+    "high": 2019.6719054609243
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 0.979,
+     "ci90": [
+      0.97,
+      0.985
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 0.992,
+     "ci90": [
+      0.986,
+      0.995
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": false,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Confirmation that a collision occurred (police report, damage evidence)",
+     "why": "Source FHWA data records a near miss (min gap 1.36 m), no collision; gap was opening"
+    },
+    {
+     "item": "AV planning/decision log; measured cut-in duration",
+     "why": "No AV logs; cut-in duration is a prior"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'pull_logs_first': human claims handler to review"
+  },
+  {
+   "claim_id": "tgsim_cut_in_2_7484",
+   "source": "tgsim_near_miss",
+   "source_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+   "synthetic": true,
+   "crash_type": "cut_in",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 1308.0,
+   "triage_p_avoid_mid": 0.975,
+   "summary": "Real FHWA TGSIM near miss in a synthetic wrapper. No collision was recorded (min TTC 1.99 s, min gap 2.2 m). The sim crash (rate about 0.90) relies on assumed AV behaviour. P(avoid): A 0.939\u20130.961, B 0.997\u20131.0. Engine says pursue, with recovery \u00a3-9.0k to \u00a34.4k (mid \u00a3731), but the collision is unsupported, so the team holds it pending collision evidence. A handler should review.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "pursue",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -9045.072003117615,
+    "mid": 730.7486562500003,
+    "high": 4417.4
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 0.951,
+     "ci90": [
+      0.939,
+      0.961
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Confirmation that a collision occurred (police report, damage evidence)",
+     "why": "Source FHWA data records a near miss (min gap 2.2 m), no collision"
+    },
+    {
+     "item": "AV planning/decision log; measured ego speed and cut-in duration",
+     "why": "Sim crash relies on assumed AV behaviour; ego speed swings P(avoid) by 0.226"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'pursue': human claims handler to review"
+  },
+  {
+   "claim_id": "tgsim_cut_in_4_596",
+   "source": "tgsim_near_miss",
+   "source_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+   "synthetic": true,
+   "crash_type": "cut_in",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 1268.0,
+   "triage_p_avoid_mid": 0.967,
+   "summary": "Real FHWA TGSIM near miss in a synthetic wrapper. This is the third claim from run 4. No collision was recorded (min TTC 2.13 s, min gap 3.2 m). Reproduction is borderline (0.475\u20130.525). P(avoid): A 0.943\u20130.975, B 0.996\u20131.0. Engine says pursue, with recovery \u00a3-10.0k to \u00a34.4k (mid \u00a3157), but the collision is unsupported, so the team holds it pending evidence. A handler should review.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "pursue",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -10005.626461893165,
+    "mid": 156.82887500000015,
+    "high": 4416.20227120588
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 0.955,
+     "ci90": [
+      0.943,
+      0.965
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 0.999,
+     "ci90": [
+      0.996,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Confirmation that a collision occurred (police report, damage evidence)",
+     "why": "Source FHWA data records a near miss (min gap 3.2 m), no collision"
+    },
+    {
+     "item": "AV planning/decision log; measured ego speed and cut-in duration",
+     "why": "Reproduction borderline (0.475\u20130.525); ego speed swings P(avoid) by 0.236"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'pursue': human claims handler to review"
+  },
+  {
+   "claim_id": "SYN-7-026",
+   "source": "insurance_synthetic",
+   "source_label": "synthetic UK claim (insurance team generator)",
+   "synthetic": true,
+   "crash_type": "lead_vehicle_decel",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": 4540.0,
+   "triage_value_gbp": 1258.0,
+   "triage_p_avoid_mid": 1.0,
+   "summary": "Synthetic lead-braking claim, Slight injury, \u00a34,540 paid. Reproduction FAILED (0 crashes). On the bundle's own numbers the AV stops about 3 m short, and the brake is logged before detection, the same pattern as SYN-7-006. P(avoid) of 0.997\u20131.0 for both A and B is not meaningful. Engine says pull_logs_first. Recovery after debate is \u00a3-7.1k to \u00a31.3k (mid \u00a3-2.9k). Confirm a collision occurred before spending more.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "pull_logs_first",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -7095.250024308513,
+    "mid": -2912.5,
+    "high": 1258.0
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": false,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Impact speed and vehicle damage/contact evidence",
+     "why": "Bundle kinematics imply AV stops ~3 m short; collision not supported"
+    },
+    {
+     "item": "Full AV logs with corrected brake and detection timestamps",
+     "why": "Brake input (999.0) logged before first detection (999.22)"
+    },
+    {
+     "item": "Police report and witness statements",
+     "why": "Listed in bundle; independent confirmation of collision"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'pull_logs_first': human claims handler to review"
+  },
+  {
+   "claim_id": "tgsim_cut_in_5_436",
+   "source": "tgsim_near_miss",
+   "source_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+   "synthetic": true,
+   "crash_type": "cut_in",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 1189.0,
+   "triage_p_avoid_mid": 0.95,
+   "summary": "Real FHWA TGSIM near miss in a synthetic wrapper. No collision was recorded (min TTC 2.05 s, min gap 1.9 m), and the gap was opening. Reproduction FAILED (rate about 0.17). P(avoid): A 0.947\u20130.968, B 0.978\u20130.991. Engine says pull_logs_first, with recovery \u00a3-12.0k to \u00a34.4k (mid \u00a31.3k), but that pricing assumes a crash. Not viable without collision evidence.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "pull_logs_first",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -11954.2,
+    "mid": 1295.76125,
+    "high": 4368.717303717327
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 0.959,
+     "ci90": [
+      0.947,
+      0.968
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 0.986,
+     "ci90": [
+      0.978,
+      0.991
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": false,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Confirmation that a collision occurred (police report, damage evidence)",
+     "why": "Source FHWA data records a near miss (min gap 1.9 m), no collision; gap was opening"
+    },
+    {
+     "item": "AV planning/decision log; measured cut-in duration and ego speed",
+     "why": "No AV logs; ego speed swings P(avoid) by 0.236"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'pull_logs_first': human claims handler to review"
+  },
+  {
+   "claim_id": "tgsim_cut_in_2_4250",
+   "source": "tgsim_near_miss",
+   "source_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+   "synthetic": true,
+   "crash_type": "cut_in",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 1189.0,
+   "triage_p_avoid_mid": 0.95,
+   "summary": "Real FHWA TGSIM near miss in a synthetic wrapper. No collision was recorded (min TTC 2.39 s, min gap 3.4 m). Ego speed is an outlier: about 20 m/s with a 5.4 m gap. The sim crash (rate about 0.84) relies on assumed AV behaviour. P(avoid): A 0.879\u20130.911, B 0.996\u20131.0. Engine says pursue, with recovery \u00a3-9.2k to \u00a34.4k (mid \u00a3614), but the collision is unsupported, so the team holds it. A handler should review.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "pursue",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -9229.399189442705,
+    "mid": 614.3614062500001,
+    "high": 4416.20227120588
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 0.896,
+     "ci90": [
+      0.879,
+      0.911
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 0.999,
+     "ci90": [
+      0.996,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Confirmation that a collision occurred (police report, damage evidence)",
+     "why": "Source FHWA data records a near miss (min gap 3.4 m), no collision"
+    },
+    {
+     "item": "Verified ego speed and gap; AV planning log",
+     "why": "Ego speed ~20 m/s with 5.4 m gap is an outlier; swings P(avoid) by 0.37; no AV logs"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'pursue': human claims handler to review"
+  },
+  {
+   "claim_id": "SYN-7-019",
+   "source": "insurance_synthetic",
+   "source_label": "synthetic UK claim (insurance team generator)",
+   "synthetic": true,
+   "crash_type": "lead_vehicle_decel",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": 4380.0,
+   "triage_value_gbp": 1130.0,
+   "triage_p_avoid_mid": 1.0,
+   "summary": "Synthetic lead-braking claim, Slight injury, \u00a34,380 paid. The AV braked 1.58 s after detecting the lead braking hard. Reproduction FAILED (rate about 0.30): on the bundle's own numbers the AV stops about 0.8 m short, so the crash is marginal. P(avoid) of 0.997\u20131.0 for both A and B may be an artefact. Engine says pull_logs_first. Recovery after debate is \u00a3-7.2k to \u00a31.1k (mid \u00a3-3.0k).",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "pull_logs_first",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -7190.818305390151,
+    "mid": -3024.5,
+    "high": 1130.0
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": false,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Impact speed and vehicle damage/contact evidence",
+     "why": "Bundle kinematics imply AV stops ~0.8 m short; collision marginal"
+    },
+    {
+     "item": "Full AV logs (gap, brake/detection timestamps, lead decel)",
+     "why": "AV braked 1.58 s after detection; lead decel 6.9 exceeds mu limit"
+    },
+    {
+     "item": "Police report / CCTV",
+     "why": "Independent confirmation; engine lists CCTV missing"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'pull_logs_first': human claims handler to review"
+  },
+  {
+   "claim_id": "15_lead_braking_avoidable",
+   "source": "insurance_example",
+   "source_label": "synthetic example bundle (insurance team)",
+   "synthetic": true,
+   "crash_type": "lead_braking",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 1070.0,
+   "triage_p_avoid_mid": 0.925,
+   "summary": "Synthetic lead-braking claim, cloned from claim 22 with Slight injury. Reproduction FAILED because AV brake escalation is not modelled. P(avoid): A 0.997\u20131.0, B 0.856\u20130.89. Engine says pull_logs_first. Expected recovery \u00a3-12.0k to \u00a34.4k (mid \u00a31.1k), so the range straddles zero. Contributory negligence is unassessed. Limitation deadline 2029-03-01.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "pull_logs_first",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -11954.2,
+    "mid": 1127.1185,
+    "high": 4417.4
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 0.874,
+     "ci90": [
+      0.856,
+      0.89
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": false,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Full AV logs incl. ego speed trace and actual deceleration",
+     "why": "Simulator did not reproduce crash (brake escalation not modelled); ego speed swings P(avoid) by 0.594"
+    },
+    {
+     "item": "Perception log",
+     "why": "Lead detected 1.8 s after braking onset"
+    },
+    {
+     "item": "Paid amount and medical records",
+     "why": "Claim value tariff-estimated"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'pull_logs_first': human claims handler to review"
+  },
+  {
+   "claim_id": "SYN-7-029",
+   "source": "insurance_synthetic",
+   "source_label": "synthetic UK claim (insurance team generator)",
+   "synthetic": true,
+   "crash_type": "lead_vehicle_decel",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": 4280.0,
+   "triage_value_gbp": 1050.0,
+   "triage_p_avoid_mid": 1.0,
+   "summary": "Synthetic lead-braking claim in rain, Slight injury, \u00a34,280 paid. The sim reproduced the crash only because the reported lead decel of 6.7 exceeds the mu 0.4 limit; at a credible decel the AV stops about 4 m short. P(avoid) is 0.997\u20131.0 for both A and B. Engine says pursue, CONTESTED (defence argued trial costs would flip it to dont_pursue). Expected recovery \u00a3-7.3k to \u00a33.3k (mid \u00a31.1k). The team holds it pending evidence on the lead's deceleration.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "pursue",
+   "contested": true,
+   "expected_recovery_gbp": {
+    "low": -7250.548481066176,
+    "mid": 1050.0,
+    "high": 3300.0
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.4)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.4)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Lead vehicle's true deceleration (CCTV street_cam, telematics)",
+     "why": "Reported 6.7 m/s\u00b2 exceeds mu 0.4 limit (~3.9); at credible decel no collision occurs"
+    },
+    {
+     "item": "Impact speed, damage evidence, corrected crash timestamp",
+     "why": "Kinematics put contact ~1 s after logged crash time"
+    },
+    {
+     "item": "AV logs (brake/detection timestamps)",
+     "why": "AV braked 1.69 s after detection"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'pursue': human claims handler to review"
+  },
+  {
+   "claim_id": "SYN-7-013",
+   "source": "insurance_synthetic",
+   "source_label": "synthetic UK claim (insurance team generator)",
+   "synthetic": true,
+   "crash_type": "lead_vehicle_decel",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": 4260.0,
+   "triage_value_gbp": 1034.0,
+   "triage_p_avoid_mid": 1.0,
+   "summary": "Synthetic lead-braking claim, dark but lit, Slight injury, \u00a34,260 paid. Clean reconstruction (rate 1.0) with consistent kinematics. The AV detected the lead braking 1.45 s late and braked 0.55 s after that. Careful-driver models A and B agree: P(avoid) 0.997\u20131.0. Engine says pursue, CONTESTED (defence argued trial costs would flip it to dont_pursue), so a handler must review. Expected recovery \u00a3-7.3k to \u00a33.3k (mid \u00a31.0k). Pre-action letter only.",
+   "team_decision": "pursue",
+   "engine_decision": "pursue",
+   "contested": true,
+   "expected_recovery_gbp": {
+    "low": -7262.49451620138,
+    "mid": 1034.0,
+    "high": 3284.0
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Real legal cost estimate",
+     "why": "Legal cost (\u00a3976\u2013\u00a311,511) is comparable to claim value; contested point"
+    },
+    {
+     "item": "AV perception log and street_cam CCTV",
+     "why": "Explain 1.45 s detection delay in dark-lit conditions; confirm lead braking"
+    },
+    {
+     "item": "Impact speed and medical records",
+     "why": "Severity not checked"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "SYN-7-020",
+   "source": "insurance_synthetic",
+   "source_label": "synthetic UK claim (insurance team generator)",
+   "synthetic": true,
+   "crash_type": "lead_vehicle_decel",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": 5260.0,
+   "triage_value_gbp": 914.0,
+   "triage_p_avoid_mid": 0.825,
+   "summary": "Synthetic lead-braking claim, Slight injury, \u00a35,260 paid. Reproduced robustly. The AV detected the lead only after it had stopped, 1.84 s after onset. Careful-driver models DISAGREE: A 0.62\u20130.669, B 0.997\u20131.0. Engine liability is NEEDS_REVIEW (low confidence) and the decision is pull_logs_first. Recovery after debate is \u00a3-8.7k to \u00a32.1k (mid \u00a3-33). Ego speed is the decisive fact.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "pull_logs_first",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -8651.117711773906,
+    "mid": -33.29999999999973,
+    "high": 2140.401811535975
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 0.645,
+     "ci90": [
+      0.62,
+      0.669
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Full AV logs incl. ego speed trace",
+     "why": "Ego speed swings P(avoid) by 0.914; careful-driver models disagree"
+    },
+    {
+     "item": "Telematics/video corroboration of ego speed and lead braking onset",
+     "why": "Independent check; engine lists CCTV missing"
+    },
+    {
+     "item": "Corrected crash timestamp and impact speed",
+     "why": "Kinematics put contact ~0.56 s before logged time"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'pull_logs_first': human claims handler to review"
+  },
+  {
+   "claim_id": "tgsim_cut_in_5_3275",
+   "source": "tgsim_near_miss",
+   "source_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+   "synthetic": true,
+   "crash_type": "cut_in",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 793.0,
+   "triage_p_avoid_mid": 0.867,
+   "summary": "Real FHWA TGSIM near miss in a synthetic wrapper, in crawling traffic. No collision was recorded (min TTC 2.10 s, min gap 1.36 m). Reproduction is borderline (0.44\u20130.51). P(avoid): A 0.784\u20130.996, B 0.895\u20131.0, depending on tier. Engine says pursue, with recovery \u00a3-9.3k to \u00a34.4k (mid \u00a3581), but the collision is unsupported, so the team holds it. A handler should review.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "pursue",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -9302.29959434002,
+    "mid": 581.3454312499998,
+    "high": 4417.4
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 0.993,
+     "ci90": [
+      0.987,
+      0.996
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Confirmation that a collision occurred (police report, damage evidence)",
+     "why": "Source FHWA data records a near miss (min gap 1.36 m), no collision"
+    },
+    {
+     "item": "AV planning log; measured ego speed and cut-in duration",
+     "why": "Reproduction borderline (0.44\u20130.51); ego speed swings P(avoid) by 0.598"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'pursue': human claims handler to review"
+  },
+  {
+   "claim_id": "tgsim_cut_in_3_5487",
+   "source": "tgsim_near_miss",
+   "source_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+   "synthetic": true,
+   "crash_type": "cut_in",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 555.0,
+   "triage_p_avoid_mid": 0.817,
+   "summary": "Real FHWA TGSIM near miss at walking pace (about 1 m/s), in a synthetic wrapper. No collision was recorded (min gap 0.85 m). Reproduction is borderline (0.535\u20130.63). P(avoid): A 0.717\u20130.907, B 0.841\u20130.995. Engine says dont_pursue: once trial-band costs were accepted (scripted debate, budget reached), recovery is \u00a3-12.0k to \u00a3-6.6k (mid \u00a3-7.5k). The team agrees, since the collision is unsupported.",
+   "team_decision": "dont_pursue",
+   "engine_decision": "dont_pursue",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -11954.2,
+    "mid": -7481.60425,
+    "high": -6614.346666639597
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 0.892,
+     "ci90": [
+      0.875,
+      0.907
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 0.991,
+     "ci90": [
+      0.985,
+      0.995
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Confirmation that a collision occurred (police report, damage evidence)",
+     "why": "Source FHWA data records a walking-pace near miss (min gap 0.85 m), no collision; would be needed to reopen"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "tgsim_cut_in_1_2560",
+   "source": "tgsim_near_miss",
+   "source_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+   "synthetic": true,
+   "crash_type": "cut_in",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 318.0,
+   "triage_p_avoid_mid": 0.767,
+   "summary": "Real FHWA TGSIM near miss in a synthetic wrapper. No collision was recorded (min gap 2.2 m). The reconstruction is unreliable because the timeline check failed. P(avoid): A 0.506\u20130.661, B 0.814\u20130.88, and the models diverge at tier 2. Engine liability is NEEDS_REVIEW (low confidence). Engine says dont_pursue once trial costs were accepted (scripted debate): recovery \u00a3-12.0k to \u00a3-7.2k (mid \u00a3-8.4k). The team agrees.",
+   "team_decision": "dont_pursue",
+   "engine_decision": "dont_pursue",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -11954.2,
+    "mid": -8393.70025,
+    "high": -7230.851750010465
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 0.636,
+     "ci90": [
+      0.611,
+      0.661
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 0.863,
+     "ci90": [
+      0.844,
+      0.88
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Confirmation that a collision occurred and corrected crash time",
+     "why": "Source FHWA data records a near miss (min gap 2.2 m); timeline check failed (2.04 s closing vs 3.0 s reported)"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "tgsim_cut_in_5_5405",
+   "source": "tgsim_near_miss",
+   "source_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+   "synthetic": true,
+   "crash_type": "cut_in",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 318.0,
+   "triage_p_avoid_mid": 0.767,
+   "summary": "Real FHWA TGSIM near miss in a stop-start queue, in a synthetic wrapper. No collision was recorded (min gap 0.93 m). The sim crash relies on assumed AV behaviour. P(avoid): A 0.659\u20130.891, B 0.823\u20130.999. Engine says dont_pursue once trial costs were accepted (scripted debate): recovery \u00a3-12.0k to \u00a3-6.6k (mid \u00a3-7.5k). The team agrees, since the collision is unsupported.",
+   "team_decision": "dont_pursue",
+   "engine_decision": "dont_pursue",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -11954.2,
+    "mid": -7505.356750000001,
+    "high": -6589.753975259394
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 0.875,
+     "ci90": [
+      0.857,
+      0.891
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 0.998,
+     "ci90": [
+      0.994,
+      0.999
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Confirmation that a collision occurred (police report, damage evidence)",
+     "why": "Source FHWA data records a stop-start near miss (min gap 0.93 m), no collision; needed to reopen"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "tgsim_cut_in_3_883",
+   "source": "tgsim_near_miss",
+   "source_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+   "synthetic": true,
+   "crash_type": "cut_in",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 239.0,
+   "triage_p_avoid_mid": 0.75,
+   "summary": "Real FHWA TGSIM high-speed near miss (about 37 m/s) in a synthetic wrapper. No collision was recorded (min gap 13.1 m). The timeline check failed. Careful-driver models DISAGREE: A 0.52\u20130.689, B 0.98\u20131.0. Engine liability is NEEDS_REVIEW (low confidence). Engine says dont_pursue once trial costs were accepted (scripted debate): recovery \u00a3-12.0k to \u00a3-6.6k (mid \u00a3-8.0k). The team agrees, since the collision is unsupported.",
+   "team_decision": "dont_pursue",
+   "engine_decision": "dont_pursue",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -11954.2,
+    "mid": -7999.4087500000005,
+    "high": -6586.200000000001
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 0.665,
+     "ci90": [
+      0.64,
+      0.689
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Confirmation that a collision occurred and corrected crash time",
+     "why": "Source FHWA data records a near miss (min gap 13.1 m); timeline check failed (2.33 s closing vs 3.0 s reported)"
+    },
+    {
+     "item": "Measured cut-in duration",
+     "why": "Careful-driver models disagree; cut-in duration is the top sensitivity at tier 2"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "tgsim_cut_in_2_7560",
+   "source": "tgsim_near_miss",
+   "source_label": "real US traffic near-miss (FHWA TGSIM), synthetic claim wrapper",
+   "synthetic": true,
+   "crash_type": "cut_in",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 80.0,
+   "triage_p_avoid_mid": 0.717,
+   "summary": "Real FHWA TGSIM near miss in a synthetic wrapper. No collision was recorded (min gap 2.0 m). The timeline check failed, so the reconstruction is unreliable. P(avoid): A 0.562\u20130.853, B 0.828\u20131.0. Engine says dont_pursue once trial costs were accepted (scripted debate): recovery \u00a3-12.0k to \u00a3-6.6k (mid \u00a3-7.6k). The team agrees, since the collision is unsupported.",
+   "team_decision": "dont_pursue",
+   "engine_decision": "dont_pursue",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -11954.2,
+    "mid": -7595.616250000001,
+    "high": -6586.200000000001
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 0.835,
+     "ci90": [
+      0.815,
+      0.853
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Confirmation that a collision occurred and corrected crash time",
+     "why": "Source FHWA data records a near miss (min gap 2.0 m); timeline check failed (2.36 s closing vs 3.0 s reported)"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "02_human_driving_manual",
+   "source": "insurance_example",
+   "source_label": "synthetic example bundle (insurance team)",
+   "synthetic": true,
+   "crash_type": null,
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 0.0,
+   "triage_p_avoid_mid": 1.0,
+   "summary": "Synthetic claim cloned from claim 01, but a human was driving in manual mode throughout. The only input is a human full brake, 0.5 s after the sensors detected the obstacle. The engine's liability check points at the human driver (high confidence), so this is an ordinary motor claim with no recovery from the tech company, and it was not priced. The careful-driver comparison is not meaningful here. The legal block's AEVA s.5 route looks inconsistent with manual driving.",
+   "team_decision": "dont_pursue",
+   "engine_decision": null,
+   "contested": null,
+   "expected_recovery_gbp": null,
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": false,
+   "repro_attempts": 1,
+   "evidence_requests": [],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "03_handover_ignored_by_human",
+   "source": "insurance_example",
+   "source_label": "synthetic example bundle (insurance team)",
+   "synthetic": true,
+   "crash_type": null,
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 0.0,
+   "triage_p_avoid_mid": 1.0,
+   "summary": "Synthetic claim cloned from claim 01. A handover demand came 20 s before the crash. The user in charge did not respond and had eyes off the road. P(avoid) is 0.997\u20131.0 for both A and B. The engine assigns liability to the human driver (medium confidence), so there is no recovery from the tech company and it was not priced. Open point for the handler: the system stayed in control with no logged fallback after the unanswered demand.",
+   "team_decision": "dont_pursue",
+   "engine_decision": null,
+   "contested": null,
+   "expected_recovery_gbp": null,
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "System log of response to the unanswered handover demand (minimum-risk manoeuvre, speed reduction)",
+     "why": "System stayed automated and in control for 20 s after the demand with no logged fallback; could reopen recovery if a fallback was required"
+    },
+    {
+     "item": "Handover demand modality (HMI log)",
+     "why": "Establish whether the demand was adequately presented to an eyes-off-road user"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "05_unavoidable_close_cutin",
+   "source": "insurance_example",
+   "source_label": "synthetic example bundle (insurance team)",
+   "synthetic": true,
+   "crash_type": "cut_in",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 0.0,
+   "triage_p_avoid_mid": 0.0,
+   "summary": "Synthetic claim. A stationary hazard appeared 10 m ahead at 13.4 m/s. Reproduced (rate 1.0). Careful-driver models A and B agree: P(avoid) 0.0\u20130.003, since stopping needs about 13.1 m. Engine finds no driving fault (medium confidence) and says dont_pursue: recovery \u00a3-12.0k to \u00a3-0.9k (mid \u00a3-3.3k). Note for the handler: the AV's 0.5 s brake delay roughly doubled the impact speed, but avoidance was not possible.",
+   "team_decision": "dont_pursue",
+   "engine_decision": "dont_pursue",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -11954.2,
+    "mid": -3324.1,
+    "high": -936.1158302889655
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 0.0,
+     "ci90": [
+      0.0,
+      0.003
+     ],
+     "n": 1000,
+     "median_driver_avoids": false
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 0.0,
+     "ci90": [
+      0.0,
+      0.003
+     ],
+     "n": 1000,
+     "median_driver_avoids": false
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "06_borderline_needs_review",
+   "source": "insurance_example",
+   "source_label": "synthetic example bundle (insurance team)",
+   "synthetic": true,
+   "crash_type": null,
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 0.0,
+   "triage_p_avoid_mid": 0.292,
+   "summary": "Synthetic claim on the claim-01 template with a 28 m gap. The AV logged no braking before impact (inputs after the crash) and hit at the full 13.4 m/s. Careful-driver models DISAGREE: A 0.0\u20130.003, B 0.549\u20130.6. Engine finds no driving fault (medium confidence). After the scripted debate accepted trial costs, the engine's decision is dont_pursue: \u00a3-12.0k to \u00a3-8.7k. Held because the models disagree. Ego speed and the visibility timing are decisive.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "dont_pursue",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -11954.2,
+    "mid": -10588.431250000001,
+    "high": -8730.840071128758
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 0.0,
+     "ci90": [
+      0.0,
+      0.003
+     ],
+     "n": 1000,
+     "median_driver_avoids": false
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 0.575,
+     "ci90": [
+      0.549,
+      0.6
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Definition of t_start / obstacle visibility (CCTV, line of sight)",
+     "why": "Avoidance requires braking within ~1.1 s of t_start; models split on this"
+    },
+    {
+     "item": "Verified ego speed and gap",
+     "why": "Ego speed swings P(avoid) by 0.976"
+    },
+    {
+     "item": "AV log timestamps",
+     "why": "Brake inputs logged after impact; confirm whether real or clock error"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'dont_pursue': human claims handler to review"
+  },
+  {
+   "claim_id": "08_integrity_failure",
+   "source": "insurance_example",
+   "source_label": "synthetic example bundle (insurance team)",
+   "synthetic": true,
+   "crash_type": null,
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 0.0,
+   "triage_p_avoid_mid": 1.0,
+   "summary": "Synthetic claim cloned from claim 01, with a tamper flag set and a 1.8 s CCTV clock offset. On face-value logs, careful-driver models A and B agree: P(avoid) 0.997\u20131.0, and reproduction is moderate (about 0.66). The evidence failed the engine's integrity checks, so liability is NEEDS_REVIEW and the claim is not priced until a human clears it. Limitation deadline 2029-03-01.",
+   "team_decision": "not_priced",
+   "engine_decision": null,
+   "contested": null,
+   "expected_recovery_gbp": null,
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Tamper-flag details and independent re-verification of log hashes",
+     "why": "tamper_flag=true with no detail; engine will not price until integrity is cleared"
+    },
+    {
+     "item": "CCTV with corrected clock (1.8 s offset)",
+     "why": "Needed to align independent footage with vehicle log"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "09_human_override",
+   "source": "insurance_example",
+   "source_label": "synthetic example bundle (insurance team)",
+   "synthetic": true,
+   "crash_type": null,
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 0.0,
+   "triage_p_avoid_mid": 1.0,
+   "summary": "Synthetic claim cloned from claim 01. A human steering input (brake 0.0) came 0.3 s before the system's second brake, with no mode change. Reproduced (rate 1.0). Careful-driver models A and B agree: P(avoid) 0.997\u20131.0. The engine assigns liability to the human driver (medium confidence) because of the override, so there is no tech-company recovery and it was not priced. The handler should note the AV's late detection preceded the override.",
+   "team_decision": "dont_pursue",
+   "engine_decision": null,
+   "contested": null,
+   "expected_recovery_gbp": null,
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Brake/steer arbitration trace around t=99.227",
+     "why": "Establish whether the human input or system arbitration released braking; the system detected late and stayed nominally in control, which could support partial recovery"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "11_no_collision",
+   "source": "insurance_example",
+   "source_label": "synthetic example bundle (insurance team)",
+   "synthetic": true,
+   "crash_type": null,
+   "injury_severity": null,
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 0.0,
+   "triage_p_avoid_mid": 1.0,
+   "summary": "Synthetic claim cloned from claim 01, with the outcome recorded as no collision and no injury or paid amount. The bundle's kinematics would put the ego on the obstacle before braking, so the hazard was probably not in its path. Reproduction fails as expected. The engine records no collision and nothing to recover (high confidence), so it was not priced. Close as no loss.",
+   "team_decision": "dont_pursue",
+   "engine_decision": null,
+   "contested": null,
+   "expected_recovery_gbp": null,
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": false,
+   "repro_attempts": 1,
+   "evidence_requests": [],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "14_human_took_control_in_time",
+   "source": "insurance_example",
+   "source_label": "synthetic example bundle (insurance team)",
+   "synthetic": true,
+   "crash_type": null,
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 0.0,
+   "triage_p_avoid_mid": 1.0,
+   "summary": "Synthetic claim cloned from claim 01, with a handover demand at t=90 and a human 'response' at t=95. Careful-driver models A and B agree: P(avoid) 0.997\u20131.0. The engine assigns liability to the human driver (medium confidence) on the basis that the human took control, and did not price the claim. But the logs show the system still in control: automated mode, system-only inputs, hands off at t=98. The team holds it pending mode logs. A handler should review.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": null,
+   "contested": null,
+   "expected_recovery_gbp": null,
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Mode-transition and HMI logs around t=95",
+     "why": "Engine assumes human took control, but mode stayed automated and all control inputs are system-sourced; takeover uncorroborated"
+    },
+    {
+     "item": "Driver monitoring and steering/pedal sensor data",
+     "why": "Hands-off at t=98 conflicts with a completed takeover at t=95"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "16_lead_braking_unavoidable",
+   "source": "insurance_example",
+   "source_label": "synthetic example bundle (insurance team)",
+   "synthetic": true,
+   "crash_type": "lead_braking",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 0.0,
+   "triage_p_avoid_mid": 0.0,
+   "summary": "Synthetic lead-braking claim with a 15 m gap and the lead braking at 8.0 m/s\u00b2, which is above the mu limit. The AV reacted 0.4 s after onset. Reproduction failed (brake escalation not modelled), but the physics alone decides it: careful-driver models A and B agree, P(avoid) 0.0\u20130.003. Engine finds no driving fault (medium confidence) and says dont_pursue: \u00a3-12.0k to \u00a3-0.9k (mid \u00a3-3.3k).",
+   "team_decision": "dont_pursue",
+   "engine_decision": "dont_pursue",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -11954.2,
+    "mid": -3324.1,
+    "high": -936.1158302889655
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 0.0,
+     "ci90": [
+      0.0,
+      0.003
+     ],
+     "n": 1000,
+     "median_driver_avoids": false
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 0.0,
+     "ci90": [
+      0.0,
+      0.003
+     ],
+     "n": 1000,
+     "median_driver_avoids": false
+    }
+   },
+   "reproduced": false,
+   "repro_attempts": 1,
+   "evidence_requests": [],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "18_cut_in_unavoidable",
+   "source": "insurance_example",
+   "source_label": "synthetic example bundle (insurance team)",
+   "synthetic": true,
+   "crash_type": "cut_in",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 0.0,
+   "triage_p_avoid_mid": 0.0,
+   "summary": "Synthetic cut-in. The cutter entered 12 m ahead at a 10 m/s closing speed and was in path within 0.3 s. Reproduced (rate 1.0). Careful-driver models A and B agree: P(avoid) 0.0\u20130.003, since a human would need to brake within about 0.47 s. Engine finds no driving fault (medium confidence) and says dont_pursue: \u00a3-12.0k to \u00a3-0.9k (mid \u00a3-3.3k). Note: full AV braking at detection might have avoided it, but that is not the careful-driver test.",
+   "team_decision": "dont_pursue",
+   "engine_decision": "dont_pursue",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -11954.2,
+    "mid": -3324.1,
+    "high": -936.1158302889655
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 0.0,
+     "ci90": [
+      0.0,
+      0.003
+     ],
+     "n": 1000,
+     "median_driver_avoids": false
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 0.0,
+     "ci90": [
+      0.0,
+      0.003
+     ],
+     "n": 1000,
+     "median_driver_avoids": false
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "19_s4_unauthorised_software_change",
+   "source": "insurance_example",
+   "source_label": "synthetic example bundle (insurance team)",
+   "synthetic": true,
+   "crash_type": null,
+   "injury_severity": "Slight",
+   "paid_claim_gbp": null,
+   "triage_value_gbp": 0.0,
+   "triage_p_avoid_mid": 1.0,
+   "summary": "Synthetic claim cloned from claim 01, flagged unauthorised_software_change=true. Careful-driver models A and B agree: P(avoid) 0.997\u20131.0. The engine treats the flag as an insured alteration (AEVA s.4), points recovery at the insured rather than the tech company, and did not price the claim. But the recorded version 2.4.1 is approved and verified, and there is no change record. The team holds it pending the change log.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": null,
+   "contested": null,
+   "expected_recovery_gbp": null,
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Software change log (who, when, what changed)",
+     "why": "Engine's AEVA s.4 conclusion rests on a bare flag; recorded version 2.4.1 is approved and verified"
+    },
+    {
+     "item": "Link between any change and the late detection",
+     "why": "s.4 requires the alteration to bear on the accident"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "SYN-7-000",
+   "source": "insurance_synthetic",
+   "source_label": "synthetic UK claim (insurance team generator)",
+   "synthetic": true,
+   "crash_type": "lead_vehicle_decel",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": 4940.0,
+   "triage_value_gbp": 0.0,
+   "triage_p_avoid_mid": 0.5,
+   "summary": "Synthetic lead-braking claim, Slight injury, \u00a34,940 paid. Low-speed, short-headway crash. The AV detected the lead braking 1.19 s after onset and hit before braking. Careful-driver models DISAGREE completely: A 0.0\u20130.003, B 0.997\u20131.0. The split is purely about reaction time. Engine's pre-debate decision was pull_logs_first. After the scripted debate accepted trial costs, its final decision is dont_pursue: \u00a3-11.8k to \u00a3-6.8k. Held because the models disagree.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "dont_pursue",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -11783.0,
+    "mid": -9313.0,
+    "high": -6843.0
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 0.0,
+     "ci90": [
+      0.0,
+      0.003
+     ],
+     "n": 1000,
+     "median_driver_avoids": false
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Handler decision on careful-driver standard (PM1 vs PM2 reaction time)",
+     "why": "Models split 0.0 vs 1.0 purely on reaction-time assumption vs ~1.35 s threshold"
+    },
+    {
+     "item": "AV perception/decision log and street_cam CCTV",
+     "why": "Explain 1.19 s detection delay and confirm contact occurred before AV braking"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'dont_pursue': human claims handler to review"
+  },
+  {
+   "claim_id": "SYN-7-001",
+   "source": "insurance_synthetic",
+   "source_label": "synthetic UK claim (insurance team generator)",
+   "synthetic": true,
+   "crash_type": "lead_vehicle_decel",
+   "injury_severity": "Serious",
+   "paid_claim_gbp": 229880.0,
+   "triage_value_gbp": 0.0,
+   "triage_p_avoid_mid": 0.0,
+   "summary": "Synthetic lead-braking claim, Serious injury, \u00a3229,880 paid. Reproduced (rate 1.0). On the bundle's numbers, careful-driver models A and B agree: P(avoid) 0.0\u20130.003, unavoidable. But a log gap (970\u20131005) covers the incident, the software is unverified, and the brake is logged before detection. The engine says the evidence failed integrity checks: liability NEEDS_REVIEW, not priced until a human clears it.",
+   "team_decision": "not_priced",
+   "engine_decision": null,
+   "contested": null,
+   "expected_recovery_gbp": null,
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 0.0,
+     "ci90": [
+      0.0,
+      0.003
+     ],
+     "n": 1000,
+     "median_driver_avoids": false
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 0.0,
+     "ci90": [
+      0.0,
+      0.003
+     ],
+     "n": 1000,
+     "median_driver_avoids": false
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Recovered AV logs for the 970\u20131005 gap",
+     "why": "Declared log gap covers the entire incident; engine will not price until integrity cleared"
+    },
+    {
+     "item": "Software verification record",
+     "why": "software_verified=false"
+    },
+    {
+     "item": "Independent gap/speed/lead-decel evidence (street_cam CCTV, police report)",
+     "why": "Brake input logged before detection; crash time conflicts with kinematics"
+    },
+    {
+     "item": "Medical records and legal/recovery-route details",
+     "why": "Support the \u00a3229,880 paid and confirm AEVA route"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "SYN-7-002",
+   "source": "insurance_synthetic",
+   "source_label": "synthetic UK claim (insurance team generator)",
+   "synthetic": true,
+   "crash_type": "cut_in",
+   "injury_severity": "Serious",
+   "paid_claim_gbp": 459000.0,
+   "triage_value_gbp": 0.0,
+   "triage_p_avoid_mid": 1.0,
+   "summary": "Synthetic cut-in, Serious injury, \u00a3459,000 paid, the highest value in the run. Reproduction FAILED: on the bundle's numbers the AV avoids the cutter with about 3.4 m to spare. P(avoid) of 0.997\u20131.0 for both A and B is therefore not meaningful. The engine leans tech company (medium confidence) but cannot price without a multi-track counsel budget. By its break-even figure, recovery is worthwhile only if costs stay below about \u00a3458k\u2013\u00a3459k. Collision and severity need verification first.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "cannot_price",
+   "contested": null,
+   "expected_recovery_gbp": null,
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": false,
+   "repro_attempts": 2,
+   "evidence_requests": [
+    {
+     "item": "Impact speed, vehicle damage and contact evidence (CCTV street_cam, police report, witnesses)",
+     "why": "Bundle kinematics show AV avoiding with ~3.4 m to spare; collision unsupported"
+    },
+    {
+     "item": "Medical and payment records",
+     "why": "Max relative impact ~5.2 m/s sits oddly with Serious injury and \u00a3459,000 paid"
+    },
+    {
+     "item": "Full AV logs (gap, cut-in timing, braking)",
+     "why": "Reproduction failed; check bundle inputs for error"
+    },
+    {
+     "item": "Counsel budget for multi-track litigation",
+     "why": "Engine cannot price claims over \u00a3100,000 without a legal cost estimate"
+    },
+    {
+     "item": "Legal block (regime, recovery route, settlement date)",
+     "why": "Missing; AEVA s.5 route unconfirmed"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'cannot_price': human claims handler to review"
+  },
+  {
+   "claim_id": "SYN-7-003",
+   "source": "insurance_synthetic",
+   "source_label": "synthetic UK claim (insurance team generator)",
+   "synthetic": true,
+   "crash_type": "lead_vehicle_decel",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": 4810.0,
+   "triage_value_gbp": 0.0,
+   "triage_p_avoid_mid": 0.45,
+   "summary": "Synthetic lead-braking claim, Slight injury, \u00a34,810 paid. Reproduced (rate 1.0). The AV braked 1.45 s after detecting the lead. Careful-driver models agree it is a coin flip: A 0.456\u20130.508, B 0.463\u20130.515. Engine liability is NEEDS_REVIEW (low confidence). Pre-debate it said pull_logs_first (\u00a3-9.5k to \u00a31.4k). After the scripted debate accepted trial costs, its final decision is dont_pursue: \u00a3-9.5k to \u00a3-9.3k. Software is unverified.",
+   "team_decision": "dont_pursue",
+   "engine_decision": "dont_pursue",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -9537.192429845685,
+    "mid": -9395.744999999999,
+    "high": -9253.870586313158
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 0.482,
+     "ci90": [
+      0.456,
+      0.508
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 0.489,
+     "ci90": [
+      0.463,
+      0.515
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Second-source ego speed (telematics/wheel-speed log)",
+     "why": "Ego speed swings P(avoid) by 0.998; could move the coin-flip result if reopened"
+    },
+    {
+     "item": "Software verification record",
+     "why": "software_verified=false; engine flags AEVA s.4 check"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "SYN-7-004",
+   "source": "insurance_synthetic",
+   "source_label": "synthetic UK claim (insurance team generator)",
+   "synthetic": true,
+   "crash_type": "lead_vehicle_decel",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": 5110.0,
+   "triage_value_gbp": 0.0,
+   "triage_p_avoid_mid": 0.5,
+   "summary": "Synthetic lead-braking claim, Slight injury, \u00a35,110 paid. Reproduction FAILED (0 crashes): on the bundle's own numbers the AV stops about 7 m short, and the brake is logged before detection. Careful-driver models DISAGREE: A 0.0\u20130.003, B 0.997\u20131.0. Engine's pre-debate decision was pull_logs_first. After the scripted debate accepted trial costs, its final decision is dont_pursue: \u00a3-11.9k to \u00a3-6.7k. Held pending confirmation of a collision.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "dont_pursue",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -11851.0,
+    "mid": -9296.0,
+    "high": -6741.0
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 0.0,
+     "ci90": [
+      0.0,
+      0.003
+     ],
+     "n": 1000,
+     "median_driver_avoids": false
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": false,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Impact speed and vehicle damage/contact evidence",
+     "why": "Bundle kinematics imply AV stops ~7 m short; collision unsupported"
+    },
+    {
+     "item": "Corrected AV brake and detection timestamps",
+     "why": "Brake input logged before detection"
+    },
+    {
+     "item": "Police report / CCTV / witness statements",
+     "why": "Listed in bundle; independent confirmation of collision"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'dont_pursue': human claims handler to review"
+  },
+  {
+   "claim_id": "SYN-7-005",
+   "source": "insurance_synthetic",
+   "source_label": "synthetic UK claim (insurance team generator)",
+   "synthetic": true,
+   "crash_type": "cut_in",
+   "injury_severity": "Serious",
+   "paid_claim_gbp": 226510.0,
+   "triage_value_gbp": 0.0,
+   "triage_p_avoid_mid": 0.633,
+   "summary": "Synthetic cut-in in rain, Serious injury, \u00a3226,510 paid. Reproduced (rate about 0.93). The AV detected the cutter 1.88 s after t_start. Careful-driver models DISAGREE: A 0.289\u20130.338, B 0.997\u20131.0. Engine liability is NEEDS_REVIEW (low confidence), and it cannot price without a multi-track counsel budget. By its break-even figures, recovery pays only if counsel costs stay below \u00a365.6k (worst case) to \u00a3148.7k (central). Injury severity looks high for the impact speed.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "cannot_price",
+   "contested": null,
+   "expected_recovery_gbp": null,
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.4)",
+     "p_avoid": 0.313,
+     "ci90": [
+      0.289,
+      0.338
+     ],
+     "n": 1000,
+     "median_driver_avoids": false
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.4)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Counsel budget for multi-track litigation",
+     "why": "Engine cannot price >\u00a3100,000 claims; break-even budget \u00a365,555 (worst) to \u00a3148,704 (central)"
+    },
+    {
+     "item": "Measured cutter speed and cut-in duration (AV logs/CCTV)",
+     "why": "Cutter speed swings P(avoid) by 0.72; careful-driver models disagree"
+    },
+    {
+     "item": "Medical and payment records; impact speed",
+     "why": "Relative impact ~2.7 m/s appears out of proportion to Serious injury and \u00a3226,510 paid"
+    },
+    {
+     "item": "Legal block (regime, recovery route)",
+     "why": "Missing; AEVA s.5 route unconfirmed"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'cannot_price': human claims handler to review"
+  },
+  {
+   "claim_id": "SYN-7-007",
+   "source": "insurance_synthetic",
+   "source_label": "synthetic UK claim (insurance team generator)",
+   "synthetic": true,
+   "crash_type": "lead_vehicle_decel",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": 4930.0,
+   "triage_value_gbp": 0.0,
+   "triage_p_avoid_mid": 0.208,
+   "summary": "Synthetic lead-braking claim, Slight injury, \u00a34,930 paid. Reproduced (rate 1.0). Contact came before the AV braked, and the AV detected the lead 1.15 s late. Careful-driver models DISAGREE: A 0.0\u20130.003, B 0.449\u20130.501. A log gap (970\u20131005) covers the incident and the software is unverified, so the evidence failed the engine's integrity checks: not priced until a human clears it.",
+   "team_decision": "not_priced",
+   "engine_decision": null,
+   "contested": null,
+   "expected_recovery_gbp": null,
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 0.0,
+     "ci90": [
+      0.0,
+      0.003
+     ],
+     "n": 1000,
+     "median_driver_avoids": false
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 0.475,
+     "ci90": [
+      0.449,
+      0.501
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Recovered AV logs for the 970\u20131005 gap",
+     "why": "Log gap covers the incident; engine will not price until integrity cleared"
+    },
+    {
+     "item": "Software verification record",
+     "why": "software_verified=false"
+    },
+    {
+     "item": "Second-source ego speed",
+     "why": "Ego speed swings P(avoid) by 0.998; careful-driver models disagree"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "SYN-7-008",
+   "source": "insurance_synthetic",
+   "source_label": "synthetic UK claim (insurance team generator)",
+   "synthetic": true,
+   "crash_type": "lead_vehicle_decel",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": 4210.0,
+   "triage_value_gbp": 0.0,
+   "triage_p_avoid_mid": 0.025,
+   "summary": "Synthetic lead-braking claim, Slight injury, \u00a34,210 paid. The bundle is clean and reproduced (rate 1.0). The AV detected the lead 1.52 s late. Careful-driver models agree a careful driver very likely could not have avoided it: A 0.0\u20130.003, B 0.032\u20130.053. Engine finds no driving fault (medium confidence) and says dont_pursue: \u00a3-11.5k to \u00a3-0.7k (mid \u00a3-3.1k).",
+   "team_decision": "dont_pursue",
+   "engine_decision": "dont_pursue",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -11491.0,
+    "mid": -3129.695,
+    "high": -744.5001403756689
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 0.0,
+     "ci90": [
+      0.0,
+      0.003
+     ],
+     "n": 1000,
+     "median_driver_avoids": false
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 0.041,
+     "ci90": [
+      0.032,
+      0.053
+     ],
+     "n": 1000,
+     "median_driver_avoids": false
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "SYN-7-009",
+   "source": "insurance_synthetic",
+   "source_label": "synthetic UK claim (insurance team generator)",
+   "synthetic": true,
+   "crash_type": "lead_vehicle_decel",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": 5140.0,
+   "triage_value_gbp": 0.0,
+   "triage_p_avoid_mid": 0.008,
+   "summary": "Synthetic lead-braking claim in rain, Slight injury, \u00a35,140 paid. Reproduced (rate 1.0). The lead decel exceeds the mu 0.4 limit, but the collision holds at a credible value. Careful-driver models agree a careful driver very likely could not have avoided it: A 0.0\u20130.003, B 0.008\u20130.02. A log gap (970\u20131005) covers the incident, so the evidence failed the engine's integrity checks: not priced until a human clears it.",
+   "team_decision": "not_priced",
+   "engine_decision": null,
+   "contested": null,
+   "expected_recovery_gbp": null,
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.4)",
+     "p_avoid": 0.0,
+     "ci90": [
+      0.0,
+      0.003
+     ],
+     "n": 1000,
+     "median_driver_avoids": false
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.4)",
+     "p_avoid": 0.013,
+     "ci90": [
+      0.008,
+      0.02
+     ],
+     "n": 1000,
+     "median_driver_avoids": false
+    }
+   },
+   "reproduced": true,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Recovered AV logs for the 970\u20131005 gap",
+     "why": "Log gap covers the incident; engine will not price until integrity cleared"
+    },
+    {
+     "item": "Lead vehicle's true deceleration (CCTV)",
+     "why": "Reported 7.4 m/s\u00b2 is nearly double the mu 0.4 limit"
+    },
+    {
+     "item": "Police report",
+     "why": "Engine lists as missing"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap."
+  },
+  {
+   "claim_id": "SYN-7-010",
+   "source": "insurance_synthetic",
+   "source_label": "synthetic UK claim (insurance team generator)",
+   "synthetic": true,
+   "crash_type": "lead_vehicle_decel",
+   "injury_severity": "Slight",
+   "paid_claim_gbp": 4420.0,
+   "triage_value_gbp": 0.0,
+   "triage_p_avoid_mid": 0.5,
+   "summary": "Synthetic lead-braking claim, Slight injury, \u00a34,420 paid. Reproduction FAILED (0 crashes): on the bundle's numbers the AV stops about 3 m short, and the brake is logged before detection. Careful-driver models DISAGREE: A 0.0\u20130.003, B 0.997\u20131.0. Engine's pre-debate decision was pull_logs_first. After the scripted debate accepted trial costs, its final decision is dont_pursue: \u00a3-11.6k to \u00a3-7.2k. Held pending confirmation of a collision.",
+   "team_decision": "get_more_evidence",
+   "engine_decision": "dont_pursue",
+   "contested": false,
+   "expected_recovery_gbp": {
+    "low": -11575.0,
+    "mid": -9365.0,
+    "high": -7155.0
+   },
+   "p_avoid": {
+    "careful_a": {
+     "model": "careful_a_r157_pm1_ccdm (decel capped at mu=0.7)",
+     "p_avoid": 0.0,
+     "ci90": [
+      0.0,
+      0.003
+     ],
+     "n": 1000,
+     "median_driver_avoids": false
+    },
+    "careful_b": {
+     "model": "careful_b_r157_pm2_fsm (decel capped at mu=0.7)",
+     "p_avoid": 1.0,
+     "ci90": [
+      0.997,
+      1.0
+     ],
+     "n": 1000,
+     "median_driver_avoids": true
+    }
+   },
+   "reproduced": false,
+   "repro_attempts": 1,
+   "evidence_requests": [
+    {
+     "item": "Impact speed and vehicle damage/contact evidence",
+     "why": "Bundle kinematics imply AV stops ~3 m short; collision unsupported"
+    },
+    {
+     "item": "Corrected AV brake and detection timestamps",
+     "why": "Brake input logged 0.43 s before detection"
+    },
+    {
+     "item": "Independent CCTV / police report",
+     "why": "Engine lists CCTV missing; confirm collision"
+    }
+   ],
+   "disclaimer": "Triage evidence for a human claims handler, not a liability ruling or legal advice. Simulation-based, with stated assumptions and a sim-to-real gap.",
+   "note": "team decision 'get_more_evidence' differs from the engine's 'dont_pursue': human claims handler to review"
+  }
+ ],
+ "updated_at": "2026-10-15T12:49:21.036+00:00"
+}

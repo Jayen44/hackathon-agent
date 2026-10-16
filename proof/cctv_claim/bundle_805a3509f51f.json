@@ -1,0 +1,71 @@
+{
+ "schema": "0.1",
+ "case_id": "cctv-d741ae8d",
+ "synthetic": false,
+ "source": "video (CCTV / dashcam), measured by sim/video",
+ "external": {
+  "cctv": [
+   "cctv-d741ae8d"
+  ]
+ },
+ "integrity": {
+  "hashes_present": true,
+  "video_sha256": "4bcc4bc1e2cbbf1393dde3bfc7bc5d91570423c1f70caad5300c30ba7b247db9",
+  "chain_of_custody": false
+ },
+ "conflict": {
+  "t_start": 0.52,
+  "ego_speed_mps": 16.0694,
+  "gap_m": 31.4438,
+  "hazard_speed_mps": 9.0314,
+  "crash_type": "cut_in",
+  "hazard_id": "track-1"
+ },
+ "conflict_ranges": {
+  "ego_speed": {
+   "lo": 2.554,
+   "hi": 29.585,
+   "source": "reported"
+  },
+  "other_speed": {
+   "lo": 5.384,
+   "hi": 12.679,
+   "source": "reported"
+  },
+  "gap": {
+   "lo": 11.801,
+   "hi": 51.087,
+   "source": "reported"
+  },
+  "lateral_offset": {
+   "lo": 0.0,
+   "hi": 23.009,
+   "source": "reported"
+  },
+  "cut_in_start": {
+   "lo": 0.0,
+   "hi": 9.733,
+   "source": "reported"
+  },
+  "cut_in_duration": {
+   "lo": 0.2,
+   "hi": 12.068,
+   "source": "reported"
+  },
+  "av_brake_start": {
+   "lo": 0.0,
+   "hi": 0.778,
+   "source": "reported"
+  },
+  "av_decel": {
+   "lo": 0.0,
+   "hi": 6.987,
+   "source": "reported"
+  }
+ },
+ "outcome": {
+  "collided": true,
+  "impact_speed_mps": 14.858
+ },
+ "t_crash": 5.36
+}

@@ -1,0 +1,1014 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crash Reconstruction Replay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #e9ebee; --panel: #ffffff; --ink: #16191d; --muted: #5d646e; --line: #cfd4da; --strip: #f4f5f7;
+    --accent: #4b6a92; --bad: #a33a32; --good: #3d6b4f; --warn: #8a6a2a; --chip: #e2e5e9;
+    --card: rgba(255,255,255,.92); --cardInk: #16191d;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #101317; --panel: #171b20; --ink: #e3e7ec; --muted: #98a1ac; --line: #2b3139; --strip: #1c2127;
+      --accent: #8ea8cc; --bad: #d4766c; --good: #7fb08f; --warn: #c9a45e; --chip: #232931;
+      --card: rgba(20,24,29,.9); --cardInk: #e3e7ec;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #101317; --panel: #171b20; --ink: #e3e7ec; --muted: #98a1ac; --line: #2b3139; --strip: #1c2127;
+    --accent: #8ea8cc; --bad: #d4766c; --good: #7fb08f; --warn: #c9a45e; --chip: #232931;
+    --card: rgba(20,24,29,.9); --cardInk: #e3e7ec;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font: 15px/1.4 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-feature-settings: "tnum" 1, "cv11" 1;
+    display: flex; flex-direction: column; min-height: 100vh;
+  }
+  #gl { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 1; display: block; }
+  header { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; padding: 12px 16px 8px; border-bottom: 1px solid var(--line); }
+  header h1 { font-size: 15px; margin: 0; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+  #scenarioTitle { color: var(--muted); font-size: 14px; }
+  .label-chip { border: 1px solid var(--warn); color: var(--warn); font-weight: 600; font-size: 12px;
+    padding: 2px 8px; border-radius: 4px; letter-spacing: .02em; }
+  .spacer { flex: 1; }
+  button, .btn {
+    font: inherit; font-size: 13px; font-weight: 500; color: var(--ink); background: var(--chip);
+    border: 1px solid var(--line); border-radius: 5px; padding: 5px 11px; cursor: pointer; min-height: 32px;
+  }
+  button:hover, .btn:hover { border-color: var(--accent); }
+  button[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
+  #panels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding: 10px 16px 6px; flex: 1 0 auto; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; overflow: hidden;
+    display: flex; flex-direction: column; position: relative; min-height: 340px; }
+  .panel h2 { margin: 0; font-size: 13.5px; padding: 7px 10px; font-weight: 600; border-bottom: 1px solid var(--line);
+    background: var(--strip); display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+  .panel h2 .st { font-size: 11px; font-weight: 700; letter-spacing: .07em; padding: 2px 7px; border-radius: 3px;
+    border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+  .panel h2 .st.bad { color: #fff; background: var(--bad); border-color: var(--bad); }
+  .panel h2 .st.good { color: #fff; background: var(--good); border-color: var(--good); }
+  .panel.collided { border-color: var(--bad); }
+  .panel.avoided { border-color: var(--good); }
+  .view { position: relative; flex: 1; min-height: 300px; overflow: hidden; }
+  .ov { position: absolute; z-index: 2; pointer-events: none; }
+  .hud { left: 8px; bottom: 8px; background: var(--card); color: var(--cardInk); border: 1px solid var(--line);
+    border-radius: 5px; padding: 5px 8px 4px; display: flex; gap: 10px; align-items: flex-end; }
+  .hud .k { font-size: 10px; font-weight: 600; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+  .hud .spd { font-size: 22px; font-weight: 600; line-height: 1.05; min-width: 92px; }
+  .hud .spd small { font-size: 12px; font-weight: 500; color: var(--muted); margin-left: 2px; }
+  .hud .brk { font-size: 10.5px; font-weight: 600; color: var(--bad); letter-spacing: .05em; visibility: hidden; }
+  .hud .brk.on { visibility: visible; }
+  .hud canvas { display: block; width: 150px; height: 46px; }
+  .labels { inset: 0; overflow: hidden; }
+  .lbl { position: absolute; left: 0; top: 0; transform: translate(-50%, -100%); white-space: nowrap; display: none;
+    background: var(--card); color: var(--cardInk); border: 1px solid var(--line); border-left: 3px solid var(--muted);
+    border-radius: 3px; font-size: 11.5px; font-weight: 500; padding: 2px 6px; line-height: 1.3; }
+  .lbl.on { display: block; }
+  .lbl b { font-weight: 700; }
+  .lbl.impact { border-left-color: var(--bad); }
+  .lbl.impact b { color: var(--bad); }
+  .lbl.brake { border-left-color: var(--accent); }
+  .lbl.gap { border-left-color: var(--good); }
+  .lbl.gap b { color: var(--good); }
+  .lbl.ghost { border-left-color: var(--muted); color: var(--muted); font-size: 10.5px; }
+  .nodata { inset: 0; display: flex; align-items: center; justify-content: center; color: var(--muted); }
+  #captions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding: 0 16px; }
+  .cap { font-size: 14px; padding: 2px 4px; min-height: 1.4em; }
+  .cap b { font-size: 16px; }
+  #controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 8px 16px 4px; }
+  #timeWrap { flex: 1 1 260px; position: relative; display: flex; align-items: center; min-width: 200px; }
+  #scrub { width: 100%; accent-color: var(--accent); height: 26px; margin: 0; }
+  #ticks { position: absolute; left: 0; right: 0; top: 0; height: 6px; pointer-events: none; }
+  #ticks i { position: absolute; top: 0; width: 2px; height: 8px; margin-left: -1px; background: var(--bad); }
+  #clock { min-width: 110px; text-align: right; font-weight: 600; font-size: 14px; }
+  #slowmo { font-weight: 600; font-size: 12px; color: var(--muted); letter-spacing: .06em; visibility: hidden; }
+  #slowmo.on { visibility: visible; }
+  .group { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+  #notes, #legend { color: var(--muted); font-size: 12.5px; padding: 0 16px; }
+  footer { color: var(--muted); font-size: 12.5px; padding: 6px 16px 12px; border-top: 1px solid var(--line); margin-top: 6px; }
+  footer b { color: var(--ink); font-weight: 600; }
+  #err { display: none; margin: 6px 16px; padding: 8px 12px; border-radius: 5px; background: var(--bad); color: #fff; }
+  #drop { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; font-size: 24px;
+    background: rgba(75,106,146,.22); border: 3px dashed var(--accent); z-index: 10; color: var(--ink); }
+  body.dragging #drop { display: flex; }
+  .pcap { display: none; padding: 6px 10px; border-top: 1px solid var(--line); font-size: 14px; }
+  @media (max-width: 900px) {
+    #panels, #captions { grid-template-columns: 1fr; }
+    #captions { display: none !important; }
+    .pcap:not(:empty) { display: block; }
+  }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<header>
+  <h1>Crash reconstruction</h1>
+  <span id="scenarioTitle"></span>
+  <span id="labelChip" class="label-chip" hidden></span>
+  <span class="spacer"></span>
+  <label class="btn" title="Load a replay JSON file (or drag and drop one anywhere)">Load JSON
+    <input id="file" type="file" accept=".json,application/json" hidden></label>
+  <button id="themeBtn" type="button" title="Toggle light / dark">Theme</button>
+</header>
+<div id="err"></div>
+<main id="panels"></main>
+<div id="captions"></div>
+<div id="controls">
+  <button id="playBtn" type="button" title="Play / pause (space)">Play</button>
+  <button id="restartBtn" type="button" title="Restart (R)">Restart</button>
+  <div id="timeWrap"><input id="scrub" type="range" min="0" max="1000" value="0" step="1" aria-label="Scrub time"><div id="ticks"></div></div>
+  <span id="clock">0.00 s</span>
+  <span id="slowmo">SLOW MOTION</span>
+  <span class="group" role="group" aria-label="Speed">
+    <button type="button" data-speed="0.25" aria-pressed="false">0.25x</button>
+    <button type="button" data-speed="1" aria-pressed="true">1x</button>
+    <button type="button" id="slowBtn" aria-pressed="true" title="Slow motion around each impact when playing at 1x">Impact slow-mo</button>
+  </span>
+  <span class="group" role="group" aria-label="Camera">
+    <button type="button" data-cam="oblique" aria-pressed="true" title="High oblique 3/4 view (C cycles)">3/4 view</button>
+    <button type="button" data-cam="top" aria-pressed="false" title="Plan view (C cycles)">Plan</button>
+    <button type="button" data-cam="chase" aria-pressed="false" title="Chase view (C cycles)">Chase</button>
+  </span>
+</div>
+<div id="legend">Trajectory ticks every 0.5 s (labelled each 1 s). Distance markers every 10 m from the ego start position. Lane width 3.5 m.
+  Brake onset = first frame with ego deceleration above 0.5 m/s² (display threshold only, not a model parameter).
+  Min gap = closest bumper-to-bumper distance between vehicle footprints in the trace.</div>
+<div id="notes"></div>
+<footer><b>Reconstruction from simulation. Triage evidence, not a liability ruling.</b>
+  2D kinematic simulation rendered in 3D. Other road users follow the reconstructed report; only the ego vehicle's behaviour differs between panels.
+  Vehicle bodies are generic and sized from the trace geometry. Not legal advice. Assets: assets/LICENSES.md.</footer>
+<div id="drop">Drop replay JSON to load</div>
+
+<script type="module">
+import * as THREE from "three";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+
+const PANELS = [
+  { key: "av", title: "Reported AV behaviour", sub: "replay of reported trajectory" },
+  { key: "careful_a", title: "Careful driver A (UN R157 PM1)", sub: "CCDM" },
+  { key: "careful_b", title: "Careful driver B (UN R157 PM2)", sub: "FSM" },
+];
+const LANE_W = 3.5;
+const BRAKE_THRESH = -0.5; // m/s^2, DISPLAY ONLY: brake lights, "brake onset" marker. Not a driver-model parameter.
+const STOP_SPEED = 0.3;    // m/s, DISPLAY ONLY: below this the ego counts as "stopped" for the label
+const $ = (id) => document.getElementById(id);
+const errBox = $("err");
+const showErr = (m) => { errBox.textContent = m; errBox.style.display = "block"; };
+const clearErr = () => { errBox.style.display = "none"; };
+const text = (el, s) => { el.textContent = s == null ? "" : String(s); };
+const kmhN = (ms) => (ms * 3.6).toFixed(0);
+const kmh = (ms) => kmhN(ms) + " km/h";
+const fmtPct = (x) => (100 * x).toFixed(0) + "%";
+const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+// ---------------- theme ----------------
+function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+function isDark() {
+  const t = document.documentElement.getAttribute("data-theme");
+  if (t) return t === "dark";
+  return !!(window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches);
+}
+const saved = store("replay-theme");
+if (saved === "dark" || saved === "light") document.documentElement.setAttribute("data-theme", saved);
+
+// ---------------- renderer: one canvas + one scene, scissored per panel ----------------
+const canvas = $("gl");
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
+} catch (e) { showErr("WebGL is not available in this browser: " + e.message); throw e; }
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.setClearColor(0x000000, 0);
+renderer.autoClear = false;
+const pmrem = new THREE.PMREMGenerator(renderer);
+const envTex = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture; // neutral studio IBL (three.js, MIT)
+
+const scene = new THREE.Scene();
+scene.environment = envTex;
+const world = new THREE.Group(); scene.add(world);
+const hemi = new THREE.HemisphereLight(0xffffff, 0x808080, 0.5); scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xffffff, 1.6);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+Object.assign(sun.shadow.camera, { left: -40, right: 40, top: 40, bottom: -40, near: 1, far: 300 });
+sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.02; sun.shadow.radius = 4;
+scene.add(sun); scene.add(sun.target);
+const sunDir = new THREE.Vector3().setFromSphericalCoords(1, THREE.MathUtils.degToRad(35), THREE.MathUtils.degToRad(150));
+
+// ---------------- canvas textures ----------------
+function rng(seed) { let s = seed >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+function canvasTex(w, h, draw, srgb = true, repeat = true) {
+  const c = document.createElement("canvas"); c.width = w; c.height = h;
+  draw(c.getContext("2d"), w, h);
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = repeat ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
+  t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+  if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+function speckle(g, w, h, base, n, spread, seed, size = 1.6) {
+  const r = rng(seed);
+  g.fillStyle = base; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < n; i++) {
+    const v = Math.floor((r() - 0.5) * spread), c = v > 0 ? 255 : 0;
+    g.fillStyle = `rgba(${c},${c},${c},${Math.abs(v) / 255})`;
+    g.fillRect(r() * w, r() * h, size * (0.5 + r()), size * (0.5 + r()));
+  }
+}
+// fallback road if the Poly Haven asphalt is missing
+const asphaltMap = canvasTex(512, 512, (g, w, h) => speckle(g, w, h, "#55585c", 22000, 70, 7));
+// ground: white base with a 1 m minor / 5 m major grid (tile = 5 m), tinted per theme via material colour
+const gridTex = canvasTex(500, 500, (g, w, h) => {
+  speckle(g, w, h, "#f4f4f4", 9000, 18, 3);
+  g.strokeStyle = "rgba(0,0,0,.09)"; g.lineWidth = 1.5;
+  for (let i = 1; i < 5; i++) { g.beginPath(); g.moveTo(i * 100, 0); g.lineTo(i * 100, h); g.stroke(); g.beginPath(); g.moveTo(0, i * 100); g.lineTo(w, i * 100); g.stroke(); }
+  g.strokeStyle = "rgba(0,0,0,.22)"; g.lineWidth = 3;
+  g.beginPath(); g.moveTo(1, 0); g.lineTo(1, h); g.moveTo(0, 1); g.lineTo(w, 1); g.stroke();
+});
+const footTex = canvasTex(256, 256, (g, w, h) => {
+  speckle(g, w, h, "#f0f0f0", 5000, 30, 4);
+  g.strokeStyle = "rgba(0,0,0,.10)"; g.lineWidth = 2;
+  for (let i = 0; i <= 2; i++) { g.beginPath(); g.moveTo(i * 128, 0); g.lineTo(i * 128, h); g.stroke(); g.beginPath(); g.moveTo(0, i * 128); g.lineTo(w, i * 128); g.stroke(); }
+});
+const textTexCache = new Map();
+function textTex(str, px = 64, weight = 600) {
+  const key = str + "|" + px + "|" + weight;
+  if (textTexCache.has(key)) return textTexCache.get(key);
+  const font = `${weight} ${px}px Inter, system-ui, sans-serif`;
+  const m = document.createElement("canvas").getContext("2d"); m.font = font;
+  const w = Math.ceil(m.measureText(str).width) + 16, h = Math.ceil(px * 1.3);
+  const t = canvasTex(w, h, (g) => { g.font = font; g.fillStyle = "#fff"; g.textBaseline = "middle"; g.fillText(str, 8, h / 2 + 2); }, true, false);
+  t.userData = { aspect: w / h };
+  textTexCache.set(key, t); return t;
+}
+
+// ---------------- shared materials ----------------
+const M = {
+  road: new THREE.MeshStandardMaterial({ map: asphaltMap, roughness: 0.95, metalness: 0 }),
+  mark: new THREE.MeshStandardMaterial({ color: 0xeeeeea, roughness: 0.7 }),
+  ground: new THREE.MeshStandardMaterial({ map: gridTex, roughness: 1, color: 0xbfc3c8 }),
+  foot: new THREE.MeshStandardMaterial({ map: footTex, roughness: 0.95, color: 0xb6b9bd }),
+  kerb: new THREE.MeshStandardMaterial({ color: 0xc9ccce, roughness: 0.8 }),
+  glass: new THREE.MeshPhysicalMaterial({ color: 0x20262d, metalness: 0.0, roughness: 0.22, clearcoat: 0.5, clearcoatRoughness: 0.2, envMapIntensity: 0.35 }),
+  trim: new THREE.MeshStandardMaterial({ color: 0x23262a, roughness: 0.6, metalness: 0.1 }),
+  tyre: new THREE.MeshStandardMaterial({ color: 0x1b1c1e, roughness: 0.9 }),
+  hub: new THREE.MeshStandardMaterial({ color: 0x8d9196, roughness: 0.4, metalness: 0.6 }),
+  head: new THREE.MeshStandardMaterial({ color: 0xd8dade, roughness: 0.15, metalness: 0.2 }),
+  edge: new THREE.LineBasicMaterial({ color: 0x15181c, transparent: true, opacity: 0.32 }),
+  distMark: new THREE.MeshBasicMaterial({ color: 0xffffff }),
+};
+// clay/satin bodies: light grey for other vehicles, one muted desaturated blue for the AV / ego
+const CLAY = {
+  ego: new THREE.MeshPhysicalMaterial({ color: 0x6f86a3, roughness: 0.5, metalness: 0.05, clearcoat: 0.3, clearcoatRoughness: 0.4 }),
+  other: new THREE.MeshPhysicalMaterial({ color: 0xa9adb2, roughness: 0.55, metalness: 0.03, clearcoat: 0.25, clearcoatRoughness: 0.45 }),
+};
+const TRAIL = { ego: new THREE.Color(0x86a9db), other: new THREE.Color(0xd2d5d9) }; // light tones read on asphalt
+const overlayMat = (color, opacity = 1, onTop = false) => new THREE.MeshBasicMaterial({ color, transparent: true, opacity, depthWrite: false, depthTest: !onTop,
+  polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+const OV = {
+  egoTrail: overlayMat(TRAIL.ego, 0.95), egoFuture: overlayMat(TRAIL.ego, 0.22),
+  othTrail: overlayMat(TRAIL.other, 0.9), othFuture: overlayMat(TRAIL.other, 0.2),
+  impact: overlayMat(0xd0453a, 0.95, true), gap: overlayMat(0x5fbf7f, 0.95, true), brake: overlayMat(0x4b6a92, 0.95),
+};
+const lineMat = (color, opacity = 0.9, dashed = false) => dashed
+  ? new THREE.LineDashedMaterial({ color, transparent: true, opacity, dashSize: 0.35, gapSize: 0.25, depthWrite: false })
+  : new THREE.LineBasicMaterial({ color, transparent: true, opacity, depthWrite: false });
+const LM = { brakeGhost: lineMat(0x4b6a92, 0.9), avGhost: lineMat(0xa33a32, 0.8, true), gapGhost: lineMat(0x5fbf7f, 0.95),
+  othGhost: lineMat(0x6d727a, 0.9), pin: lineMat(0x2a2e33, 0.7) };
+const decalMats = [];
+function decal(str, heightM, x, z, rotY = 0, px = 64) {
+  const t = textTex(str, px);
+  const m = new THREE.MeshBasicMaterial({ map: t, transparent: true, depthWrite: false, color: 0x2b2f35,
+    polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+  decalMats.push(m);
+  const g = new THREE.PlaneGeometry(heightM * t.userData.aspect, heightM); g.rotateX(-Math.PI / 2);
+  const o = new THREE.Mesh(g, m); o.position.set(x, 0.02, z); o.rotation.y = rotY; o.renderOrder = 2; return o;
+}
+
+// ---------------- procedural sedan: side-profile extrusions with bevels. Car frame: +x forward, +y up, +z right ----------------
+// Nominal 4.60 m x 1.82 m x 1.47 m; scaled per vehicle to the trace geometry.
+const NOM_L = 4.6, NOM_W = 1.82, WHEEL_R = 0.33, AXLE = [1.38, -1.37];
+const carGeo = (() => {
+  const ext = (shape, depth, bevel, segs = 4, curve = 24) => {
+    const g = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel * 0.8, bevelSegments: segs, curveSegments: curve });
+    g.translate(0, 0, -depth / 2); g.computeVertexNormals(); return g;
+  };
+  // lower body: bumpers, wheel arches, hood, belt line, deck lid
+  const s = new THREE.Shape();
+  s.moveTo(-2.20, 0.30);
+  s.lineTo(-1.77, 0.30); s.absarc(AXLE[1], 0.30, 0.40, Math.PI, 0, true);
+  s.lineTo(0.98, 0.30); s.absarc(AXLE[0], 0.30, 0.40, Math.PI, 0, true);
+  s.lineTo(2.10, 0.30);
+  s.quadraticCurveTo(2.25, 0.32, 2.25, 0.48);
+  s.quadraticCurveTo(2.25, 0.64, 2.14, 0.70);
+  s.quadraticCurveTo(1.60, 0.80, 0.92, 0.87);
+  s.lineTo(-1.55, 0.91);
+  s.quadraticCurveTo(-2.00, 0.93, -2.18, 0.86);
+  s.quadraticCurveTo(-2.26, 0.78, -2.25, 0.55);
+  s.quadraticCurveTo(-2.25, 0.34, -2.20, 0.30);
+  const lower = ext(s, NOM_W - 0.16, 0.08, 5);
+  // greenhouse (glass): windscreen, roof line, rear window
+  const gh = new THREE.Shape();
+  gh.moveTo(0.95, 0.84); gh.quadraticCurveTo(0.45, 1.10, 0.0, 1.35);
+  gh.quadraticCurveTo(-0.45, 1.42, -0.95, 1.39);
+  gh.quadraticCurveTo(-1.35, 1.28, -1.62, 0.88); gh.lineTo(0.95, 0.84);
+  const house = ext(gh, 1.30, 0.06, 3);
+  // painted roof panel over the glass
+  const rf = new THREE.Shape();
+  rf.moveTo(0.06, 1.36); rf.quadraticCurveTo(-0.45, 1.46, -1.0, 1.43);
+  rf.lineTo(-1.0, 1.36); rf.quadraticCurveTo(-0.45, 1.39, 0.06, 1.30); rf.lineTo(0.06, 1.36);
+  const roof = ext(rf, 1.30, 0.05, 3);
+  // pillars as thin side plates
+  const plate = (pts) => { const p = new THREE.Shape(); p.moveTo(pts[0][0], pts[0][1]); for (const q of pts.slice(1)) p.lineTo(q[0], q[1]);
+    const g = new THREE.ExtrudeGeometry(p, { depth: 0.02, bevelEnabled: false }); g.translate(0, 0, -0.01); return g; };
+  const aPil = plate([[0.97, 0.84], [0.05, 1.37], [-0.06, 1.35], [0.84, 0.84]]);
+  const bPil = plate([[-0.40, 0.88], [-0.38, 1.41], [-0.50, 1.41], [-0.52, 0.88]]);
+  const cPil = plate([[-0.90, 1.41], [-1.62, 0.88], [-1.20, 0.88], [-0.80, 1.41]]);
+  const tyre = new THREE.CylinderGeometry(WHEEL_R, WHEEL_R, 0.22, 36); tyre.rotateX(Math.PI / 2);
+  const hub = new THREE.CylinderGeometry(0.21, 0.21, 0.225, 28); hub.rotateX(Math.PI / 2);
+  const liner = new THREE.CylinderGeometry(0.40, 0.40, NOM_W - 0.30, 28, 1, true, 0, Math.PI); liner.rotateX(Math.PI / 2); liner.rotateZ(-Math.PI / 2);
+  const head = new THREE.BoxGeometry(0.05, 0.07, 0.40);
+  const tail = new THREE.BoxGeometry(0.05, 0.09, 0.44);
+  const grille = new THREE.BoxGeometry(0.04, 0.10, 0.80);
+  const mirror = new THREE.BoxGeometry(0.14, 0.09, 0.16);
+  const puck = new THREE.CylinderGeometry(0.15, 0.17, 0.10, 28);
+  const edges = (g) => new THREE.EdgesGeometry(g, 35);
+  return { lower, house, roof, aPil, bPil, cPil, tyre, hub, liner, head, tail, grille, mirror, puck,
+    eLower: edges(lower), eHouse: edges(house), eRoof: edges(roof) };
+})();
+
+function makeCar(isEgo, len = 4.6, wid = 1.82) {
+  const car = new THREE.Group();
+  const body = new THREE.Group(); car.add(body); // pitches under braking
+  const sx = len / NOM_L, sz = wid / NOM_W;
+  const shell = new THREE.Group(); shell.scale.set(sx, 1, sz); body.add(shell);
+  const mesh = (g, m, x = 0, y = 0, z = 0, parent = shell) => { const o = new THREE.Mesh(g, m); o.position.set(x, y, z); o.castShadow = true; o.receiveShadow = true; parent.add(o); return o; };
+  const pm = isEgo ? CLAY.ego : CLAY.other;
+  mesh(carGeo.lower, pm); mesh(carGeo.house, M.glass); mesh(carGeo.roof, pm);
+  for (const sd of [-1, 1]) {
+    const zz = sd * 0.735;
+    mesh(carGeo.aPil, pm, 0, 0, zz); mesh(carGeo.bPil, pm, 0, 0, zz); mesh(carGeo.cPil, pm, 0, 0, zz);
+    mesh(carGeo.head, M.head, 2.28, 0.62, sd * 0.56);
+    mesh(carGeo.mirror, pm, 0.80, 0.98, sd * 0.97);
+  }
+  mesh(carGeo.grille, M.trim, 2.30, 0.46, 0);
+  for (const x of AXLE) mesh(carGeo.liner, M.trim, x, 0.30, 0);
+  if (isEgo) mesh(carGeo.puck, M.trim, -0.45, 1.50, 0); // roof sensor, kept low and neutral
+  for (const g of [carGeo.eLower, carGeo.eHouse, carGeo.eRoof]) shell.add(new THREE.LineSegments(g, M.edge));
+  // brake lights: per-car material so each panel's ego lights independently
+  const tailMat = new THREE.MeshStandardMaterial({ color: 0x5a1a18, emissive: 0xff2010, emissiveIntensity: 0, roughness: 0.3 });
+  for (const sd of [-1, 1]) mesh(carGeo.tail, tailMat, -2.28, 0.76, sd * 0.58);
+  const wheels = [];
+  for (const x of AXLE) for (const sd of [-1, 1]) {
+    const w = new THREE.Group(); w.position.set(x * sx, WHEEL_R, sd * 0.78 * sz);
+    mesh(carGeo.tyre, M.tyre, 0, 0, 0, w); mesh(carGeo.hub, M.hub, 0, 0, 0, w);
+    car.add(w); wheels.push(w);
+  }
+  car.userData = { body, wheels, tailMat, braking: null };
+  setBrake(car, false);
+  return car;
+}
+function setBrake(car, on) {
+  const u = car.userData; if (u.braking === on) return; u.braking = on;
+  u.tailMat.emissiveIntensity = on ? 2.2 : 0;
+  u.tailMat.color.setHex(on ? 0xc0201a : 0x5a1a18);
+}
+
+// ---------------- optional local assets (assets/manifest.json): photo asphalt ----------------
+async function loadAssets() {
+  let man = null;
+  try { const r = await fetch("assets/manifest.json", { cache: "no-cache" }); if (r.ok) man = await r.json(); } catch (e) { /* none */ }
+  const a = man && man.asphalt;
+  if (!a || !a.diffuse) return;
+  try {
+    const TL = new THREE.TextureLoader(), rep = 10 / (a.tile_m || 3); // road UVs: 1 unit per 10 m
+    const load = async (f, srgb) => {
+      const t = await TL.loadAsync("assets/" + f);
+      t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rep, rep);
+      t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+      if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+      return t;
+    };
+    const [map, nor, rough] = await Promise.all([load(a.diffuse, true), a.normal ? load(a.normal) : null, a.roughness ? load(a.roughness) : null]);
+    M.road.map = map;
+    if (nor) { M.road.normalMap = nor; M.road.normalScale.set(0.6, 0.6); }
+    if (rough) { M.road.roughnessMap = rough; M.road.roughness = 1; }
+    M.road.needsUpdate = true;
+  } catch (e) { showErr("Asphalt texture failed to load, using procedural road: " + (e.message || e)); }
+}
+
+// ---------------- environment: neutral grey backdrop, soft light ----------------
+const views = [];
+const BG = new THREE.Color(); // cleared per panel viewport (scene.background would also repaint the transparent page canvas)
+function applyEnvironment() {
+  const dark = isDark();
+  const bg = BG.setHex(dark ? 0x1a1e23 : 0xdde1e5);
+  scene.fog = new THREE.Fog(bg, 90, 330);
+  renderer.toneMappingExposure = dark ? 0.62 : 0.85;
+  sun.intensity = dark ? 0.9 : 1.6; hemi.intensity = dark ? 0.25 : 0.5;
+  M.ground.color.setHex(dark ? 0x3a3f46 : 0xc0c4c9);
+  M.foot.color.setHex(dark ? 0x4a4f56 : 0xb3b6ba);
+  M.road.color.setHex(dark ? 0x9a9a9a : 0xa4a7ab);
+  M.edge.color.setHex(dark ? 0x000000 : 0x15181c); M.edge.opacity = dark ? 0.55 : 0.32;
+  for (const m of decalMats) m.color.setHex(dark ? 0xc9ced4 : 0x2b2f35);
+  LM.pin.color.setHex(dark ? 0xc9ced4 : 0x2a2e33);
+}
+
+function instanced(geo, mat, n, shadows = false) {
+  const im = new THREE.InstancedMesh(geo, mat, Math.max(1, n));
+  im.count = n; im.castShadow = shadows; im.receiveShadow = true; return im;
+}
+
+let originX = 0;
+function buildWorld(ext) {
+  world.traverse((o) => { if (o.geometry && o !== world) o.geometry.dispose(); });
+  world.clear(); decalMats.length = 0;
+  const x0 = Math.floor((ext.minX - 80) / 10) * 10, x1 = Math.ceil((ext.maxX + 120) / 10) * 10, L = x1 - x0, cx = (x0 + x1) / 2;
+  const loLane = Math.min(-1, Math.floor((ext.minY - 0.5) / LANE_W + 0.5));
+  const hiLane = Math.max(1, Math.ceil((ext.maxY + 0.5) / LANE_W - 0.5));
+  const yR = (loLane - 0.5) * LANE_W, yL = (hiLane + 0.5) * LANE_W, W = yL - yR, cy = (yL + yR) / 2;
+  const Z = (y) => -y; // sim lateral (left +) -> three z
+  const plane = (w, h, mat, x, y, z, rx, ry) => {
+    const g = new THREE.PlaneGeometry(w, h);
+    if (rx) { const uv = g.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * rx, uv.getY(i) * ry); }
+    const m = new THREE.Mesh(g, mat); m.rotation.x = -Math.PI / 2; m.position.set(x, y, z); m.receiveShadow = true;
+    world.add(m); return m;
+  };
+  const GW = L + 600;
+  plane(GW, 600, M.ground, cx, -0.02, Z(cy), GW / 5, 600 / 5); // 5 m grid tiles, aligned to world metres
+  plane(L, W + 0.6, M.road, cx, 0, Z(cy), L / 10, (W + 0.6) / 10);
+  const FOOT = 2.4;
+  for (const side of [-1, 1]) {
+    const edge = side > 0 ? yL : yR;
+    plane(L, FOOT, M.foot, cx, 0.13, Z(edge + side * (0.3 + FOOT / 2)), L / 2, FOOT / 2);
+    const kerb = new THREE.Mesh(new THREE.BoxGeometry(L, 0.13, 0.3), M.kerb);
+    kerb.position.set(cx, 0.065, Z(edge + side * 0.15)); kerb.castShadow = kerb.receiveShadow = true; world.add(kerb);
+  }
+  const mtx = new THREE.Matrix4(), q = new THREE.Quaternion(), p = new THREE.Vector3(), s = new THREE.Vector3();
+  // markings: solid edge lines (0.15 m) + dashed lane lines (3 m mark, 6 m gap, 0.10 m)
+  const lineGeo = new THREE.PlaneGeometry(1, 1); lineGeo.rotateX(-Math.PI / 2);
+  const dashes = [];
+  for (let lane = loLane; lane < hiLane; lane++) for (let x = x0; x < x1; x += 9) dashes.push([x + 1.5, (lane + 0.5) * LANE_W, 3, 0.10]);
+  dashes.push([cx, yR + 0.35, L, 0.15], [cx, yL - 0.35, L, 0.15]);
+  // distance markers every 10 m from the ego start: short bars across the right edge line
+  const dist = [];
+  for (let x = originX + Math.ceil((x0 - originX) / 10) * 10; x <= x1; x += 10) dist.push(x);
+  dist.forEach((x) => dashes.push([x, yR + 0.45, 0.12, 0.9]));
+  const marks = instanced(lineGeo, M.mark, dashes.length);
+  dashes.forEach(([x, y, l, w], i) => { mtx.compose(p.set(x, 0.006, Z(y)), q.identity(), s.set(l, 1, w)); marks.setMatrixAt(i, mtx); });
+  world.add(marks);
+  for (const x of dist) {
+    const d = Math.round(x - originX);
+    const lbl = decal(d + " m", 0.85, x, 0);
+    lbl.position.set(x + 0.15, 0.15, Z(yR - 0.3 - FOOT / 2)); lbl.rotation.y = 0;
+    world.add(lbl);
+  }
+  return { yR, yL };
+}
+
+// ---------------- geometry helpers ----------------
+function corners(st, len, wid) {
+  const c = Math.cos(st[2]), s = Math.sin(st[2]), hl = len / 2, hw = wid / 2;
+  return [[hl, hw], [-hl, hw], [-hl, -hw], [hl, -hw]].map(([a, b]) => [st[0] + a * c - b * s, st[1] + a * s + b * c]);
+}
+function segPt(p, a, b) {
+  const dx = b[0] - a[0], dy = b[1] - a[1], L2 = dx * dx + dy * dy || 1e-9;
+  const u = Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / L2));
+  const q = [a[0] + u * dx, a[1] + u * dy]; return { d: Math.hypot(p[0] - q[0], p[1] - q[1]), q };
+}
+function overlap(A, B) { // SAT for two rectangles
+  for (const P of [A, B]) for (let i = 0; i < 4; i++) {
+    const a = P[i], b = P[(i + 1) % 4], nx = a[1] - b[1], ny = b[0] - a[0];
+    let aMin = Infinity, aMax = -Infinity, bMin = Infinity, bMax = -Infinity;
+    for (const v of A) { const d = v[0] * nx + v[1] * ny; aMin = Math.min(aMin, d); aMax = Math.max(aMax, d); }
+    for (const v of B) { const d = v[0] * nx + v[1] * ny; bMin = Math.min(bMin, d); bMax = Math.max(bMax, d); }
+    if (aMax < bMin || bMax < aMin) return false;
+  }
+  return true;
+}
+function rectGap(A, B) { // min distance + closest points between two rectangles (0 if overlapping)
+  let best = { d: Infinity, p: null, q: null };
+  for (const [P, Q, flip] of [[A, B, false], [B, A, true]]) for (const v of P) for (let i = 0; i < 4; i++) {
+    const r = segPt(v, Q[i], Q[(i + 1) % 4]);
+    if (r.d < best.d) best = flip ? { d: r.d, p: r.q, q: v } : { d: r.d, p: v, q: r.q };
+  }
+  if (overlap(A, B)) best.d = 0;
+  return best;
+}
+// per-run derived facts from the trace (display only)
+function analyse(r, geom) {
+  const n = r.t.length, dt = n > 1 ? (r.t[n - 1] - r.t[0]) / (n - 1) : 0.02;
+  const others = Object.keys(r).filter((k) => k !== "t" && k !== "ego" && k !== "result" && Array.isArray(r[k]));
+  let brakeIdx = -1;
+  for (let i = 1; i < n; i++) if ((r.ego[i][3] - r.ego[i - 1][3]) / dt < BRAKE_THRESH) { brakeIdx = i - 1; break; }
+  let stopIdx = -1;
+  for (let i = 0; i < n; i++) if (r.ego[i][3] < STOP_SPEED) { stopIdx = i; break; }
+  let gap = { d: Infinity, i: -1, name: null, p: null, q: null };
+  for (const k of others) {
+    const g = geom(k);
+    for (let i = 0; i < n; i++) {
+      const res = rectGap(corners(r.ego[i], geom.ego.length, geom.ego.width), corners(r[k][i], g.length, g.width));
+      if (res.d < gap.d - 1e-6) gap = { d: res.d, i, name: k, p: res.p, q: res.q };
+    }
+  }
+  return { dt, others, brakeIdx, stopIdx, gap };
+}
+
+// ---------------- overlay builders ----------------
+function ribbonGeo(pts, width) { // pts: [[x,y]] in sim frame; flat strip on the ground
+  const n = pts.length, pos = new Float32Array(n * 6), idx = [];
+  for (let i = 0; i < n; i++) {
+    const a = pts[Math.max(0, i - 1)], b = pts[Math.min(n - 1, i + 1)];
+    let tx = b[0] - a[0], ty = b[1] - a[1]; const l = Math.hypot(tx, ty) || 1; tx /= l; ty /= l;
+    const nx = -ty * width / 2, ny = tx * width / 2;
+    pos.set([pts[i][0] + nx, 0, -(pts[i][1] + ny), pts[i][0] - nx, 0, -(pts[i][1] - ny)], i * 6);
+    if (i < n - 1) idx.push(2 * i, 2 * i + 1, 2 * i + 2, 2 * i + 1, 2 * i + 3, 2 * i + 2);
+  }
+  const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(pos, 3)); g.setIndex(idx);
+  return g;
+}
+function outline(st, len, wid, mat, y = 0.035) {
+  const pts = corners(st, len, wid).map(([x, yy]) => new THREE.Vector3(x, y, -yy));
+  const g = new THREE.BufferGeometry().setFromPoints([...pts, pts[0]]);
+  const l = new THREE.Line(g, mat); if (mat.isLineDashedMaterial) l.computeLineDistances();
+  // direction chevron at the front
+  const f = new THREE.Line(new THREE.BufferGeometry().setFromPoints([pts[0], new THREE.Vector3((pts[0].x + pts[3].x) / 2 + Math.cos(st[2]) * 0.0, y, (pts[0].z + pts[3].z) / 2), pts[3]]), mat);
+  const grp = new THREE.Group(); grp.add(l, f); return grp;
+}
+function pin(x, z, h, mat) { return new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x, 0.03, z), new THREE.Vector3(x, h, z)]), mat); }
+function addLabel(v, cls, html, anchor, t0) {
+  const el = document.createElement("div"); el.className = "lbl " + cls; el.innerHTML = html;
+  v.labelLayer.appendChild(el);
+  v.labels.push({ el, anchor, t0, objs: [] }); return v.labels[v.labels.length - 1];
+}
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+// ---------------- data + views ----------------
+let data = null, T = 0, simT = 0, playing = false, speed = 1, camMode = "oblique", slowmoOn = true;
+let road = { yR: -5.25, yL: 5.25 }, impacts = [];
+
+function validate(d) {
+  if (!d || typeof d !== "object" || !d.runs || typeof d.runs !== "object") throw new Error("JSON must have a 'runs' object");
+  let any = false;
+  for (const p of PANELS) {
+    const r = d.runs[p.key]; if (!r) continue;
+    if (!Array.isArray(r.t) || !Array.isArray(r.ego) || r.t.length !== r.ego.length || !r.t.length)
+      throw new Error("runs." + p.key + " needs equal-length 't' and 'ego' arrays");
+    any = true;
+  }
+  if (!any) throw new Error("No runs found (expected av, careful_a, careful_b)");
+}
+function loadUrl(url) {
+  fetch(url).then((r) => { if (!r.ok) throw new Error("HTTP " + r.status + " loading " + url); return r.json(); })
+    .then((d) => setData(d, url)).catch((e) => showErr("Could not load replay data: " + e.message));
+}
+function loadFile(f) {
+  const rd = new FileReader();
+  rd.onload = () => { try { setData(JSON.parse(rd.result), f.name); } catch (e) { showErr("Invalid JSON in " + f.name + ": " + e.message); } };
+  rd.readAsText(f);
+}
+$("file").onchange = (e) => { if (e.target.files[0]) loadFile(e.target.files[0]); e.target.value = ""; };
+let dragDepth = 0;
+addEventListener("dragenter", (e) => { e.preventDefault(); dragDepth++; document.body.classList.add("dragging"); });
+addEventListener("dragleave", (e) => { e.preventDefault(); if (--dragDepth <= 0) { dragDepth = 0; document.body.classList.remove("dragging"); } });
+addEventListener("dragover", (e) => e.preventDefault());
+addEventListener("drop", (e) => {
+  e.preventDefault(); dragDepth = 0; document.body.classList.remove("dragging");
+  const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) loadFile(f);
+});
+
+function sceneExtent(d) {
+  let minX = Infinity, maxX = -Infinity, minY = 0, maxY = 0;
+  for (const p of PANELS) {
+    const r = d.runs[p.key]; if (!r) continue;
+    for (const k of Object.keys(r)) {
+      if (k === "t" || k === "result" || !Array.isArray(r[k])) continue;
+      for (const s of r[k]) { minX = Math.min(minX, s[0]); maxX = Math.max(maxX, s[0]); minY = Math.min(minY, s[1]); maxY = Math.max(maxY, s[1]); }
+    }
+  }
+  return { minX, maxX, minY, maxY };
+}
+
+function setData(d, src) {
+  try { validate(d); } catch (e) { showErr(e.message + " (" + src + ")"); return; }
+  clearErr();
+  data = d;
+  const sc = d.scenario || {};
+  text($("scenarioTitle"), sc.title || sc.id || src);
+  const chip = $("labelChip");
+  if (sc.label) { text(chip, sc.label); chip.hidden = false; } else chip.hidden = true;
+  text($("notes"), sc.notes || "");
+  T = 0;
+  for (const p of PANELS) { const r = d.runs[p.key]; if (r) T = Math.max(T, r.t[r.t.length - 1]); }
+  impacts = PANELS.map((p) => d.runs[p.key] && d.runs[p.key].result).filter((r) => r && r.collided && r.t_collision != null).map((r) => r.t_collision);
+  const first = PANELS.map((p) => d.runs[p.key]).find(Boolean);
+  originX = Math.round(first.ego[0][0]);
+  road = buildWorld(sceneExtent(d));
+  buildViews();
+  buildCaptions();
+  buildTicks();
+  applyEnvironment();
+  setPlaying(false);
+  const qp = new URLSearchParams(location.search);
+  const qc = qp.get("cam") === "orbit" ? "oblique" : qp.get("cam");
+  setCam(CAMS.includes(qc) ? qc : camMode);
+  seek(parseFloat(qp.get("t")) || 0);
+  if (qp.get("autoplay") === "1") setPlaying(true);
+}
+
+// P(avoid) captions: only from the JSON, never invented
+function capText(key) {
+  const pa = data.p_avoid && data.p_avoid[key];
+  if (!pa || typeof pa.p !== "number") return null;
+  let s = "P(avoid) <b>" + fmtPct(pa.p) + "</b>";
+  if (Array.isArray(pa.ci90) && pa.ci90.length === 2) s += " &nbsp;90% CI " + fmtPct(pa.ci90[0]) + " to " + fmtPct(pa.ci90[1]);
+  if (typeof pa.n === "number") s += " &nbsp;(n=" + pa.n + ")";
+  return s;
+}
+function buildCaptions() {
+  const caps = $("captions"); caps.innerHTML = ""; let any = false;
+  PANELS.forEach((p, i) => {
+    const c = document.createElement("div"); c.className = "cap";
+    const s = capText(p.key); if (s) { c.innerHTML = s; any = true; }
+    caps.appendChild(c); views[i].pcap.innerHTML = s || "";
+  });
+  caps.style.display = any ? "" : "none";
+}
+function buildTicks() {
+  const ticks = $("ticks"); ticks.innerHTML = "";
+  for (const p of PANELS) {
+    const r = data.runs[p.key];
+    if (r && r.result && r.result.collided && r.result.t_collision != null && T > 0) {
+      const i = document.createElement("i"); i.style.left = (100 * r.result.t_collision / T) + "%";
+      i.title = p.title + ": impact at " + r.result.t_collision.toFixed(2) + " s"; ticks.appendChild(i);
+    }
+  }
+}
+
+function stateAt(rows, tArr, dt, t) { return sample(rows, tArr, dt, t).s; }
+
+function buildViews() {
+  for (const v of views) if (v.group) { scene.remove(v.group); v.group.traverse((o) => { if (o.geometry && !Object.values(carGeo).includes(o.geometry)) o.geometry.dispose(); }); }
+  views.length = 0; $("panels").innerHTML = "";
+  const sc = data.scenario || {};
+  const eg = sc.ego_geometry || { length: 4.6, width: 1.82 };
+  const geomByName = {}; (sc.actors || []).forEach((a) => { geomByName[a.name] = a; });
+  const geom = (k) => geomByName[k] || { length: 4.6, width: 1.82 };
+  geom.ego = eg;
+  const avRun = data.runs.av, avRes = avRun && avRun.result;
+  for (const p of PANELS) {
+    const el = document.createElement("section"); el.className = "panel";
+    el.innerHTML = '<h2><span class="ttl"></span><span class="st">--</span></h2><div class="view">' +
+      '<div class="ov labels"></div>' +
+      '<div class="ov hud"><div><div class="k">Ego speed</div><div class="spd">--</div><div class="brk">BRAKING</div></div>' +
+      '<div><div class="k">Speed / time</div><canvas width="300" height="92"></canvas></div></div></div><div class="pcap"></div>';
+    text(el.querySelector(".ttl"), p.title);
+    el.querySelector(".ttl").title = p.sub;
+    $("panels").appendChild(el);
+    const v = { key: p.key, p, el, view: el.querySelector(".view"), hud: el.querySelector(".spd"), brk: el.querySelector(".brk"),
+      st: el.querySelector(".st"), spark: el.querySelector("canvas"), labelLayer: el.querySelector(".labels"), labels: [],
+      pcap: el.querySelector(".pcap"), run: data.runs[p.key], camPos: new THREE.Vector3(), camLook: new THREE.Vector3(), snap: true,
+      cars: [], focus: new THREE.Vector3(), badgeState: null };
+    views.push(v);
+    if (!v.run) { const nd = document.createElement("div"); nd.className = "ov nodata"; nd.textContent = "No run in data"; v.view.appendChild(nd); continue; }
+    const r = v.run, res = r.result || {};
+    const A = analyse(r, geom); v.A = A; v.dt = A.dt;
+    v.group = new THREE.Group(); scene.add(v.group);
+    v.ego = makeCar(true, eg.length, eg.width); v.group.add(v.ego); v.cars.push(v.ego);
+    v.vehicles = {};
+    for (const name of A.others) { const g = geom(name); const c = makeCar(false, g.length, g.width); v.group.add(c); v.vehicles[name] = c; v.cars.push(c); }
+
+    // trajectory trails (future faint, travelled solid) + time ticks every 0.5 s
+    v.trails = [];
+    const addTrail = (rows, isEgo) => {
+      const pts = rows.map((s) => [s[0], s[1]]);
+      const geoF = ribbonGeo(pts, isEgo ? 0.16 : 0.12), geoT = ribbonGeo(pts, isEgo ? 0.16 : 0.12);
+      const fut = new THREE.Mesh(geoF, isEgo ? OV.egoFuture : OV.othFuture); fut.position.y = 0.025; fut.renderOrder = 1;
+      const trav = new THREE.Mesh(geoT, isEgo ? OV.egoTrail : OV.othTrail); trav.position.y = 0.03; trav.renderOrder = 1;
+      const tickGeo = new THREE.PlaneGeometry(1, 1); tickGeo.rotateX(-Math.PI / 2);
+      const tks = []; for (let tk = 0; tk <= r.t[r.t.length - 1] + 1e-6; tk += 0.5) tks.push(tk);
+      const ti = instanced(tickGeo, isEgo ? OV.egoTrail : OV.othTrail, tks.length); ti.position.y = 0.032; ti.renderOrder = 1;
+      const mtx = new THREE.Matrix4(), q = new THREE.Quaternion(), pp = new THREE.Vector3(), s = new THREE.Vector3(), e = new THREE.Euler();
+      const tlabels = [];
+      tks.forEach((tk, i) => {
+        const st = stateAt(rows, r.t, v.dt, tk), whole = Math.abs(tk - Math.round(tk)) < 1e-6;
+        mtx.compose(pp.set(st[0], 0, -st[1]), q.setFromEuler(e.set(0, st[2], 0)), s.set(0.12, 1, whole ? 1.6 : 1.0)); ti.setMatrixAt(i, mtx);
+        if (isEgo && whole && tk > 0) {
+          const d = decal(tk.toFixed(0) + " s", 0.5, 0, 0, 0, 56);
+          d.position.set(st[0] - Math.sin(st[2]) * 0 + 0.1, 0.034, -(st[1] - 1.25)); d.visible = false; d.material = d.material.clone();
+          d.material.color.copy(TRAIL.ego); d.material.opacity = 1; v.group.add(d); tlabels.push({ t: tk, o: d });
+        }
+      });
+      v.group.add(fut, trav, ti);
+      v.trails.push({ trav, ti, tks, tlabels });
+    };
+    addTrail(r.ego, true);
+    for (const name of A.others) addTrail(r[name], false);
+
+    // brake onset marker
+    if (A.brakeIdx >= 0) {
+      const st = r.ego[A.brakeIdx], tb = r.t[A.brakeIdx];
+      const o = outline(st, eg.length, eg.width, LM.brakeGhost); v.group.add(o);
+      const pn = pin(st[0], -st[1], 1.8, LM.pin); v.group.add(pn);
+      const L = addLabel(v, "brake", "Brake onset <b>t=" + tb.toFixed(2) + " s</b>, " + kmh(st[3]), new THREE.Vector3(st[0], 1.8, -st[1]), tb);
+      L.objs.push(o, pn);
+    }
+    if (res.collided && res.t_collision != null) {
+      // impact marker at the contact point
+      const tc = res.t_collision, other = res.other_actor && r[res.other_actor] ? res.other_actor : A.others[0];
+      const es = stateAt(r.ego, r.t, v.dt, tc);
+      let cx = es[0], cy = es[1];
+      if (other) {
+        const os = stateAt(r[other], r.t, v.dt, tc), g = geom(other);
+        const rg = rectGap(corners(es, eg.length, eg.width), corners(os, g.length, g.width));
+        if (rg.d > 0.0 && rg.p) { cx = (rg.p[0] + rg.q[0]) / 2; cy = (rg.p[1] + rg.q[1]) / 2; }
+        else { const ec = corners(es, eg.length, eg.width); cx = (ec[0][0] + ec[3][0]) / 2; cy = (ec[0][1] + ec[3][1]) / 2; } // ego front centre
+      }
+      const mk = new THREE.Group();
+      const ring = new THREE.Mesh(new THREE.RingGeometry(0.62, 0.74, 48), OV.impact); ring.rotation.x = -Math.PI / 2;
+      const b1 = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 0.06), OV.impact); b1.rotation.x = -Math.PI / 2;
+      const b2 = b1.clone(); b2.rotation.z = Math.PI / 2;
+      mk.add(ring, b1, b2); mk.position.set(cx, 0.045, -cy); mk.traverse((o) => { o.renderOrder = 5; }); v.group.add(mk);
+      const pn = pin(cx, -cy, 2.6, LM.pin); v.group.add(pn);
+      const spd = res.ego_speed_at_impact != null ? res.ego_speed_at_impact : es[3];
+      const typ = res.impact_type ? ", " + esc(res.impact_type.replace(/_/g, "-")) : "";
+      let html = "<b>Impact</b> t=" + tc.toFixed(2) + " s, " + kmh(spd) + typ;
+      if (res.relative_speed_at_impact != null) html += "<br>closing speed " + kmh(res.relative_speed_at_impact);
+      const L = addLabel(v, "impact", html, new THREE.Vector3(cx, 2.6, -cy), tc); L.objs.push(mk, pn);
+    } else if (A.gap.i >= 0 && isFinite(A.gap.d)) {
+      // closest approach: ghost footprints + dimension line + label
+      const i = A.gap.i, g = geom(A.gap.name), tg = r.t[i];
+      const go = outline(r.ego[i], eg.length, eg.width, LM.gapGhost), oo = outline(r[A.gap.name][i], g.length, g.width, LM.othGhost);
+      v.group.add(go, oo);
+      const P = A.gap.p, Q = A.gap.q, objs = [go, oo];
+      if (P && Q && A.gap.d > 0.05) {
+        const dim = new THREE.Mesh(ribbonGeo([P, Q], 0.12), OV.gap); dim.position.y = 0.05; dim.renderOrder = 5; v.group.add(dim); objs.push(dim);
+        let dx = Q[0] - P[0], dy = Q[1] - P[1]; const l = Math.hypot(dx, dy) || 1; dx /= l; dy /= l;
+        for (const E of [P, Q]) { const t = new THREE.Mesh(ribbonGeo([[E[0] + dy * 0.5, E[1] - dx * 0.5], [E[0] - dy * 0.5, E[1] + dx * 0.5]], 0.10), OV.gap); t.position.y = 0.05; t.renderOrder = 5; v.group.add(t); objs.push(t); }
+      }
+      const mx = P && Q ? (P[0] + Q[0]) / 2 : r.ego[i][0], my = P && Q ? (P[1] + Q[1]) / 2 : r.ego[i][1];
+      const pn = pin(mx, -my, 2.2, LM.pin); v.group.add(pn); objs.push(pn);
+      const stopped = A.stopIdx >= 0;
+      const html = (stopped ? "<b>Stopped " + A.gap.d.toFixed(1) + " m short</b>" : "<b>Impact avoided</b>, min gap " + A.gap.d.toFixed(1) + " m") +
+        "<br>t=" + tg.toFixed(2) + " s, ego " + kmh(r.ego[i][3]);
+      const L = addLabel(v, "gap", html, new THREE.Vector3(mx, 2.2, -my), tg); L.objs.push(...objs);
+      v.gapText = stopped ? "Stopped " + A.gap.d.toFixed(1) + " m short" : "Impact avoided, min gap " + A.gap.d.toFixed(1) + " m";
+    }
+    // in careful panels: the AV's reported impact position as a dashed ghost, for comparison
+    if (p.key !== "av" && avRes && avRes.collided && avRes.t_collision != null && avRun.ego) {
+      const avDt = (avRun.t[avRun.t.length - 1] - avRun.t[0]) / Math.max(1, avRun.t.length - 1);
+      const st = stateAt(avRun.ego, avRun.t, avDt, avRes.t_collision);
+      const o = outline(st, eg.length, eg.width, LM.avGhost); v.group.add(o);
+      const L = addLabel(v, "ghost", "AV position at reported impact", new THREE.Vector3(st[0] - eg.length / 2, 0.1, -(st[1] - eg.width / 2 - 0.3)), avRes.t_collision);
+      L.objs.push(o); L.below = true;
+    }
+    v.cam = new THREE.PerspectiveCamera(32, 1, 0.1, 2000);
+    v.camTop = new THREE.OrthographicCamera(-10, 10, 10, -10, 0.1, 400); v.camTop.up.set(0, 0, -1);
+    v.sparkRef = p.key !== "av" && avRun ? avRun : null;
+  }
+}
+
+// trace state at time t (interpolated); holds the last frame after the trace ends (e.g. at impact)
+function sample(rows, tArr, dt, t) {
+  const n = rows.length, f = (t - tArr[0]) / dt;
+  const acc = (i) => (n > 1 ? (rows[Math.min(i + 1, n - 1)][3] - rows[Math.max(Math.min(i, n - 2), 0)][3]) / dt : 0);
+  if (f <= 0) return { s: rows[0], a: acc(0), i: 0 };
+  if (f >= n - 1) return { s: rows[n - 1], a: acc(n - 2), i: n - 1 };
+  const i = Math.floor(f), u = f - i, a = rows[i], b = rows[i + 1];
+  return { s: [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u, a[3] + (b[3] - a[3]) * u], a: (b[3] - a[3]) / dt, i, u };
+}
+function smoothAccel(rows, tArr, dt, t) { let s = 0; for (let k = -3; k <= 3; k++) s += sample(rows, tArr, dt, t + k * 0.05).a; return s / 7; }
+function placeCar(car, st, a, active) {
+  car.position.set(st[0], 0, -st[1]); car.rotation.y = st[2];
+  const u = car.userData;
+  u.body.rotation.z = THREE.MathUtils.clamp(a * 0.003, -0.03, 0.02); // slight nose dip under braking
+  u.body.position.y = Math.abs(u.body.rotation.z) * 0.6;
+  const ang = -st[0] / WHEEL_R; for (const w of u.wheels) w.rotation.z = ang;
+  setBrake(car, active && a < BRAKE_THRESH);
+}
+
+function drawSpark(v) {
+  const c = v.spark, g = c.getContext("2d"), W = c.width, H = c.height, r = v.run;
+  const padL = 4, padR = 4, padT = 6, padB = 14;
+  const tMax = T || r.t[r.t.length - 1];
+  let vMax = 0; for (const s of r.ego) vMax = Math.max(vMax, s[3]);
+  if (v.sparkRef) for (const s of v.sparkRef.ego) vMax = Math.max(vMax, s[3]);
+  vMax = Math.max(1, Math.ceil(vMax * 3.6 / 10) * 10 / 3.6);
+  const X = (t) => padL + (W - padL - padR) * t / tMax, Y = (s) => padT + (H - padT - padB) * (1 - s / vMax);
+  g.clearRect(0, 0, W, H);
+  const ink = css("--cardInk") || "#16191d", mute = css("--muted") || "#5d646e", acc = css("--accent") || "#4b6a92", bad = css("--bad") || "#a33a32";
+  g.strokeStyle = css("--line") || "#ccc"; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(padL, H - padB + 0.5); g.lineTo(W - padR, H - padB + 0.5); g.stroke();
+  g.fillStyle = mute; g.font = "500 18px Inter, system-ui, sans-serif"; g.textBaseline = "bottom";
+  g.fillText("0", padL, H); const tl = tMax.toFixed(0) + " s"; g.fillText(tl, W - padR - g.measureText(tl).width, H);
+  const vm = kmhN(vMax) + " km/h"; g.textBaseline = "top"; g.fillText(vm, W - padR - g.measureText(vm).width, 0);
+  const path = (rows, tArr, col, w, dash) => {
+    g.strokeStyle = col; g.lineWidth = w; g.setLineDash(dash || []); g.beginPath();
+    rows.forEach((s, i) => { const x = X(tArr[i]), y = Y(s[3]); i ? g.lineTo(x, y) : g.moveTo(x, y); }); g.stroke(); g.setLineDash([]);
+  };
+  if (v.sparkRef) path(v.sparkRef.ego, v.sparkRef.t, mute, 1.5, [5, 4]);
+  path(r.ego, r.t, acc, 3);
+  const res = r.result || {};
+  if (v.A.brakeIdx >= 0) { const x = X(r.t[v.A.brakeIdx]); g.strokeStyle = acc; g.lineWidth = 1.5; g.beginPath(); g.moveTo(x, padT); g.lineTo(x, H - padB); g.stroke(); }
+  if (res.collided && res.t_collision != null) { const x = X(res.t_collision); g.strokeStyle = bad; g.lineWidth = 2; g.beginPath(); g.moveTo(x, padT); g.lineTo(x, H - padB); g.stroke(); }
+  const x = X(Math.min(simT, tMax)); g.strokeStyle = ink; g.lineWidth = 1.5; g.beginPath(); g.moveTo(x, padT - 4); g.lineTo(x, H - padB); g.stroke();
+  const e = sample(r.ego, r.t, v.dt, simT).s; g.fillStyle = ink; g.beginPath(); g.arc(x, Y(e[3]), 4, 0, 7); g.fill();
+}
+
+const OBLIQUE = new THREE.Vector3(-1, 1.15, 1).normalize(); // camera direction: behind, high, right side of the road
+const _tp = new THREE.Vector3(), _tl = new THREE.Vector3(), _pv = new THREE.Vector3();
+function update(v, dtReal) {
+  const r = v.run; if (!r) return;
+  const res = r.result || {};
+  const ended = simT >= r.t[r.t.length - 1] - 1e-9;
+  const crashed = res.collided && res.t_collision != null && simT >= res.t_collision - 1e-9;
+  const e = sample(r.ego, r.t, v.dt, simT);
+  placeCar(v.ego, e.s, ended ? 0 : smoothAccel(r.ego, r.t, v.dt, simT), !crashed && !ended);
+  for (const [k, car] of Object.entries(v.vehicles)) {
+    const o = sample(r[k], r.t, v.dt, simT);
+    placeCar(car, o.s, ended ? 0 : smoothAccel(r[k], r.t, v.dt, simT), !crashed && !ended);
+  }
+  // trails: travelled part up to simT, ticks up to simT
+  for (const tr of v.trails) {
+    const k = Math.min(r.t.length - 1, e.i + (e.u > 0 ? 1 : 0));
+    tr.trav.geometry.setDrawRange(0, Math.max(0, k) * 6);
+    tr.ti.count = tr.tks.filter((tk) => tk <= simT + 1e-6).length;
+    for (const l of tr.tlabels) l.o.visible = l.t <= simT + 1e-6;
+  }
+  for (const L of v.labels) { const on = simT >= L.t0 - 1e-6; L.on = on; for (const o of L.objs) o.visible = on; }
+  text(v.hud, ""); v.hud.innerHTML = kmhN(e.s[3]) + "<small>km/h</small>";
+  v.brk.classList.toggle("on", !!v.ego.userData.braking);
+  drawSpark(v);
+
+  const avRes = data.runs.av && data.runs.av.result;
+  const avT = avRes && avRes.collided ? avRes.t_collision : null;
+  let state = "";
+  if (crashed) state = "bad";
+  else if (!res.collided && ((avT != null && simT >= avT) || ended)) state = "good";
+  if (v.badgeState !== state) {
+    v.badgeState = state;
+    v.st.className = "st" + (state ? " " + state : "");
+    text(v.st, state === "bad" ? "IMPACT" : state === "good" ? "IMPACT AVOIDED" : "IN PROGRESS");
+    v.el.classList.toggle("collided", state === "bad"); v.el.classList.toggle("avoided", state === "good");
+  }
+
+  // cameras: high oblique 3/4 (default), plan, chase
+  const x = e.s[0], z = -e.s[1], hd = e.s[2];
+  if (camMode === "chase") {
+    _tp.set(x - 11 * Math.cos(hd), 3.6, z + 11 * Math.sin(hd));
+    _tl.set(x + 16 * Math.cos(hd), 0.9, z - 16 * Math.sin(hd));
+  } else {
+    // frame ego + nearest other vehicle; look slightly ahead of the ego
+    let fx = x + 6, fz = z;
+    if (v.A.gap.name && r[v.A.gap.name]) { const o = sample(r[v.A.gap.name], r.t, v.dt, simT).s; if (Math.abs(o[0] - x) < 45) { fx = (x + o[0]) / 2; fz = (z - o[1]) / 2; } }
+    fz = THREE.MathUtils.clamp(fz, -road.yL, -road.yR);
+    _tl.set(fx, 0, fz);
+    const asp = v.cam.aspect || 1, hv = asp >= 1 ? 11 / Math.pow(asp, 0.4) : 11 / asp;
+    _tp.copy(OBLIQUE).multiplyScalar(hv / Math.tan(THREE.MathUtils.degToRad(v.cam.fov / 2))).add(_tl);
+  }
+  if (v.snap) { v.camPos.copy(_tp); v.camLook.copy(_tl); v.snap = false; }
+  else { const k = 1 - Math.exp(-dtReal * 4); v.camPos.lerp(_tp, k); v.camLook.lerp(_tl, k); }
+  v.cam.position.copy(v.camPos); v.cam.lookAt(v.camLook);
+  const mz = -(road.yL + road.yR) / 2;
+  v.camTop.position.set(x + (v.topAhead || 10), 120, mz); v.camTop.lookAt(x + (v.topAhead || 10), 0, mz);
+  v.focus.set(v.camLook.x, 0, v.camLook.z);
+}
+
+function placeLabels(v, cam, w, h) {
+  for (const L of v.labels) {
+    if (!L.on) { L.el.classList.remove("on"); continue; }
+    _pv.copy(L.anchor);
+    if (cam.isOrthographicCamera) { _pv.y = 0; _pv.z += L.below ? 1.6 : -2.2; } // plan view: label beside the marker, not on it
+    _pv.project(cam);
+    const px = (_pv.x + 1) / 2 * w, py = (1 - _pv.y) / 2 * h;
+    const vis = _pv.z < 1 && px > -40 && px < w + 40 && py > 0 && py < h + 20;
+    L.el.classList.toggle("on", vis);
+    if (vis) L.el.style.transform = `translate(${px.toFixed(1)}px, ${py.toFixed(1)}px) translate(-50%, ${L.below ? "0%" : "-100%"})`;
+  }
+}
+
+function renderAll(dtReal = 0) {
+  const W = innerWidth, H = innerHeight, pr = renderer.getPixelRatio();
+  if (canvas.width !== Math.floor(W * pr) || canvas.height !== Math.floor(H * pr)) renderer.setSize(W, H, false);
+  renderer.setScissorTest(false); renderer.clear();
+  renderer.setScissorTest(true);
+  for (const v of views) {
+    if (!v.group) continue;
+    update(v, dtReal);
+    const rc = v.view.getBoundingClientRect();
+    if (rc.bottom < 0 || rc.top > H || rc.width < 2 || rc.height < 2) continue;
+    const w = rc.width, h = rc.height;
+    v.cam.aspect = w / h; v.cam.updateProjectionMatrix();
+    // plan view: at least 44 m of road and the full carriageway visible. Landscape panel: road left to right, sim left (+y) up.
+    // Portrait panel: road bottom to top, sim left on the left.
+    const needAcross = (road.yL - road.yR) / 2 + 4, portrait = h > w * 1.05, sAlong = portrait ? h : w, sAcross = portrait ? w : h;
+    let halfAlong = 22, halfAcross = halfAlong * sAcross / sAlong;
+    if (halfAcross < needAcross) { halfAcross = needAcross; halfAlong = halfAcross * sAlong / sAcross; }
+    if (portrait) { v.camTop.up.set(1, 0, 0); Object.assign(v.camTop, { left: -halfAcross, right: halfAcross, top: halfAlong, bottom: -halfAlong }); }
+    else { v.camTop.up.set(0, 0, -1); Object.assign(v.camTop, { left: -halfAlong, right: halfAlong, top: halfAcross, bottom: -halfAcross }); }
+    v.camTop.updateProjectionMatrix(); v.topAhead = 0.2 * halfAlong;
+    if (camMode === "top") v.camTop.lookAt(v.camTop.position.x, 0, v.camTop.position.z);
+    for (const o of views) if (o.group) o.group.visible = o === v;
+    sun.position.copy(v.focus).addScaledVector(sunDir, 120); sun.target.position.copy(v.focus); sun.target.updateMatrixWorld();
+    const y = H - rc.bottom;
+    renderer.setViewport(rc.left, y, w, h); renderer.setScissor(rc.left, y, w, h);
+    renderer.setClearColor(BG, 1); renderer.clear(); renderer.setClearColor(0x000000, 0);
+    const cam = camMode === "top" ? v.camTop : v.cam;
+    renderer.render(scene, cam);
+    placeLabels(v, cam, w, h);
+  }
+  text($("clock"), simT.toFixed(2) + " / " + T.toFixed(1) + " s");
+  if (!scrubbing) $("scrub").value = T ? Math.round(1000 * simT / T) : 0;
+}
+
+// ---------------- controls ----------------
+let scrubbing = false, lastFrame = null;
+function setPlaying(p) { playing = p; text($("playBtn"), p ? "Pause" : "Play"); if (p && simT >= T - 1e-6) seek(0); }
+function seek(t) {
+  simT = Math.max(0, Math.min(T, t));
+  for (const v of views) v.snap = true;
+  if (data) renderAll();
+}
+$("playBtn").onclick = () => setPlaying(!playing);
+$("restartBtn").onclick = () => { seek(0); setPlaying(true); };
+const scrub = $("scrub");
+scrub.addEventListener("input", () => { scrubbing = true; setPlaying(false); seek(T * scrub.value / 1000); });
+scrub.addEventListener("change", () => { scrubbing = false; });
+document.querySelectorAll("[data-speed]").forEach((b) => b.onclick = () => {
+  speed = parseFloat(b.getAttribute("data-speed"));
+  document.querySelectorAll("[data-speed]").forEach((o) => o.setAttribute("aria-pressed", String(o === b)));
+});
+$("slowBtn").onclick = () => { slowmoOn = !slowmoOn; $("slowBtn").setAttribute("aria-pressed", String(slowmoOn)); };
+const CAMS = ["oblique", "top", "chase"];
+function setCam(m) {
+  camMode = m; for (const v of views) v.snap = true;
+  document.querySelectorAll("[data-cam]").forEach((o) => o.setAttribute("aria-pressed", String(o.getAttribute("data-cam") === m)));
+  if (data) renderAll();
+}
+document.querySelectorAll("[data-cam]").forEach((b) => b.onclick = () => setCam(b.getAttribute("data-cam")));
+$("themeBtn").onclick = () => {
+  const next = isDark() ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next); store("replay-theme", next);
+  if (data) { applyEnvironment(); renderAll(); }
+};
+if (window.matchMedia) matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (data) applyEnvironment(); });
+addEventListener("keydown", (e) => {
+  if (e.target && e.target.tagName === "INPUT" && e.target.type !== "range") return;
+  if (e.key === " ") { e.preventDefault(); setPlaying(!playing); }
+  else if (e.key === "c" || e.key === "C") setCam(CAMS[(CAMS.indexOf(camMode) + 1) % CAMS.length]);
+  else if (e.key === "r" || e.key === "R") { seek(0); setPlaying(true); }
+  else if (e.key === "ArrowRight") { setPlaying(false); seek(simT + 0.1); }
+  else if (e.key === "ArrowLeft") { setPlaying(false); seek(simT - 0.1); }
+});
+
+function timeScale() {
+  if (!slowmoOn || speed !== 1) return 1;
+  for (const tc of impacts) if (simT > tc - 0.6 && simT < tc + 0.9) return 0.3;
+  return 1;
+}
+let fpsAcc = 0, fpsN = 0, fps = 0;
+function loop(now) {
+  requestAnimationFrame(loop);
+  const dtReal = lastFrame == null ? 0 : Math.min(0.1, (now - lastFrame) / 1000);
+  lastFrame = now;
+  if (!data) return;
+  if (dtReal > 0) { fpsAcc += dtReal; fpsN++; if (fpsAcc > 1) { fps = Math.round(fpsN / fpsAcc); fpsAcc = 0; fpsN = 0; } }
+  const ts = playing ? timeScale() : 1;
+  $("slowmo").classList.toggle("on", playing && ts < 1);
+  if (playing) {
+    simT += dtReal * speed * ts;
+    if (simT >= T) { simT = T; setPlaying(false); }
+  }
+  renderAll(dtReal);
+}
+
+// ---------------- boot ----------------
+window.__replay = {
+  get state() { return { T, simT, playing, cam: camMode, views: views.length, hasData: !!data, fps,
+    derived: views.map((v) => v.A ? { key: v.key, brakeOnset: v.A.brakeIdx >= 0 ? v.run.t[v.A.brakeIdx] : null, minGap: v.A.gap.d, gapText: v.gapText || null } : null) }; },
+  seek, setPlaying, setCam,
+};
+await loadAssets();
+requestAnimationFrame(loop);
+loadUrl(new URLSearchParams(location.search).get("data") || "sample.json");
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "_comment": "Optional local assets for viz/web/index.html. Vehicles are always the built-in procedural sedan (sized from the trace geometry) and the backdrop is a neutral procedural one. Remove the asphalt entry to use the procedural road. Paths are relative to this folder. asphalt.tile_m is the real-world size of one texture tile. Every file listed here must also be listed in LICENSES.md.",
+  "asphalt": {
+    "diffuse": "asphalt/asphalt_02_diff_1k.jpg",
+    "normal": "asphalt/asphalt_02_nor_gl_1k.jpg",
+    "roughness": "asphalt/asphalt_02_rough_1k.jpg",
+    "tile_m": 3
+  }
+}

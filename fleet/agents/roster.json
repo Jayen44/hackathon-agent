@@ -1,0 +1,20 @@
+{
+  "environment": {
+    "name": "accel-fleet-env",
+    "config": {"type": "cloud", "networking": {"type": "limited", "allow_package_managers": false, "allow_mcp_servers": false}}
+  },
+  "workers": [
+    {"key": "investigator", "name": "Investigator", "model": "claude-sonnet-5-5", "prompt": "investigator.md",
+     "description": "Reads one claim's crash bundle and returns the facts that matter for a counterfactual (speeds, gap, hazard type, AV braking, evidence tier) plus unknowns and red flags. Give it the claim_id.",
+     "tools": ["get_claim_bundle"]},
+    {"key": "reconstructor", "name": "Reconstructor", "model": "claude-sonnet-5-5", "prompt": "reconstructor.md",
+     "description": "Checks that the simulator reproduces the reported crash for one claim and revises scenario ranges when it does not (max 5 attempts). Give it the claim_id and the investigator's facts.",
+     "tools": ["get_claim_bundle", "check_reproduction"]},
+    {"key": "counterfactual", "name": "Counterfactual analyst", "model": "claude-sonnet-5-5", "prompt": "counterfactual.md",
+     "description": "Runs the Monte Carlo counterfactual for one claim (careful drivers A and B in the AV's seat), at the bundle's evidence tier and at a higher tier, and says what evidence would narrow the answer. Give it the claim_id.",
+     "tools": ["estimate_counterfactual"]}
+  ],
+  "orchestrator": {"key": "orchestrator", "name": "Recovery portfolio lead", "model": "claude-opus-5-5", "prompt": "orchestrator.md",
+    "description": "Works a queue of robotaxi crash claims for a UK motor insurer, delegates investigation, reconstruction and counterfactual analysis, prices recovery from the AV company, and keeps a portfolio summary.",
+    "tools": ["list_queue", "get_next_claim", "price_and_debate", "record_finding", "update_portfolio"]}
+}

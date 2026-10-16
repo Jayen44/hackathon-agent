@@ -1,0 +1,34 @@
+{
+ "environment_id": "env_01BPa9aWgnomMxw3n66qKves",
+ "agents": {
+  "investigator": {
+   "id": "agent_01KQt5HLL6k2ZWjrznVqwZUQ",
+   "version": 1,
+   "name": "Investigator",
+   "model": "claude-sonnet-5-5",
+   "hash": "9ed8ff00d0792cc1"
+  },
+  "reconstructor": {
+   "id": "agent_01UJYx7dyd77iMa5exKDM88u",
+   "version": 1,
+   "name": "Reconstructor",
+   "model": "claude-sonnet-5-5",
+   "hash": "a57ceadbd8b1b74d"
+  },
+  "counterfactual": {
+   "id": "agent_01JJRTvo8Jh23rmNRxVh4XsF",
+   "version": 1,
+   "name": "Counterfactual analyst",
+   "model": "claude-sonnet-5-5",
+   "hash": "e2e140a6484daffd"
+  },
+  "orchestrator": {
+   "id": "agent_0174fy8FABfwXFQ45poVgM7S",
+   "version": 1,
+   "name": "Recovery portfolio lead",
+   "model": "claude-opus-5-5",
+   "hash": "99b110f18caefa63"
+  }
+ },
+ "updated_at": "2026-10-15T11:18:14.803+00:00"
+}
