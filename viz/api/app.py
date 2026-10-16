@@ -33,7 +33,13 @@ import pathlib
 import subprocess
 import tempfile
 
+import os
+
 import modal
+
+# Public-demo switch. Default: paused (no compute or Claude spend from public visitors).
+# Reconnect: ACCEL_LIVE_RUNS=1 modal deploy viz/api/app.py
+LIVE_RUNS = os.environ.get("ACCEL_LIVE_RUNS", "0") == "1"
 
 HERE = pathlib.Path(__file__).parent
 REPO = HERE.parent.parent
@@ -55,6 +61,7 @@ def _vendor_insurance() -> pathlib.Path | None:
 
 image = (modal.Image.debian_slim(python_version="3.12")
          .pip_install("numpy", "fastapi[standard]", "anthropic", "python-dotenv")
+         .env({"ACCEL_LIVE_RUNS": "1" if LIVE_RUNS else "0"})
          .add_local_python_source("sim", "montecarlo")
          .add_local_file(HERE / "claims.py", "/root/viz/api/claims.py")
          .add_local_file(HERE / "pricing.py", "/root/viz/api/pricing.py")
@@ -282,6 +289,14 @@ def web():
     from viz.api.claims import cctv_meta, form_to_bundle, insurance_available, merge_cctv
 
     api = FastAPI(title="Accel claims API")
+
+    # Registered before CORS so the paused reply still carries CORS headers (later middleware wraps earlier).
+    @api.middleware("http")
+    async def _live_runs_switch(request: Request, call_next):
+        import os as _os
+        if _os.environ.get("ACCEL_LIVE_RUNS") != "1" and request.method not in ("GET", "HEAD", "OPTIONS"):
+            return JSONResponse({"detail": "Live runs are paused on the public demo so it cannot run up costs. Stored results, replays and the guided tour still work. To run it yourself see CONNECTIONS.md (deploy with ACCEL_LIVE_RUNS=1).", "paused": True}, status_code=403)
+        return await call_next(request)
     api.add_middleware(CORSMiddleware, allow_origin_regex=CORS_ORIGIN_REGEX, allow_methods=["GET", "POST", "PUT"],
                        allow_headers=["content-type"])
     examples = _examples()

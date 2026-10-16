@@ -12,7 +12,13 @@ from __future__ import annotations
 
 import pathlib
 
+import os
+
 import modal
+
+# Public-demo switch. Default: paused (no GPU/compute spend from public visitors).
+# Reconnect: ACCEL_LIVE_RUNS=1 modal deploy viz/lab/app.py
+LIVE_RUNS = os.environ.get("ACCEL_LIVE_RUNS", "0") == "1"
 
 HERE = pathlib.Path(__file__).parent
 ROOT = HERE.parent.parent
@@ -20,6 +26,7 @@ ROOT = HERE.parent.parent
 image = (
     modal.Image.debian_slim(python_version="3.12")
     .pip_install("numpy", "fastapi[standard]")
+    .env({"ACCEL_LIVE_RUNS": "1" if LIVE_RUNS else "0"})
     .add_local_python_source("sim", "montecarlo")
     .add_local_file(ROOT / "viz" / "export.py", "/root/viz/export.py")
     .add_local_file(HERE / "cctv.py", "/root/viz/lab/cctv.py")
@@ -101,6 +108,14 @@ def web():
     from sim.world import run
 
     api = FastAPI(title="Sim Lab")
+
+    @api.middleware("http")
+    async def _live_runs_switch(request, call_next):
+        import os as _os
+        from fastapi.responses import JSONResponse
+        if _os.environ.get("ACCEL_LIVE_RUNS") != "1" and request.method not in ("GET", "HEAD", "OPTIONS"):
+            return JSONResponse({"detail": "Live runs are paused on the public demo so it cannot run up costs. Stored results, replays and the guided tour still work. To run it yourself see CONNECTIONS.md (deploy with ACCEL_LIVE_RUNS=1).", "paused": True}, status_code=403)
+        return await call_next(request)
     from fastapi.middleware.cors import CORSMiddleware
     # The claims dashboard (Vercel) uploads CCTV straight to this app from its intake form.
     api.add_middleware(CORSMiddleware, allow_methods=["GET", "POST"], allow_headers=["content-type"],

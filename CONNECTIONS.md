@@ -104,3 +104,22 @@ About 25 s for one claim.
 | Demo claims | `fleet/demo_claims.py` |
 | 3D replay look | `viz/web/index.html` (copied into the dashboard at build) |
 | Legal wording and limits | `sim/LEGAL_BASIS.md` |
+
+## Public demo switch (live runs paused)
+
+The public demo is read-only by default so visitors can't run up costs.
+
+| App | Paused when `ACCEL_LIVE_RUNS` is not `1` | Still works |
+|---|---|---|
+| Claims API | every POST/PUT/DELETE: assess, investigate (Claude), debate (Claude), reprice, profiles | stored claims, replays, examples, health |
+| Sim Lab | every POST/DELETE: Monte Carlo runs, CCTV upload, GPU analysis, claim hand-off | pages, video status, frames, tracks, thumbnails |
+
+- **When paused,** those routes return HTTP 403 with `{"paused": true, "detail": ...}`. The guided tour still works: it uses stored results.
+- **Fleet:** runs only start from the CLI (`modal run fleet/runner.py::start`), so the public read API is already safe.
+
+**Reconnect** (redeploy with the flag set):
+```bash
+ACCEL_LIVE_RUNS=1 .venv/bin/modal deploy viz/api/app.py
+ACCEL_LIVE_RUNS=1 .venv/bin/modal deploy viz/lab/app.py
+```
+**Pause again:** deploy without the flag.

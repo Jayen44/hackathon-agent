@@ -159,13 +159,20 @@ export default function NewClaim() {
   const submit = async (body: { form?: unknown; bundle?: unknown; cctv?: unknown }) => {
     setBusy("Submitting to the simulator…"); setErr(null);
     try {
-      const r = await submitAssessment(body);
       // Demo tour with a CCTV clip that was already assessed: show that decision after a short pause instead of
-      // waiting 30-90 s for the fresh assessment (which still runs and is stored under r.claim_id).
+      // waiting 30-90 s for a fresh assessment. A fresh one is still requested; if live runs are paused on the
+      // public demo (HTTP 403) the stored decision is shown anyway.
       const vid = (body.cctv as { video_id?: string } | undefined)?.video_id;
       const pre = vid && tourActiveOnCctv() ? DEMO_CCTV[vid]?.assessedClaim : undefined;
-      if (pre) { setBusy("Assessing on Modal: simulating careful drivers A and B, pricing, debate…"); await sleep(5000); }
-      const shown = pre || r.claim_id;
+      let fresh: string | undefined;
+      if (pre) {
+        setBusy("Assessing on Modal: simulating careful drivers A and B, pricing, debate…");
+        try { fresh = (await submitAssessment(body)).claim_id; } catch { /* paused or offline: use the stored decision */ }
+        await sleep(5000);
+      } else {
+        fresh = (await submitAssessment(body)).claim_id;
+      }
+      const shown = pre || fresh!;
       tourAfterAssess(shown);
       router.push(`/claims/${encodeURIComponent(shown)}`);
     } catch (e) {
